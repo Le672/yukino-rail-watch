@@ -159,7 +159,7 @@ export async function onRequestGet(context: { request: Request }) {
     return json({
       source: "12306",
       checkedAt: new Date().toISOString(),
-      date, from, to, trainCode,
+      date, from, to, fromCode, toCode, trainCode,
       trains: parseTrains(payload.data.result, payload.data.map || {}, trainCode),
     }, 200, 30);
   } catch (error) {

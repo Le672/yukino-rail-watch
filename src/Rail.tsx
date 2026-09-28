@@ -1,13 +1,14 @@
 import { ArrowLeft, Bell, BellOff, Clock3, ExternalLink, RefreshCw, TrainFront } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { enrichWithRailGo } from "./lib/railgo";
 
 type Station = { name: string; code: string; pinyin: string };
 type Seat = { label: string; value: string; available: boolean };
 type Train = {
   code: string; from: string; to: string; departure: string; arrival: string;
-  duration: string; saleStatus: string; seats: Seat[]; trainsetModel: string | null;
+  duration: string; saleStatus: string; seats: Seat[]; trainsetModel: string | null; trainsetOwner?: string | null;
 };
-type Result = { checkedAt: string; date: string; from: string; to: string; trains: Train[] };
+type Result = { checkedAt: string; date: string; from: string; to: string; fromCode?: string; toCode?: string; trains: Train[]; modelCheckedAt?: string | null };
 type Settings = {
   date: string; from: string; to: string; train: string; seat: string;
   intervalMinutes: number; enabled: boolean;
@@ -110,12 +111,19 @@ export default function Rail() {
     if (!desktop) localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, [desktop, settings]);
 
+  useEffect(() => {
+    if (!desktop || !result || result.modelCheckedAt) return;
+    let active = true;
+    void enrichWithRailGo(result).then((next) => { if (active) setResult(next); });
+    return () => { active = false; };
+  }, [desktop, result]);
+
   const runCheck = useCallback(async (notify = false) => {
     if (!validSettings(settings)) { setError("请填写有效的日期、不同的出发站与到达站，以及 1–60 分钟的间隔"); return; }
     setChecking(true);
     setError(null);
     try {
-      const next = desktop ? await desktop.checkNow(settings) : await query(settings);
+      const next = desktop ? await desktop.checkNow(settings) : await enrichWithRailGo(await query(settings));
       setResult(next);
       if (!desktop && notify) {
         const current: Record<string, boolean> = {};
@@ -214,13 +222,14 @@ export default function Rail() {
         {error && <div className="rail-error" role="alert">查询失败：{error}</div>}
         <section className="rail-results" aria-labelledby="rail-results-title">
           <div className="rail-section-heading"><div><span className="rail-overline">03 / RESULTS</span><h2 id="rail-results-title">查询结果</h2></div>{result && <span>{result.trains.length} 趟车 · {matched.length} 趟有关注席别余票</span>}</div>
+          <p className="rail-model-credit">车型参考：<a href="https://railgo.dev/" target="_blank" rel="noreferrer">RailGo <ExternalLink size={12} /></a>；<a href="https://rail.re/" target="_blank" rel="noreferrer">rail.re <ExternalLink size={12} /></a> 提供历史交路记录。{result?.modelCheckedAt ? `车型数据查询于 ${formatCheckedAt(result.modelCheckedAt)}。` : "车型暂不可用时仍显示 12306 余票。"}实际编组可能调整。</p>
           {!result ? <div className="rail-empty">还没有查询结果。填写日期与车站后点击“立即查询”。</div> : result.trains.length === 0 ? <div className="rail-empty">没有找到符合条件的车次。请检查日期、车站与车次。</div> :
             <div className="rail-trains">{result.trains.map((train) => {
               const available = matchingSeats(train, settings.seat);
               return <article className="rail-train" key={`${train.code}-${train.departure}`}>
                 <div className="rail-train-main"><span className="rail-train-code">{train.code}</span><div className="rail-journey"><strong>{train.departure}</strong><span>{train.from}</span></div><div className="rail-route"><span>{train.duration}</span><i /></div><div className="rail-journey"><strong>{train.arrival}</strong><span>{train.to}</span></div><span className={available.length ? "rail-badge is-available" : "rail-badge"}>{available.length ? "有余票" : "暂无余票"}</span></div>
                 <div className="rail-seats">{train.seats.filter((seat) => seat.value !== "--").map((seat) => <span className={seat.available ? "rail-seat is-available" : "rail-seat"} key={seat.label}>{seat.label} <strong>{seat.value}</strong></span>)}</div>
-                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "12306 未提供准确配属车型"}</span><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div>
+                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}</span><span className="rail-train-links"><a href={`https://rail.re/#${train.code}`} target="_blank" rel="noreferrer">历史交路 <ExternalLink size={13} /></a><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></span></div>
               </article>;
             })}</div>}
         </section>

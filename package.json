@@ -1,7 +1,7 @@
 {
   "name": "yukino-rail-watch",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "main": "electron/rail-main.cjs",
   "description": "12306 余票查询与 Windows 通知",
@@ -29,6 +29,6 @@
     "vite": "^6.3.5",
     "vitest": "^3.2.4",
     "wrangler": "^4.115.0"
-  }
+  },
+  "author": "Yukino"
 }
-

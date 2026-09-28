@@ -123,7 +123,8 @@ function createWindow() {
     if (!quitting) { event.preventDefault(); window.hide(); }
   });
   window.webContents.setWindowOpenHandler(({ url }) => {
-    if (url === "https://www.12306.cn/" || url.startsWith("https://www.yukino.bond/")) {
+    if (url === "https://www.12306.cn/" || url.startsWith("https://www.yukino.bond/") ||
+        url === "https://railgo.dev/" || url.startsWith("https://rail.re/")) {
       void shell.openExternal(url);
     }
     return { action: "deny" };
