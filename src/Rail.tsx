@@ -260,12 +260,24 @@ export default function Rail() {
         <p className="rail-disclaimer">本工具仅展示公开查询结果，不提供购票或抢票。车票状态会随时变化，最终以 12306 官网为准。</p>
         <a className="rail-attribution" href="https://api.railgo.dev/" target="_blank" rel="noreferrer" aria-label="车型与配属数据来源：RailGo 数据服务（打开数据服务文档）">
           <span className="rail-attribution-main">
-            <span className="rail-attribution-icon" aria-hidden="true"><TrainFront size={36} strokeWidth={1.4} /></span>
+            <span className="rail-attribution-icon" aria-hidden="true"><TrainFront size={28} strokeWidth={1.4} /></span>
             <span className="rail-attribution-copy"><strong>RailGo Data Service</strong><span>api.railgo.dev</span></span>
             <ExternalLink className="rail-attribution-external" size={17} aria-hidden="true" />
           </span>
           <span className="rail-attribution-caption">车型与配属数据由 RailGo 数据服务提供</span>
         </a>
+        <footer className="rail-site-footer" role="contentinfo" aria-label="Yukino 页脚">
+          <div className="rail-site-footer-main">
+            <div className="rail-site-footer-brand"><a className="footer-brand" href="https://www.yukino.bond/" target="_blank" rel="noreferrer">Yukino.</a><span>慢慢写，慢慢长。</span></div>
+            <nav aria-label="页脚导航">
+              <a href="https://github.com/Le672" target="_blank" rel="noreferrer">GitHub ↗</a>
+              <a href="mailto:Raptor@yukino.bond" target="_blank" rel="noreferrer">邮件 ↗</a>
+              <a href="https://www.yukino.bond/changelog" target="_blank" rel="noreferrer">更新日志</a>
+              <a href="https://www.yukino.bond/rss" target="_blank" rel="noreferrer">订阅</a>
+            </nav>
+          </div>
+          <div className="rail-site-footer-caption">© {new Date().getFullYear()} Yukino</div>
+        </footer>
       </div>
     </div>
   );
