@@ -5,7 +5,8 @@ const path = require("node:path");
 const API = process.env.RAIL_API_URL || "https://www.yukino.bond/api/rail";
 const ICON = path.join(__dirname, "../public/icon-512.png");
 const DEFAULT_SETTINGS = {
-  date: "", from: "", to: "", train: "", seat: "任意席别", intervalMinutes: 5, enabled: false,
+  queryMode: "train", date: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10),
+  from: "", to: "", train: "", seat: "任意席别", intervalMinutes: 5, enabled: false,
 };
 
 let window;
@@ -17,29 +18,43 @@ let result = null;
 let error = null;
 let checking = false;
 let availability = {};
+let revision = 0;
+const TRAIN_CODE = /^(?:[GDCZTKYS]\d{1,4}[A-Z]?|\d{4})$/;
 
 function configPath() { return path.join(app.getPath("userData"), "rail-monitor.json"); }
 
 function readSettings() {
   try {
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(fs.readFileSync(configPath(), "utf8")) };
+    const saved = JSON.parse(fs.readFileSync(configPath(), "utf8"));
+    return validate({
+      ...DEFAULT_SETTINGS, ...saved,
+      date: saved.date || DEFAULT_SETTINGS.date,
+      queryMode: saved.queryMode || (saved.from || saved.to ? "route" : "train"),
+      enabled: saved.queryMode ? Boolean(saved.enabled) : false,
+    });
   } catch { return DEFAULT_SETTINGS; }
 }
 
 function validate(value) {
   if (!value || typeof value !== "object") throw new Error("无效监控设置");
   const next = {
+    queryMode: value.queryMode || (value.from || value.to ? "route" : "train"),
     date: String(value.date || ""), from: String(value.from || "").trim(),
     to: String(value.to || "").trim(), train: String(value.train || "").trim().toUpperCase(),
     seat: String(value.seat || "任意席别"), intervalMinutes: Number(value.intervalMinutes),
     enabled: Boolean(value.enabled),
   };
+  if (!["train", "route"].includes(next.queryMode)) throw new Error("请选择按车次或按区间查询");
   if (next.date && !/^\d{4}-\d{2}-\d{2}$/.test(next.date)) throw new Error("日期格式错误");
-  if (next.from.length > 30 || next.to.length > 30 || next.from === next.to && next.from) throw new Error("请填写两个不同的车站");
-  if (next.train && !/^[GDCZTKYS]\d{1,4}[A-Z]?$/.test(next.train)) throw new Error("车次格式错误");
+  if (next.from.length > 30 || next.to.length > 30 || next.train.length > 8) throw new Error("查询条件过长");
   if (!Number.isInteger(next.intervalMinutes) || next.intervalMinutes < 1 || next.intervalMinutes > 60) throw new Error("检查间隔须为 1–60 分钟");
-  if (next.enabled && (!next.date || !next.from || !next.to)) throw new Error("请填写日期和车站");
+  if (next.enabled && !queryReady(next)) throw new Error("请填写日期，以及有效车次或两个不同的车站");
   return next;
+}
+
+function queryReady(config) {
+  return !!config.date && (config.queryMode === "train" ? TRAIN_CODE.test(config.train) :
+    !!config.from && !!config.to && config.from !== config.to);
 }
 
 function snapshot() { return { settings, result, error, checking }; }
@@ -48,7 +63,7 @@ function emit() {
 }
 
 async function apiRequest(url) {
-  const response = await fetch(url, { signal: AbortSignal.timeout(18000) });
+  const response = await fetch(url, { signal: AbortSignal.timeout(60000) });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error || `接口返回 ${response.status}`);
   return payload;
@@ -60,14 +75,17 @@ function availableSeats(train, seat) {
 
 async function check(value, withNotification = false) {
   const config = validate(value);
-  if (!config.date || !config.from || !config.to) throw new Error("请填写日期和车站");
-  const params = new URLSearchParams({ date: config.date, from: config.from, to: config.to });
-  if (config.train) params.set("train", config.train);
+  if (!queryReady(config)) throw new Error("请填写日期，以及有效车次或两个不同的车站");
+  const params = new URLSearchParams({ date: config.date, search: config.queryMode });
+  if (config.queryMode === "train") params.set("train", config.train);
+  else { params.set("from", config.from); params.set("to", config.to); }
+  const requestRevision = revision;
   checking = true;
   error = null;
   emit();
   try {
     const next = await apiRequest(`${API}?${params}`);
+    if (requestRevision !== revision) return next;
     result = next;
     if (withNotification) {
       const current = {};
@@ -89,11 +107,10 @@ async function check(value, withNotification = false) {
     }
     return next;
   } catch (cause) {
-    error = cause instanceof Error ? cause.message : String(cause);
+    if (requestRevision === revision) error = cause instanceof Error ? cause.message : String(cause);
     throw cause;
   } finally {
-    checking = false;
-    emit();
+    if (requestRevision === revision) { checking = false; emit(); }
   }
 }
 
@@ -151,6 +168,8 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle("rail:stations", () => apiRequest(`${API}?mode=stations`));
     ipcMain.handle("rail:configure", (_event, value) => {
       settings = validate(value);
+      revision++;
+      checking = false;
       fs.writeFileSync(configPath(), JSON.stringify(settings), "utf8");
       availability = {};
       result = null;

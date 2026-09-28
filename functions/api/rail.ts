@@ -11,6 +11,13 @@ const REQUEST_HEADERS = {
 
 let stationCache: { at: number; stations: Station[] } | undefined;
 let sessionCache: { at: number; cookie: string } | undefined;
+type TrainRoute = { from: string; to: string; trainNo: string };
+const trainRouteCache = new Map<string, { at: number; route: TrainRoute }>();
+const TRAIN_CODE = /^(?:[GDCZTKYS]\d{1,4}[A-Z]?|\d{4})$/;
+
+class QueryError extends Error {
+  constructor(message: string, readonly status: number) { super(message); }
+}
 
 export function parseStations(text: string): Station[] {
   const stations = new Map<string, Station>();
@@ -32,11 +39,11 @@ export function seatsFromFields(fields: string[]): Seat[] {
   });
 }
 
-export function parseTrains(result: string[], names: Record<string, string>, trainCode?: string) {
+export function parseTrains(result: string[], names: Record<string, string>, trainCode?: string, trainNo?: string) {
   return result.map((row) => {
     const fields = row.split("|");
     const code = fields[3] || "";
-    if (!/^[GDCZTKYS]\d+[A-Z]?$/.test(code)) return null;
+    if (!TRAIN_CODE.test(code) || (trainCode && code !== trainCode && (!trainNo || fields[2] !== trainNo))) return null;
     return {
       code,
       from: names[fields[6]] || fields[6],
@@ -49,7 +56,7 @@ export function parseTrains(result: string[], names: Record<string, string>, tra
       // The left-ticket response does not identify the physical trainset.
       trainsetModel: null,
     };
-  }).filter((train) => train && (!trainCode || train.code === trainCode));
+  }).filter((train) => train !== null);
 }
 
 function json(data: unknown, status = 200, cacheSeconds = 0) {
@@ -97,6 +104,38 @@ async function getSessionCookie(): Promise<string> {
   return cookie;
 }
 
+async function getTrainRoute(date: string, trainCode: string): Promise<TrainRoute> {
+  const key = `${date}/${trainCode}`;
+  const cached = trainRouteCache.get(key);
+  if (cached && Date.now() - cached.at < 15 * 60 * 1000) return cached.route;
+  const search = new URL("https://search.12306.cn/search/v1/train/search");
+  search.searchParams.set("keyword", trainCode);
+  search.searchParams.set("date", date.replace(/-/g, ""));
+  const response = await fetch(search, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(12000) });
+  if (!response.ok) throw new Error(`12306 车次搜索返回 ${response.status}`);
+  const payload = await response.json() as {
+    status?: boolean; errorMsg?: string;
+    data?: { date?: string; station_train_code?: string; from_station?: string; to_station?: string; train_no?: string }[];
+  };
+  if (payload.status !== true || !Array.isArray(payload.data)) throw new Error(payload.errorMsg || "12306 暂未返回可识别的车次资料");
+  const matches = payload.data.filter((row) => row?.station_train_code === trainCode && row.date === date.replace(/-/g, ""));
+  if (!matches.length) throw new QueryError(`12306 未找到 ${date} 的 ${trainCode}，请检查日期和车次`, 404);
+  const routes = new Map<string, TrainRoute>();
+  for (const row of matches) {
+    if (typeof row.from_station !== "string" || typeof row.to_station !== "string" || typeof row.train_no !== "string" ||
+        !row.from_station.trim() || !row.to_station.trim() || !/^[A-Za-z0-9]{1,32}$/.test(row.train_no)) {
+      throw new Error("12306 车次线路资料不完整，请稍后重试");
+    }
+    const route = { from: row.from_station.trim(), to: row.to_station.trim(), trainNo: row.train_no };
+    routes.set(`${route.trainNo}/${route.from}/${route.to}`, route);
+  }
+  if (routes.size !== 1) throw new QueryError("该车次对应多条线路，请改用区间查询", 400);
+  const route = [...routes.values()][0];
+  if (trainRouteCache.size >= 200) trainRouteCache.delete(trainRouteCache.keys().next().value!);
+  trainRouteCache.set(key, { at: Date.now(), route });
+  return route;
+}
+
 async function fetchTicketPayload(url: URL, cookie: string) {
   const response = await fetch(url, {
     headers: { ...REQUEST_HEADERS, Cookie: cookie },
@@ -130,12 +169,23 @@ export async function onRequestGet(context: { request: Request }) {
     const stations = await getStations();
     if (mode === "stations") return json({ stations }, 200, 86400);
 
-    const date = url.searchParams.get("date") || "";
-    const from = (url.searchParams.get("from") || "").trim();
-    const to = (url.searchParams.get("to") || "").trim();
+    const date = url.searchParams.get("date") || new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    let from = (url.searchParams.get("from") || "").trim();
+    let to = (url.searchParams.get("to") || "").trim();
     const trainCode = (url.searchParams.get("train") || "").trim().toUpperCase();
-    if (!isValidDate(date) || !from || !to || (trainCode && !/^[GDCZTKYS]\d{1,4}[A-Z]?$/.test(trainCode))) {
-      return json({ error: "请填写有效的日期、出发站、到达站和车次" }, 400);
+    const search = url.searchParams.get("search") || (from || to ? "route" : trainCode ? "train" : "route");
+    if (!isValidDate(date) || !["train", "route"].includes(search) || (trainCode && !TRAIN_CODE.test(trainCode))) {
+      return json({ error: "请填写有效的日期、查询方式和车次" }, 400);
+    }
+    let trainNo: string | undefined;
+    if (search === "train") {
+      if (!trainCode) return json({ error: "按车次查询时请填写车次，无需填写车站" }, 400);
+      const route = await getTrainRoute(date, trainCode);
+      from = route.from;
+      to = route.to;
+      trainNo = route.trainNo;
+    } else if (!from || !to) {
+      return json({ error: "按区间查询时请填写出发站和到达站，无需填写车次" }, 400);
     }
     const byName = new Map(stations.map((station) => [station.name, station.code]));
     const fromCode = byName.get(from) || (stations.some((s) => s.code === from) ? from : "");
@@ -159,10 +209,10 @@ export async function onRequestGet(context: { request: Request }) {
     return json({
       source: "12306",
       checkedAt: new Date().toISOString(),
-      date, from, to, fromCode, toCode, trainCode,
-      trains: parseTrains(payload.data.result, payload.data.map || {}, trainCode),
+      date, from, to, fromCode, toCode, trainCode, queryMode: search,
+      trains: parseTrains(payload.data.result, payload.data.map || {}, trainCode, trainNo),
     }, 200, 30);
   } catch (error) {
-    return json({ error: error instanceof Error ? error.message : "查询 12306 失败" }, 502);
+    return json({ error: error instanceof Error ? error.message : "查询 12306 失败" }, error instanceof QueryError ? error.status : 502);
   }
 }

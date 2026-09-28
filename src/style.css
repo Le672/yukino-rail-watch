@@ -24,7 +24,15 @@ button { cursor: pointer; }
 .rail-overline { font-size: 10px; font-weight: 700; letter-spacing: .22em; color: #80977c; }
 .rail-card h2, .rail-section-heading h2 { margin: 5px 0 0; font-family: Georgia, "Noto Serif SC", "Songti SC", serif; font-size: 23px; color: #294738; }
 .rail-small, .rail-section-heading > span { color: #879087; font-size: 12px; }
-.rail-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px; margin: 28px 0 24px; }
+.rail-search-modes { display: flex; gap: 6px; padding: 5px; margin-top: 24px; border: 1px solid #dfe6db; border-radius: 12px; background: #f4f7ef; }
+.rail-search-modes button { flex: 1; min-height: 39px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #768575; font-size: 13px; font-weight: 650; cursor: pointer; }
+.rail-search-modes button[aria-pressed="true"] { border-color: #bed0b7; background: #fffefb; color: #315c42; box-shadow: 0 2px 6px #31473608; }
+.rail-search-modes button:focus-visible { outline: 2px solid #719375; outline-offset: 2px; }
+.rail-search-help, .rail-result-route { color: #70816e; font-size: 12px; line-height: 1.8; }
+.rail-search-help { margin: 12px 0 0; }
+.rail-result-route { margin: -5px 0 13px; }
+.rail-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px; margin: 20px 0 24px; }
+.rail-date { grid-column: 1 / -1; }
 .rail-fields label { display: flex; flex-direction: column; gap: 8px; min-width: 0; color: #4b5c51; font-size: 13px; font-weight: 650; }
 .rail-fields small { color: #9ca79d; font-weight: 400; }
 .rail-fields input, .rail-fields select { width: 100%; min-width: 0; height: 45px; border: 1px solid #dfe6db; border-radius: 9px; background: #fbfcf7; padding: 0 13px; color: #294738; outline: 0; }
@@ -81,4 +89,3 @@ button { cursor: pointer; }
 .rail-spin { animation: rail-spin .8s linear infinite; }
 @media (max-width: 760px) { .rail-page { padding: 26px 16px 70px; } .rail-layout { grid-template-columns: 1fr; } .rail-status { min-height: 240px; } .rail-hero-icon { width: 80px; height: 80px; border-radius: 20px; } .rail-hero-icon svg { width: 40px; } }
 @media (max-width: 540px) { .rail-hero-icon { display: none; } .rail-form, .rail-status { padding: 22px; } .rail-fields { gap: 14px; } .rail-train { padding: 16px; } .rail-train-main { flex-wrap: wrap; gap: 10px 15px; } .rail-train-code { width: 100%; } .rail-route { flex: 1; } .rail-badge { margin-left: 0; } .rail-section-heading { align-items: start; } }
-
