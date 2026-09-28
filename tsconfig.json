@@ -14,8 +14,10 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "types": [
-      "vitest/globals"
-    ]
+      "vitest/globals",
+      "vite/client"
+    ],
+    "resolveJsonModule": true
   },
   "include": [
     "src",

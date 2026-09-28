@@ -142,7 +142,10 @@ function createWindow() {
   window.webContents.setWindowOpenHandler(({ url }) => {
     if (url === "https://www.12306.cn/" || url.startsWith("https://www.yukino.bond/") ||
         url === "https://railgo.dev/" || url === "https://api.railgo.dev/" ||
-        url === "https://github.com/Le672" || url === "mailto:Raptor@yukino.bond") {
+        url === "https://github.com/Le672" || url === "mailto:Raptor@yukino.bond" ||
+        url.startsWith("https://commons.wikimedia.org/wiki/File:") ||
+        url.startsWith("https://creativecommons.org/licenses/") ||
+        url.startsWith("https://creativecommons.org/publicdomain/")) {
       void shell.openExternal(url);
     }
     return { action: "deny" };
