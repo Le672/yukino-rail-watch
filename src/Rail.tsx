@@ -247,14 +247,13 @@ export default function Rail() {
         <section className="rail-results" aria-labelledby="rail-results-title">
           <div className="rail-section-heading"><div><span className="rail-overline">03 / RESULTS</span><h2 id="rail-results-title">查询结果</h2></div>{result && <span>{result.trains.length} 趟车 · {matched.length} 趟有关注席别余票</span>}</div>
           {result && <p className="rail-result-route">{result.date} · {result.from} → {result.to}{result.queryMode === "train" ? " · 全程余票" : ""}</p>}
-          <p className="rail-model-credit">车型参考：<a href="https://railgo.dev/" target="_blank" rel="noreferrer">RailGo <ExternalLink size={12} /></a>；<a href="https://rail.re/" target="_blank" rel="noreferrer">rail.re <ExternalLink size={12} /></a> 提供历史交路记录。{result?.modelCheckedAt ? `车型数据查询于 ${formatCheckedAt(result.modelCheckedAt)}。` : "车型暂不可用时仍显示 12306 余票。"}实际编组可能调整。</p>
           {!result ? <div className="rail-empty">还没有查询结果。填写车次或乘车区间后点击“立即查询”。</div> : result.trains.length === 0 ? <div className="rail-empty">没有找到符合条件的余票数据。请检查日期，或前往 12306 查看开行情况。</div> :
             <div className="rail-trains">{result.trains.map((train) => {
               const available = matchingSeats(train, settings.seat);
               return <article className="rail-train" key={`${train.code}-${train.departure}`}>
                 <div className="rail-train-main"><span className="rail-train-code">{train.code}</span><div className="rail-journey"><strong>{train.departure}</strong><span>{train.from}</span></div><div className="rail-route"><span>{train.duration}</span><i /></div><div className="rail-journey"><strong>{train.arrival}</strong><span>{train.to}</span></div><span className={available.length ? "rail-badge is-available" : "rail-badge"}>{available.length ? "有余票" : "暂无余票"}</span></div>
                 <div className="rail-seats">{train.seats.filter((seat) => seat.value !== "--").map((seat) => <span className={seat.available ? "rail-seat is-available" : "rail-seat"} key={seat.label}>{seat.label} <strong>{seat.value}</strong></span>)}</div>
-                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}</span><span className="rail-train-links"><a href={`https://rail.re/#${train.code}`} target="_blank" rel="noreferrer">历史交路 <ExternalLink size={13} /></a><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></span></div>
+                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}{train.trainsetModel && <> · <a href="https://railgo.dev/" target="_blank" rel="noreferrer" title="车型数据来源：RailGo">RailGo</a></>}</span><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div>
               </article>;
             })}</div>}
         </section>

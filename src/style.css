@@ -60,9 +60,6 @@ button { cursor: pointer; }
 .rail-error { margin-top: 18px; padding: 13px 16px; border: 1px solid #ead0c3; border-radius: 10px; background: #fff5ef; color: #9e5640; font-size: 13px; }
 .rail-results { margin-top: 43px; }
 .rail-section-heading { margin-bottom: 17px; }
-.rail-model-credit { margin: -4px 0 18px; color: #7d8d7d; font-size: 11px; line-height: 1.9; }
-.rail-model-credit a { display: inline-flex; align-items: center; gap: 3px; color: #4b7655; }
-.rail-model-credit a:hover { text-decoration: underline; }
 .rail-empty { border: 1px dashed #d6e1d1; border-radius: 18px; background: #fffefb9c; padding: 55px 20px; text-align: center; color: #8a9589; font-size: 13px; }
 .rail-trains { display: grid; gap: 12px; }
 .rail-train { border: 1px solid #e0e6da; border-radius: 16px; background: #fffefb; padding: 18px 22px; }
@@ -83,7 +80,6 @@ button { cursor: pointer; }
 .rail-train-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef0ea; color: #9aa49a; font-size: 11px; }
 .rail-train-foot a { display: inline-flex; align-items: center; gap: 4px; color: #5d805f; }
 .rail-train-foot a:hover { color: #295a38; }
-.rail-train-links { display: flex; flex-wrap: wrap; gap: 12px; flex: none; }
 .rail-disclaimer { margin-top: 30px; color: #9aa49a; text-align: center; font-size: 11px; line-height: 1.8; }
 @keyframes rail-spin { to { transform: rotate(360deg); } }
 .rail-spin { animation: rail-spin .8s linear infinite; }
