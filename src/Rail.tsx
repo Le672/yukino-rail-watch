@@ -253,11 +253,19 @@ export default function Rail() {
               return <article className="rail-train" key={`${train.code}-${train.departure}`}>
                 <div className="rail-train-main"><span className="rail-train-code">{train.code}</span><div className="rail-journey"><strong>{train.departure}</strong><span>{train.from}</span></div><div className="rail-route"><span>{train.duration}</span><i /></div><div className="rail-journey"><strong>{train.arrival}</strong><span>{train.to}</span></div><span className={available.length ? "rail-badge is-available" : "rail-badge"}>{available.length ? "有余票" : "暂无余票"}</span></div>
                 <div className="rail-seats">{train.seats.filter((seat) => seat.value !== "--").map((seat) => <span className={seat.available ? "rail-seat is-available" : "rail-seat"} key={seat.label}>{seat.label} <strong>{seat.value}</strong></span>)}</div>
-                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}{train.trainsetModel && <> · <a href="https://railgo.dev/" target="_blank" rel="noreferrer" title="车型数据来源：RailGo">RailGo</a></>}</span><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div>
+                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}</span><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div>
               </article>;
             })}</div>}
         </section>
         <p className="rail-disclaimer">本工具仅展示公开查询结果，不提供购票或抢票。车票状态会随时变化，最终以 12306 官网为准。</p>
+        <a className="rail-attribution" href="https://api.railgo.dev/" target="_blank" rel="noreferrer" aria-label="车型与配属数据来源：RailGo 数据服务（打开数据服务文档）">
+          <span className="rail-attribution-main">
+            <span className="rail-attribution-icon" aria-hidden="true"><TrainFront size={36} strokeWidth={1.4} /></span>
+            <span className="rail-attribution-copy"><strong>RailGo Data Service</strong><span>api.railgo.dev</span></span>
+            <ExternalLink className="rail-attribution-external" size={17} aria-hidden="true" />
+          </span>
+          <span className="rail-attribution-caption">车型与配属数据由 RailGo 数据服务提供</span>
+        </a>
       </div>
     </div>
   );

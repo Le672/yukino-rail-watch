@@ -141,7 +141,7 @@ function createWindow() {
   });
   window.webContents.setWindowOpenHandler(({ url }) => {
     if (url === "https://www.12306.cn/" || url.startsWith("https://www.yukino.bond/") ||
-        url === "https://railgo.dev/" || url.startsWith("https://rail.re/")) {
+        url === "https://railgo.dev/" || url === "https://api.railgo.dev/") {
       void shell.openExternal(url);
     }
     return { action: "deny" };
