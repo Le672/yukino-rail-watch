@@ -1,5 +1,5 @@
-import { parseDelays, parseJourney, parseRailwayRoute, TRAIN_CODE, isJourneyDate } from "./train-position";
-import type { DelayReport, TrainJourney, RailwayRoute } from "./train-position";
+import { parseDelays, parseJourney, parseRailwayMap, TRAIN_CODE, isJourneyDate } from "./train-position";
+import type { DelayReport, TrainJourney, RailwayMapData } from "./train-position";
 
 const BASE = "https://rg-api.zenglingkun.cn/api/v2/";
 type FetchedPayload = { payload: unknown; checkedAt: number };
@@ -35,7 +35,7 @@ export async function loadDelays(train: string, date: string): Promise<DelayRepo
   const fetched = await request("getTrainDelayAll", { trainNum: train, date: date.replace(/-/g, "") }, 55000);
   return parseDelays(fetched.payload, fetched.checkedAt);
 }
-export async function loadRailway(journey: TrainJourney): Promise<RailwayRoute> {
+export async function loadRailway(journey: TrainJourney): Promise<RailwayMapData> {
   const fetched = await request("mapLine", { train: journey.train }, 60 * 60000);
-  return parseRailwayRoute(fetched.payload, journey);
+  return parseRailwayMap(fetched.payload, journey);
 }

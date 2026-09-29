@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { chinaDateTime, coordinateAt, isJourneyDate, locateJourney, observationTime, parseDelays, parseJourney, parseRailwayRoute, positionOnRailway } from "../lib/train-position";
+import { chinaDateTime, coordinateAt, isJourneyDate, locateJourney, observationTime, parseDelays, parseJourney, parseRailwayMap, parseRailwayRoute, positionOnRailway, TRAIN_CODE } from "../lib/train-position";
+import { k123, k123Map } from "./fixtures/conventional-position";
 
 // Public RailGo V2 G6003 timetable fetched 2026-09-29. This is a regression fixture,
 // never a fallback timetable in the product.
@@ -68,6 +69,7 @@ describe("route coordinates cannot change next stopping station", () => {
   } } };
   it("interpolates on the bent railway, not a straight line between stopping stations", () => {
     const route = parseRailwayRoute(line, journey);
+    expect(parseRailwayMap(line, journey).route).toEqual(route);
     const position = locateJourney(journey, at("11:01"));
     const marker = positionOnRailway(route, position);
     expect(marker.coordinate[0]).toBeLessThan(113.1);
@@ -84,5 +86,34 @@ describe("route coordinates cannot change next stopping station", () => {
     expect(() => parseRailwayRoute(changed, journey)).toThrow(/不一致/);
     const disconnected = structuredClone(line); disconnected.data.train["广州南-深圳北"].line[0] = [115, 24];
     expect(() => parseRailwayRoute(disconnected, journey)).toThrow(/断开/);
+  });
+});
+
+describe("conventional trains without track geometry", () => {
+  const conventional = parseJourney(k123, "K123", "2026-09-29");
+  it.each(["Z22", "T21", "K123", "1461"])("accepts %s", train => {
+    expect(TRAIN_CODE.test(train)).toBe(true);
+  });
+  it("retains station coordinates when RailGo returns an empty train object", () => {
+    const map = parseRailwayMap(k123Map, conventional);
+    expect(map.route).toBeNull();
+    expect(map.stations).toEqual([[121.230588, 30.982601], [120.763489, 30.764099], [111.603283, 32.264263], [110.78189, 32.603917]]);
+    expect(map.warning).toContain("GPS 实时位置仍可显示");
+  });
+  it("preserves timetable indexes when a station is missing or has conflicting coordinates", () => {
+    const map = parseRailwayMap({ success: true, data: { stations: [
+      { 上海松江: [121.230588, 30.982601] }, { 上海松江: [120, 30] }, { 十堰: [110.78189, 32.603917] },
+    ], train: {} } }, conventional);
+    expect(map.stations).toEqual([null, null, null, [110.78189, 32.603917]]);
+    expect(map.route).toBeNull();
+    expect(() => parseRailwayMap({ success: false }, conventional)).toThrow();
+  });
+  it("uses the origin date across midnight and accepts a duplicate train number", () => {
+    const alias = parseJourney(k123, "K122", "2026-09-29");
+    const position = locateJourney(alias, observationTime("2026-09-30T09:36"));
+    expect(position.phase).toBe("running");
+    expect(alias.stops[position.previousIndex!].station).toBe("谷城");
+    expect(alias.stops[position.nextIndex!].station).toBe("十堰");
+    expect(chinaDateTime(position.arrivalAt!)).toBe("2026-09-30T10:43");
   });
 });

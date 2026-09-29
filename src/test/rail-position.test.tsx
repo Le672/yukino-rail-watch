@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RailPosition } from "../components/RailPosition";
-import { parseJourney } from "../lib/train-position";
+import { parseJourney, parseRailwayMap } from "../lib/train-position";
+import { k123, k123Map } from "./fixtures/conventional-position";
 import { distanceKm } from "../lib/train-position";
 import { wgs84togcj02 } from "coordtransform";
 
@@ -60,7 +61,8 @@ describe("position query user workflow", () => {
     const points = [[113.06, 28.15], [113.11, 26], [113.26, 22.99], [114.03, 22.61]].map(point => wgs84togcj02(point[0], point[1]));
     const distances = [0];
     for (let i = 1; i < points.length; i++) distances.push(distances[i - 1] + distanceKm(points[i - 1], points[i]));
-    loaders.loadRailway.mockResolvedValue({ points, distances, stops: [points[0], points[2], points[3]], stopDistances: [0, distances[2], distances[3]], lengthKm: distances[3] });
+    const route = { points, distances, stops: [points[0], points[2], points[3]], stopDistances: [0, distances[2], distances[3]], lengthKm: distances[3] };
+    loaders.loadRailway.mockResolvedValue({ route, stations: route.stops, warning: null });
     render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" />);
     fireEvent.click(screen.getByRole("button", { name: "查询位置" }));
     await screen.findByText("广州南 → 深圳北");
@@ -82,7 +84,8 @@ describe("position query user workflow", () => {
   });
   it("shows departure acceleration without starting GPS and advances the map by integrated distance", async () => {
     const points = [[113.06, 28.15], [113.26, 22.99], [114.03, 22.61]];
-    loaders.loadRailway.mockResolvedValue({ points, distances: [0, 600, 740], stops: points, stopDistances: [0, 600, 740], lengthKm: 740 });
+    const route = { points, distances: [0, 600, 740], stops: points, stopDistances: [0, 600, 740], lengthKm: 740 };
+    loaders.loadRailway.mockResolvedValue({ route, stations: points, warning: null });
     vi.stubGlobal("isSecureContext", true);
     const watchPosition = vi.fn();
     vi.stubGlobal("navigator", { geolocation: { watchPosition, clearWatch: vi.fn() } });
@@ -99,5 +102,27 @@ describe("position query user workflow", () => {
     fireEvent.change(screen.getByLabelText("观察时间（北京时间）"), { target: { value: "2026-09-29T12:03" } });
     expect(speed.getByText("0")).toBeInTheDocument();
     expect(speed.getByText("线路＋时刻表预估 · 停站中")).toBeInTheDocument();
+  });
+  it("keeps a conventional train's next station and GPS speed when track geometry is unavailable", async () => {
+    const now = Date.parse("2026-09-30T09:36:00+08:00");
+    vi.spyOn(Date, "now").mockReturnValue(now);
+    const journey = parseJourney(k123, "K123", "2026-09-29", now);
+    loaders.loadJourney.mockResolvedValue(journey);
+    loaders.loadRailway.mockResolvedValue(parseRailwayMap(k123Map, journey));
+    vi.stubGlobal("isSecureContext", true);
+    const watchPosition = vi.fn().mockReturnValue(9), clearWatch = vi.fn();
+    vi.stubGlobal("navigator", { geolocation: { watchPosition, clearWatch } });
+    render(<RailPosition initialTrain="K123" initialDate="2026-09-29" />);
+    fireEvent.click(screen.getByRole("button", { name: "查询位置" }));
+    await screen.findByText("谷城 → 十堰");
+    await screen.findByText(/GPS 实时位置仍可显示/);
+    fireEvent.click(screen.getByRole("button", { name: "开启 GPS 实时定位" }));
+    act(() => watchPosition.mock.calls[0][0]({ coords: { longitude: 111.59, latitude: 32.26, accuracy: 20, speed: 20, heading: 270 }, timestamp: now }));
+    expect(within(screen.getByLabelText("下一停靠站")).getByText("十堰")).toBeInTheDocument();
+    expect(screen.getByText(/地图显示设备 GPS 位置；完整线路暂缺/)).toBeInTheDocument();
+    expect(within(screen.getByRole("group", { name: "实时速度" })).getByText("72")).toBeInTheDocument();
+    expect(screen.queryByText(/GPS 实时匹配/)).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "停止 GPS 定位" }));
+    expect(clearWatch).toHaveBeenCalledWith(9);
   });
 });

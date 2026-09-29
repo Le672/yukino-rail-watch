@@ -2,8 +2,8 @@ import { Clock3, LocateFixed, MapPin, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadDelays, loadJourney, loadRailway } from "../lib/rail-position-data";
 import { chinaDateTime, locateJourney, observationTime } from "../lib/train-position";
-import type { DelayReport, RailwayRoute, TrainJourney } from "../lib/train-position";
-import { matchGpsJourney, railwayToWgs84 } from "../lib/rail-gps";
+import type { DelayReport, RailwayMapData, TrainJourney } from "../lib/train-position";
+import { gcjToWgs84, matchGpsJourney, railwayToWgs84 } from "../lib/rail-gps";
 import { useRailLocation } from "../hooks/useRailLocation";
 import { RailMap } from "./RailMap";
 import { RailSpeed } from "./RailSpeed";
@@ -29,7 +29,8 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   const [customTime, setCustomTime] = useState(chinaDateTime());
   const [now, setNow] = useState(Date.now());
   const [journey, setJourney] = useState<TrainJourney | null>(null);
-  const [route, setRoute] = useState<RailwayRoute | null>(null);
+  const [mapData, setMapData] = useState<RailwayMapData | null>(null);
+  const route = mapData?.route ?? null;
   const [delays, setDelays] = useState<DelayReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   const gps = useRailLocation();
   const gpsHistory = useRef<{ distanceKm: number; timestamp: number } | null>(null);
   const wgsRoute = useMemo(() => route ? railwayToWgs84(route) : null, [route]);
+  const wgsStations = useMemo(() => mapData?.stations.map(point => point ? gcjToWgs84(point) : null) ?? [], [mapData]);
   useEffect(() => { gpsHistory.current = null; }, [route, train, date, gps.enabled]);
 
   useEffect(() => {
@@ -54,12 +56,12 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   useEffect(() => () => { generation.current++; }, []);
 
   const invalidate = () => {
-    generation.current++; setJourney(null); setRoute(null); setDelays(null); setError(null);
+    generation.current++; setJourney(null); setMapData(null); setDelays(null); setError(null);
     setRouteError(null); setDelayError(null); setLoading(false); setDetailsLoading(false);
   };
   const queryPosition = async () => {
     const version = ++generation.current;
-    setLoading(true); setDetailsLoading(false); setError(null); setJourney(null); setRoute(null); setDelays(null);
+    setLoading(true); setDetailsLoading(false); setError(null); setJourney(null); setMapData(null); setDelays(null);
     setRouteError(null); setDelayError(null);
     try {
       const next = await loadJourney(train.trim().toUpperCase(), date);
@@ -67,7 +69,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
       setJourney(next); setLoading(false); setDetailsLoading(true);
       const extra = await Promise.allSettled([loadRailway(next), live ? loadDelays(next.train, next.date) : Promise.resolve(null)]);
       if (version !== generation.current) return;
-      if (extra[0].status === "fulfilled") setRoute(extra[0].value);
+      if (extra[0].status === "fulfilled") setMapData(extra[0].value);
       else setRouteError("线路资料暂不可用或与停站表不一致，仍可查看运行区间和下一站。");
       if (extra[1].status === "fulfilled") setDelays(extra[1].value);
       else setDelayError("正晚点资料暂不可用，当前按计划时刻估算。");
@@ -90,7 +92,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
           const extra = await Promise.allSettled([loadRailway(updated), loadDelays(updated.train, updated.date)]);
           if (!active || version !== generation.current) return;
           setJourney(updated);
-          setRoute(extra[0].status === "fulfilled" ? extra[0].value : null);
+          setMapData(extra[0].status === "fulfilled" ? extra[0].value : null);
           setRouteError(extra[0].status === "fulfilled" ? null : "线路资料暂不可用，仍可查看运行区间和下一站。");
           setDelays(extra[1].status === "fulfilled" ? extra[1].value : null);
           setDelayError(extra[1].status === "fulfilled" ? null : "正晚点资料暂不可用，当前按计划时刻估算。");
@@ -115,6 +117,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   const gpsMatch = gps.enabled && live && journey && wgsRoute && plannedPosition && gps.fix ?
     matchGpsJourney(journey, wgsRoute, plannedPosition, gps.fix, now, gpsHistory.current) : null;
   const gpsPosition = gpsMatch?.position;
+  const freshFix = gps.enabled && gps.fix && now - gps.fix.timestamp >= -5000 && now - gps.fix.timestamp <= 30000 ? gps.fix : null;
   const speed = useMemo(() => readRailSpeed(gps.samples, now), [gps.samples, now]);
   const motion = useMemo(() => journey && plannedPosition ? estimateRailMotion(journey, wgsRoute, observation, live ? delays : null) : null,
     [journey, plannedPosition, wgsRoute, observation, live, delays]);
@@ -130,10 +133,10 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   return <section className="rail-position-section" aria-labelledby="rail-position-title">
     <div className="rail-card rail-position-form">
       <div className="rail-card-heading"><div><span className="rail-overline">ON BOARD / NEXT STOP</span><h2 id="rail-position-title">列车位置与下一站</h2></div><span className="rail-small">北京时间 · UTC+8</span></div>
-      <p className="rail-search-help">乘车时开启 GPS，按设备位置匹配铁路线路及下一停靠站。地图支持 2D 与卫星图切换。</p>
+      <p className="rail-search-help">支持 G／D／C、Z／T／K 及四位数字车次。乘车时开启 GPS 查看设备实时位置；地图支持 2D 与卫星图切换。</p>
       <form onSubmit={event => { event.preventDefault(); void queryPosition(); }}>
         <div className="rail-position-fields">
-          <label>定位车次<input placeholder="例如 G6003" value={train} onChange={event => { invalidate(); setTrain(event.target.value.toUpperCase()); }} required /></label>
+          <label>定位车次<input placeholder="例如 G6003、K123 或 1461" value={train} onChange={event => { invalidate(); setTrain(event.target.value.toUpperCase()); }} required /></label>
           <label>始发日期<input type="date" value={date} onChange={event => { invalidate(); setDate(event.target.value); }} required /></label>
           <label className="rail-clock-option"><input type="checkbox" checked={live} onChange={event => { gps.stop(); setLive(event.target.checked); setNow(Date.now()); setCustomTime(chinaDateTime()); }} />跟随当前时间</label>
           {live ? <div className="rail-current-clock"><Clock3 size={16} /><span>{timeLabel(now)}<small>每秒更新位置估算</small></span></div> :
@@ -143,12 +146,12 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
           <button className="rail-gps-button" type="button" aria-pressed={gps.enabled} onClick={() => { if (gps.enabled) gps.stop(); else { setLive(true); setNow(Date.now()); gps.start(); } }}><LocateFixed size={16} />{gps.enabled ? "停止 GPS 定位" : "开启 GPS 实时定位"}</button></div>
       </form>
       <div className="rail-gps-overview"><div className={`rail-gps-status${gpsPosition ? " is-matched" : ""}`} role="status">
-        <strong>{gps.enabled ? gps.fix && now - gps.fix.timestamp <= 30000 ? `定位精度 ±${Math.round(gps.fix.accuracy)} 米` : "正在等待 GPS／设备定位信号" : "GPS 未开启"}</strong>
-        <span>{gps.error || gpsMatch?.reason || (gpsPosition ? `已匹配本车次线路 · 距线路约 ${Math.round(gpsMatch!.errorMeters)} 米` : gps.enabled ? journey ? route ? "等待有效定位后判断下一站。" : "正在读取铁路线路，暂按时刻表显示。" : "输入车次并查询后，将用定位匹配下一站。" : "仅在乘坐此车次时开启；GPS 未开启时按时刻表估算。")}</span>
+        <strong>{gps.enabled ? freshFix ? `定位精度 ±${Math.round(freshFix.accuracy)} 米` : "正在等待 GPS／设备定位信号" : "GPS 未开启"}</strong>
+        <span>{gps.error || gpsMatch?.reason || (gpsPosition ? `已匹配本车次线路 · 距线路约 ${Math.round(gpsMatch!.errorMeters)} 米` : gps.enabled ? journey ? route ? "等待有效定位后判断下一站。" : detailsLoading ? "正在读取铁路线路，暂按时刻表显示。" : freshFix ? "地图显示设备 GPS 位置；完整线路暂缺，下一站按时刻表判断。" : "等待 GPS 信号后显示设备位置；完整线路暂缺，下一站按时刻表判断。" : "输入车次并查询后，将用定位匹配下一站。" : "仅在乘坐此车次时开启；GPS 未开启时按时刻表估算。")}</span>
         {gps.fix && gps.enabled && <small>定位更新于 {timeLabel(gps.fix.timestamp)}</small>}
       </div><RailSpeed reading={speed} estimate={motion} enabled={gps.enabled} live={live} matched={Boolean(gpsPosition)} now={now} error={gps.error} /></div>
       <p className="rail-gps-privacy">定位在设备上匹配，不保存位置历史或上传到本站。地图服务会接收当前视野的瓦片请求；精度取决于 GPS 和系统定位，车厢或隧道内可能暂时无信号。</p>
-      <p className="rail-hint">跨日列车请填首站发车的日期。下一站仅指本车次实际停靠站；自定义观察时间按计划时刻推算。</p>
+      <p className="rail-hint">跨日普速车请填列车从首站发车的日期，可能早于你的乘车日期。下一站仅指本车次实际停靠站；自定义观察时间按计划时刻推算。</p>
     </div>
     {error && <div role="alert" className="rail-error">{error}</div>}
     {journey && !Number.isFinite(observation) && <div role="alert" className="rail-error">请填写完整的观察日期和时间。</div>}
@@ -167,9 +170,9 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
         {position.phase === "running" && <div className="rail-position-progress"><progress max="1" value={position.progress} aria-label="当前停站区间运行进度" /><small>当前区间{gpsPosition ? "定位" : "估算"}进度 {Math.round(position.progress * 100)}%</small></div>}
         <p className="rail-position-observed">{gpsPosition ? "GPS 定位于" : "观察于"} {timeLabel(gpsPosition ? gps.fix!.timestamp : observation)}</p>
       </div>
-      <div className="rail-position-route rail-card"><RailMap journey={journey} route={wgsRoute} position={position} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} />
-        {(!route || detailsLoading) && <p className="rail-position-explanation">{detailsLoading ? "正在读取铁路线路点…" : routeError}</p>}
-        <p className="rail-position-explanation">蓝点为设备实测位置，绿色为铁路匹配位置或时刻表估算，金色为下一停靠站。GPS 失效时会明确切回时刻表估算；定位不能证明列车身份，请确认正在乘坐所选车次。</p>
+      <div className="rail-position-route rail-card"><RailMap journey={journey} route={wgsRoute} stations={wgsStations} position={position} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} />
+        {(!route || detailsLoading) && <p className="rail-position-explanation">{detailsLoading ? "正在读取铁路线路点…" : routeError || mapData?.warning}</p>}
+        <p className="rail-position-explanation">{route ? "蓝点为设备实测位置，绿色为铁路匹配位置或时刻表估算，金色为下一停靠站。" : "蓝点为设备实测位置，绿色为本车次停靠站，金色为按时刻表判断的下一站。"}定位不能证明列车身份，请确认正在乘坐所选车次。</p>
       </div>
       <div className="rail-card rail-position-timetable">
         <div className="rail-card-heading"><div><span className="rail-overline">TIMETABLE</span><h3>本车次停站表</h3></div><span className="rail-small">{journey.stops.length} 站 · 不列通过站</span></div>
@@ -182,8 +185,8 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
       </div>
     </div>}
     {!journey && !loading && !error && <div className="rail-empty">输入车次和始发日期，查看运行区间、下一停靠站及铁路线路图。</div>}
-    {!position && <div className="rail-card rail-position-route"><RailMap journey={journey} route={wgsRoute} position={null} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} /></div>}
+    {!position && <div className="rail-card rail-position-route"><RailMap journey={journey} route={wgsRoute} stations={wgsStations} position={null} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} /></div>}
     {(delayError || position?.warning) && journey && <p className="rail-position-warning">{position?.warning || delayError}</p>}
-    <p className="rail-hint rail-position-source">时刻表、线路点与正晚点来自 RailGo 数据服务。开启 GPS 后使用设备位置匹配下一站；未获得有效定位时按时刻表估算。实际到发及临时停站请以列车广播、站内显示和 12306 为准。</p>
+    <p className="rail-hint rail-position-source">时刻表、站点、线路与正晚点来自 RailGo 数据服务。开启 GPS 后显示设备实时位置；有完整线路时匹配下一站，缺少线路或有效定位时按时刻表估算。实际到发及临时停站请以列车广播、站内显示和 12306 为准。</p>
   </section>;
 }

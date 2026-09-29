@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { parseJourney } from "../lib/train-position";
+import { k123, k123Map } from "./fixtures/conventional-position";
 
 const response = { success: true, data: { numberFull: ["G6003"], rundays: ["20260929"], timetable: [
   { station: "长沙南", stationTelecode: "CWQ", day: 0, arrive: "10:00", depart: "10:00" },
@@ -6,6 +8,14 @@ const response = { success: true, data: { numberFull: ["G6003"], rundays: ["2026
 ] } };
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 describe("position data dates and caching", () => {
+  it("loads conventional station coordinates without requiring track geometry", async () => {
+    vi.resetModules();
+    const fetchMock = vi.fn().mockResolvedValue(Response.json(k123Map)); vi.stubGlobal("fetch", fetchMock);
+    const { loadRailway } = await import("../lib/rail-position-data");
+    const map = await loadRailway(parseJourney(k123, "K123", "2026-09-29"));
+    expect(map.route).toBeNull(); expect(map.stations).toHaveLength(4);
+    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get("train")).toBe("K123");
+  });
   it("coalesces requests, preserves the fetched timestamp and sends an explicit origin date", async () => {
     vi.resetModules(); vi.useFakeTimers(); vi.setSystemTime(new Date("2026-09-29T02:01:00Z"));
     const fetchMock = vi.fn().mockResolvedValue(Response.json(response)); vi.stubGlobal("fetch", fetchMock);

@@ -13,6 +13,9 @@ export type Coordinate = [number, number]; // longitude, latitude; RailGo routes
 export type RailwayRoute = {
   points: Coordinate[]; distances: number[]; stopDistances: number[]; stops: Coordinate[]; lengthKm: number;
 };
+export type RailwayMapData = {
+  route: RailwayRoute | null; stations: (Coordinate | null)[]; warning: string | null;
+};
 export type JourneyPosition = {
   phase: "before" | "running" | "stopped" | "arrived";
   currentIndex: number | null; previousIndex: number | null; nextIndex: number | null;
@@ -118,6 +121,28 @@ export function locateJourney(journey: TrainJourney, now: number, report?: Delay
 
 function coordinate(value: unknown): value is Coordinate {
   return Array.isArray(value) && value.length === 2 && value.every(Number.isFinite) && Math.abs(value[0]) <= 180 && Math.abs(value[1]) <= 90;
+}
+/** Station coordinates remain useful when the provider has no track geometry (e.g. conventional trains). */
+export function parseRailwayMap(payload: unknown, journey: TrainJourney): RailwayMapData {
+  const root = record(payload), data = record(root.data);
+  if (root.success !== true || !Array.isArray(data.stations)) throw new Error("该车次暂无可用地图资料");
+  const coordinates = new Map<string, Coordinate | null>();
+  for (const item of data.stations) for (const [name, value] of Object.entries(record(item))) {
+    if (!coordinate(value)) continue;
+    if (!coordinates.has(name)) coordinates.set(name, value);
+    else {
+      const previous = coordinates.get(name);
+      if (!previous || distanceKm(previous, value) > 0.01) coordinates.set(name, null);
+    }
+  }
+  const stations = journey.stops.map(stop => coordinates.get(stop.station) ?? null);
+  try {
+    if (stations.some(point => point === null)) throw new Error("部分停靠站坐标缺失或存在冲突");
+    return { route: parseRailwayRoute(payload, journey), stations, warning: null };
+  } catch {
+    return { route: null, stations,
+      warning: "该车次暂无可用的完整铁路线路，已保留可核实的停靠站；GPS 实时位置仍可显示，下一站按时刻表判断。" };
+  }
 }
 export function distanceKm(a: Coordinate, b: Coordinate) {
   const rad = Math.PI / 180, dlat = (b[1] - a[1]) * rad, dlon = (b[0] - a[0]) * rad;
