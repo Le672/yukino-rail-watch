@@ -2,6 +2,7 @@ import { ArrowLeft, Bell, BellOff, Clock3, ExternalLink, RefreshCw, TrainFront }
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { enrichWithRailGo } from "./lib/railgo";
 import { TrainIllustration, TrainArtReferences } from "./components/TrainIllustration";
+import { RailPosition } from "./components/RailPosition";
 
 type Station = { name: string; code: string; pinyin: string };
 type Seat = { label: string; value: string; available: boolean };
@@ -93,6 +94,8 @@ export default function Rail() {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+  const [feature, setFeature] = useState<"tickets" | "position">("tickets");
+  const [positionSelection, setPositionSelection] = useState<{ train: string; date?: string }>({ train: "" });
   const [permission, setPermission] = useState(() => typeof Notification === "undefined" ? "unsupported" : Notification.permission);
   const availability = useRef<Record<string, boolean>>({});
   const requestGeneration = useRef(0);
@@ -205,10 +208,15 @@ export default function Rail() {
           <div>
             <p className="eyebrow"><span className="status-dot" /> RAIL WATCH / 12306</p>
             <h1>余票提醒<span>.</span></h1>
-            <p>输入车次，或选择乘车区间。余票变化时，及时收到提醒。</p>
+            <p>查询余票、查看列车运行区间与下一停靠站。余票变化时，及时收到提醒。</p>
           </div>
           <div className="rail-hero-icon" aria-hidden="true"><TrainFront size={54} strokeWidth={1.25} /></div>
         </header>
+        <div className="rail-feature-tabs" role="group" aria-label="功能选择">
+          <button type="button" aria-pressed={feature === "tickets"} onClick={() => setFeature("tickets")}>余票查询与监控</button>
+          <button type="button" aria-pressed={feature === "position"} onClick={() => setFeature("position")}>列车位置与下一站</button>
+        </div>
+        <div hidden={feature !== "tickets"}>
         <div className="rail-layout">
           <section className="rail-card rail-form" aria-labelledby="rail-settings-title">
             <div className="rail-card-heading"><div><span className="rail-overline">01 / SEARCH</span><h2 id="rail-settings-title">查询条件</h2></div><span className="rail-small">数据来自 12306</span></div>
@@ -254,19 +262,21 @@ export default function Rail() {
               return <article className="rail-train" key={`${train.code}-${train.departure}`}>
                 <div className="rail-train-main"><div className="rail-train-identity"><span className="rail-train-code">{train.code}</span><TrainIllustration model={train.trainsetModel} /></div><div className="rail-journey"><strong>{train.departure}</strong><span>{train.from}</span></div><div className="rail-route"><span>{train.duration}</span><i /></div><div className="rail-journey"><strong>{train.arrival}</strong><span>{train.to}</span></div><span className={available.length ? "rail-badge is-available" : "rail-badge"}>{available.length ? "有余票" : "暂无余票"}</span></div>
                 <div className="rail-seats">{train.seats.filter((seat) => seat.value !== "--").map((seat) => <span className={seat.available ? "rail-seat is-available" : "rail-seat"} key={seat.label}>{seat.label} <strong>{seat.value}</strong></span>)}</div>
-                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}</span><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div>
+                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}</span><div className="rail-train-links"><button type="button" onClick={() => { setPositionSelection({ train: train.code, date: result.date }); setFeature("position"); }}>位置／下一站</button><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div></div>
               </article>;
             })}</div>}
         </section>
-        <p className="rail-disclaimer">本工具仅展示公开查询结果，不提供购票或抢票。车票状态会随时变化，最终以 12306 官网为准。</p>
         <TrainArtReferences models={result?.trains.map((train) => train.trainsetModel) ?? []} />
-        <a className="rail-attribution" href="https://api.railgo.dev/" target="_blank" rel="noreferrer" aria-label="车型与配属数据来源：RailGo 数据服务（打开数据服务文档）">
+        </div>
+        {feature === "position" && <RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} />}
+        <p className="rail-disclaimer">本工具仅展示公开查询结果，不提供购票或抢票。车票状态会随时变化，最终以 12306 官网为准。</p>
+        <a className="rail-attribution" href="https://api.railgo.dev/" target="_blank" rel="noreferrer" aria-label="车型、时刻表与线路数据来源：RailGo 数据服务（打开数据服务文档）">
           <span className="rail-attribution-main">
             <span className="rail-attribution-icon" aria-hidden="true"><TrainFront size={28} strokeWidth={1.4} /></span>
             <span className="rail-attribution-copy"><strong>RailGo Data Service</strong><span>api.railgo.dev</span></span>
             <ExternalLink className="rail-attribution-external" size={17} aria-hidden="true" />
           </span>
-          <span className="rail-attribution-caption">车型与配属数据由 RailGo 数据服务提供</span>
+          <span className="rail-attribution-caption">车型、时刻表、线路与正晚点数据由 RailGo 数据服务提供</span>
         </a>
         <footer className="rail-site-footer" role="contentinfo" aria-label="Yukino 页脚">
           <div className="rail-site-footer-main">
