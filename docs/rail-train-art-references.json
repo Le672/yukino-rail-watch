@@ -1,0 +1,770 @@
+{
+  "reviewedAt": "2026-09-29",
+  "references": [
+    {
+      "model": "CR400AF",
+      "key": "CR400AF",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12002-101-S.html",
+      "label": "CR400AF",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF.webp",
+          "author": "图 / 捧一池星光"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF.webp",
+          "author": "图 / 幺三铁线"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-A",
+      "key": "CR400AF-A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12010-101-S.html",
+      "label": "CR400AF-A",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-A.webp",
+          "author": "图 / 幺三铁线"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-A.webp",
+          "author": "图 / 幺三铁线"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-B",
+      "key": "CR400AF-B",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12011-101-S.html",
+      "label": "CR400AF-B",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-B.webp",
+          "author": "图 / 幺三铁线"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-B.webp",
+          "author": "图 / 京彩上铁"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-G",
+      "key": "CR400AF-G",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12012-101-S.html",
+      "label": "CR400AF-G",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-G.webp",
+          "author": "图 / 捧一池星光"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-G.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-C",
+      "key": "CR400AF-C",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12110-101-S.html",
+      "label": "CR400AF-C",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-C.webp",
+          "author": "图 / 魔光老徐"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-C.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-Z",
+      "key": "CR400AF-Z",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12111-101-S.html",
+      "label": "CR400AF-Z",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-Z.webp",
+          "author": "图 / KoloFrankz"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-Z.webp",
+          "author": "图 / 幺三铁线"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-AZ",
+      "key": "CR400AF-AZ",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12112-101-S.html",
+      "label": "CR400AF-AZ",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-AZ.webp",
+          "author": "图 / 秦浩博"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-AZ.webp",
+          "author": "图 / 秦浩博"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-BZ",
+      "key": "CR400AF-BZ",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12113-101-S.html",
+      "label": "CR400AF-BZ",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-BZ.webp",
+          "author": "图 / Aiklld2364"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-C.webp",
+          "author": "中国动车组资料页署名"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-S",
+      "key": "CR400AF-S",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12015-101-S.html",
+      "label": "CR400AF-S",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF-SS.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-SS.webp",
+          "author": "图 / 秦浩博"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-SS.webp",
+          "author": "图 / 来自网络"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-S",
+      "key": "CR400AF-S-alt",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12121-101-S.html",
+      "label": "CR400AF-S",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-S.webp",
+          "author": "图 / 董邱迪"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-S.webp",
+          "author": "图 / 董邱迪"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-AS",
+      "key": "CR400AF-AS",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12123-101-S.html",
+      "label": "CR400AF-AS",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-AS.webp",
+          "author": "图 / Zhaisa"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-AS.webp",
+          "author": "图 / Zhaisa"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-BS",
+      "key": "CR400AF-BS",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12124-101-S.html",
+      "label": "CR400AF-BS",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-BS.webp",
+          "author": "图 / 董邱迪"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-BS.webp",
+          "author": "图 / 秦浩博"
+        }
+      ]
+    },
+    {
+      "model": "CR400AF-AE",
+      "key": "CR400AF-AE",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-12125-102-S.html",
+      "label": "CR400AF-AE",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400AF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-AE.webp",
+          "author": "图 / 秦浩博"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-AE.webp",
+          "author": "图 / 秦浩博"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF",
+      "key": "CR400BF",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13032-101-S.html",
+      "label": "CR400BF",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF.webp",
+          "author": "图 / KoloFrankz"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF.webp",
+          "author": "图 / 京彩上铁"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-A",
+      "key": "CR400BF-A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13033-101-S.html",
+      "label": "CR400BF-A",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-A.webp",
+          "author": "图 / 捧一池星光"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-A.webp",
+          "author": "图 / KoloFrankz"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-B",
+      "key": "CR400BF-B",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13034-101-S.html",
+      "label": "CR400BF-B",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-B.webp",
+          "author": "图 / 秦浩博"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-B.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-G",
+      "key": "CR400BF-G",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13036-101-S.html",
+      "label": "CR400BF-G",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-G.webp",
+          "author": "图 / 捧一池星光"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-G.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-Z",
+      "key": "CR400BF-Z",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13111-101-S.html",
+      "label": "CR400BF-Z",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-Z.webp",
+          "author": "图 / Aiklld2364"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-Z.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-AZ",
+      "key": "CR400BF-AZ",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13113-101-S.html",
+      "label": "CR400BF-AZ",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-AZ.webp",
+          "author": "图 / 董邱迪"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-AZ.webp",
+          "author": "图 / 董邱迪"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-BZ",
+      "key": "CR400BF-BZ",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13114-101-S.html",
+      "label": "CR400BF-BZ",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-BZ.webp",
+          "author": "图 / Aiklld2364"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-BZ.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-S",
+      "key": "CR400BF-S",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13309-101-S.html",
+      "label": "CR400BF-S",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF-SS.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-SS.webp",
+          "author": "图 / 来自网络"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BFs.webp",
+          "author": "中国动车组资料页署名"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-S",
+      "key": "CR400BF-S-alt",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13120-101-S.html",
+      "label": "CR400BF-S",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF-S.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-S.webp",
+          "author": "图 / 董邱迪"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-S.webp",
+          "author": "图 / KoloFrankz"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-AS",
+      "key": "CR400BF-AS",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13121-101-S.html",
+      "label": "CR400BF-AS",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF-S.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-AS.webp",
+          "author": "图 / 董邱迪"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-AS.webp",
+          "author": "图 / HXD3CA7501"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-BS",
+      "key": "CR400BF-BS",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13122-101-S.html",
+      "label": "CR400BF-BS",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF-S.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-BS.webp",
+          "author": "图 / 秦浩博"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-BS.webp",
+          "author": "图 / 秦浩博"
+        }
+      ]
+    },
+    {
+      "model": "CR400BF-GZ",
+      "key": "CR400BF-GZ",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-13115-101-S.html",
+      "label": "CR400BF-GZ",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR400BF-Z.gif",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-GZ.webp",
+          "author": "图 / 捧一池星光"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-GZ.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CR300AF",
+      "key": "CR300AF",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-11032-101-S.html",
+      "label": "CR300AF",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR300AF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR300AF.webp",
+          "author": "图 / 幺三铁线"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR300AF.webp",
+          "author": "图 / 幺三铁线"
+        }
+      ]
+    },
+    {
+      "model": "CR300BF",
+      "key": "CR300BF",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-11036-101-S.html",
+      "label": "CR300BF",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CR300BF.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR300BF.webp",
+          "author": "图 / 捧一池星光"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR300BF.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CRH1A",
+      "key": "CRH1A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-21002-101-S.html",
+      "label": "CRH1A-250",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH1A.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH1A-250.webp",
+          "author": "图 / KoloFrankz"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH1A-250.webp",
+          "author": "图 / 捧一池星光"
+        }
+      ]
+    },
+    {
+      "model": "CRH1A-A",
+      "key": "CRH1A-A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-21006-101-S.html",
+      "label": "CRH1A-A",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH1A-A.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH1A-A.webp",
+          "author": "图 / 讨账刘"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH1A-A.webp",
+          "author": "图 / 京彩上铁"
+        }
+      ]
+    },
+    {
+      "model": "CRH1B",
+      "key": "CRH1B",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-21003-101-S.html",
+      "label": "CRH1B",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH1A.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH1B.webp",
+          "author": "图 / 幺三铁线"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH1B.webp",
+          "author": "图 / 京彩上铁"
+        }
+      ]
+    },
+    {
+      "model": "CRH2A",
+      "key": "CRH2A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-22001-101-S.html",
+      "label": "CRH2A",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH2A.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2A.webp",
+          "author": "图 / Aiklld2364"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH2A.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CRH2B",
+      "key": "CRH2B",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-22004-101-S.html",
+      "label": "CRH2B",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH2B.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2B.webp",
+          "author": "图 / Aiklld2364"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH2B.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CRH2G",
+      "key": "CRH2G",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-22016-101-S.html",
+      "label": "CRH2G",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH2G.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2G.webp",
+          "author": "图 / 中华门的西柚"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH2G.webp",
+          "author": "图 / 京彩上铁"
+        }
+      ]
+    },
+    {
+      "model": "CRH3C",
+      "key": "CRH3C",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-23012-101-S.html",
+      "label": "CRH3C (二阶段)",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH3C.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH3C-2.webp",
+          "author": "图 / CRH380A-6059L"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH3C-2.webp",
+          "author": "图 / CRH380A-6059L"
+        }
+      ]
+    },
+    {
+      "model": "CRH380A",
+      "key": "CRH380A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-30001-101-S.html",
+      "label": "CRH380A",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH380A.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380A.webp",
+          "author": "图 / DF4B-2274"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH380A.webp",
+          "author": "图 / CRH380A-6059L"
+        }
+      ]
+    },
+    {
+      "model": "CRH380AL",
+      "key": "CRH380AL",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-30008-101-S.html",
+      "label": "CRH380AL (三阶段)",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH380A.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380AL-3.webp",
+          "author": "图 / 董邱迪"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH380AL-3.webp",
+          "author": "图 / 董邱迪"
+        }
+      ]
+    },
+    {
+      "model": "CRH380B",
+      "key": "CRH380B",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-31002-101-S.html",
+      "label": "CRH380B",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH380B.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380B.webp",
+          "author": "图 / KoloFrankz"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH380B.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CRH380BG",
+      "key": "CRH380BG",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-31001-101-S.html",
+      "label": "CRH380BG",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH380B.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380BG.webp",
+          "author": "图 / DF4B-2274"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH380BG.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CRH380BL",
+      "key": "CRH380BL",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-31008-101-S.html",
+      "label": "CRH380BL (三阶段)",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH380B.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380BL-3.webp",
+          "author": "图 / Aiklld2364"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH380BL-3.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CRH380CL",
+      "key": "CRH380CL",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-31010-101-S.html",
+      "label": "CRH380CL",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH380C.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380CL.webp",
+          "author": "图 / 幺三铁线"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH380CL.webp",
+          "author": "图 / 幺三铁线"
+        }
+      ]
+    },
+    {
+      "model": "CRH380D",
+      "key": "CRH380D",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-32001-101-S.html",
+      "label": "CRH380D",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH380D.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380D.webp",
+          "author": "图 / KoloFrankz"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH380D.webp",
+          "author": "图 / 土豆有可爱的小狼牙"
+        }
+      ]
+    },
+    {
+      "model": "CRH5A",
+      "key": "CRH5A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-25001-101-S.html",
+      "label": "CRH5A",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH5A.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH5A.webp",
+          "author": "图 / 董邱迪"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH5A.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CRH5G",
+      "key": "CRH5G",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-25004-101-S.html",
+      "label": "CRH5G",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH5A.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH5G.webp",
+          "author": "图 / 中华门的西柚"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH5G.webp",
+          "author": "图 / 捧一池星光"
+        }
+      ]
+    },
+    {
+      "model": "CRH6A",
+      "key": "CRH6A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-26001-201-S.html",
+      "label": "CRH6A",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH6A.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6A-1.webp",
+          "author": "图 / CRH380A-6059L"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH6A-1.webp",
+          "author": "图 / CRH380A-6059L"
+        }
+      ]
+    },
+    {
+      "model": "CRH6F",
+      "key": "CRH6F",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-26011-201-S.html",
+      "label": "CRH6F",
+      "cute": "https://www.china-emu.cn/assets/imgs/Trains/Cute/CRH6F.png",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6F.webp",
+          "author": "图 / Leooo_young"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH6F.webp",
+          "author": "图 / 京彩上铁"
+        }
+      ]
+    }
+  ]
+}

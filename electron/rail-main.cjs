@@ -144,6 +144,8 @@ function createWindow() {
         url === "https://railgo.dev/" || url === "https://api.railgo.dev/" ||
         url === "https://github.com/Le672" || url === "mailto:Raptor@yukino.bond" ||
         url.startsWith("https://commons.wikimedia.org/wiki/File:") ||
+        url === "https://www.china-emu.cn/Trains/ALL/" ||
+        /^https:\/\/www\.china-emu\.cn\/Trains\/Model\/Detail-\d+-\d+-[A-Z]\.html$/.test(url) ||
         url.startsWith("https://creativecommons.org/licenses/") ||
         url.startsWith("https://creativecommons.org/publicdomain/")) {
       void shell.openExternal(url);

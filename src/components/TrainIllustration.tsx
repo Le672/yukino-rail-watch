@@ -13,9 +13,10 @@ export function TrainArtReferences({ models }: { models: (string | null)[] }) {
   const selected = new Set(models.flatMap((model) => { const art = resolveTrainArt(model); return art ? [art.model] : []; }));
   const rows = trainArtCatalogue.filter((item) => selected.has(item.model));
   return <details className="rail-art-references">
-    <summary>车型图示说明 · 已核对 {trainArtCatalogue.length} 款型号</summary>
-    <p>图示根据对应完整型号的实拍外观绘制，为首车的 Q 版侧视图，不表示完整编组或本次车组的特殊涂装。只精确匹配完整型号；缺少资料、型号不明确或存在冲突时不显示替代图。</p>
-    <p>插画采用 <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a> 许可。外观参考照片及摄影者如下，照片保留各自许可。</p>
-    {rows.length ? <ul>{rows.map((item) => <li key={item.model}><strong>{item.model}</strong><span>{item.livery} · {item.features}</span><span><a href={item.source} target="_blank" rel="noreferrer">实拍参考</a> · {item.author} · <a href={item.licenseUrl} target="_blank" rel="noreferrer">{item.license}</a></span></li>)}</ul> : <p>查询结果显示车型插画后，这里将列出对应的实拍参考。</p>}
+    <summary>车型图示说明 · {trainArtCatalogue.length} 款参考外观</summary>
+    <p>外观资料：<a href="https://www.china-emu.cn/Trains/ALL/" target="_blank" rel="noreferrer">中国动车组</a>。图示按车型页实拍重新绘制车头、窗带与涂装，为首车的 Q 版侧视图；比例压缩，不表示完整编组、车组批次或本次列车的特殊涂装。</p>
+    <p>只匹配已核对的完整型号。同名存在不同头型、代际或涂装且无法区分时，显示「外观图待核实」，不使用相近车型代替。</p>
+    <p>原创侧视插画采用 <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a> 许可。参考图片的权利归原作者，本站未转载中国动车组的示例头像或实拍照片。</p>
+    {rows.length ? <ul>{rows.map((item) => <li key={item.model}><strong>{item.model}</strong><span>{item.livery} · {item.features}</span><span><a href={item.reviewSource} target="_blank" rel="noreferrer">中国动车组实拍资料</a> · {item.reviewEdition} · {item.reviewAuthors}</span><span><a href={item.source} target="_blank" rel="noreferrer">补充实拍</a> · {item.author} · <a href={item.licenseUrl} target="_blank" rel="noreferrer">{item.license}</a></span></li>)}</ul> : <p>查询结果显示车型插画后，这里将列出对应的实拍参考。</p>}
   </details>;
 }

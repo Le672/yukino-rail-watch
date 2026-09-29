@@ -9,6 +9,9 @@ export type TrainArt = {
   author: string;
   license: string;
   licenseUrl: string;
+  reviewSource: string;
+  reviewEdition: string;
+  reviewAuthors: string;
 };
 
 const references = new Map<string, TrainArt>(catalogue.map((item) => [item.model, item]));
