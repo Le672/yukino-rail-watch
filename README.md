@@ -2,6 +2,12 @@
 
 独立的 12306 余票查询、网页通知和 Windows 托盘提醒项目。网页入口为 [cr.yukino.bond](https://cr.yukino.bond)，也可通过主站 [余票提醒](https://www.yukino.bond/cr) 使用。子域已完成 Pages 绑定和 DNS 配置，并验证 HTTPS 页面可以访问。
 
+## 下载
+
+[下载最新 Windows 便携版](https://github.com/Le672/yukino-rail-watch/releases/latest) · [全部版本](https://github.com/Le672/yukino-rail-watch/releases)
+
+在版本页的 Assets 中下载 `.exe`，双击运行即可。每个正式版本同时提供 `SHA256SUMS.txt`。
+
 ## 功能
 
 - 按车次查询：只输入车次，自动从 12306 识别该日期的始发和终到站，查询全程余票。日期默认中国时区的今天，可自行修改。
@@ -46,7 +52,7 @@ pnpm exec wrangler pages dev dist
 pnpm desktop:build
 ```
 
-产物位于 `release/`，GitHub Actions 也会在每次推送 `main` 时构建并上传便携版。桌面版默认使用已部署的 `https://www.yukino.bond/api/rail`；可通过 `RAIL_API_URL` 环境变量指定自己的 API。
+产物位于 `release/`，GitHub Actions 会在推送 `main` 时运行测试、构建便携版并保留 Actions 附件；当 `package.json` 与 `electron-builder.json` 的版本一致且该版本尚未发布时，自动创建对应 `v版本号` 的 Release，上传 `.exe` 和校验文件后发布。已发布版本的附件保持不变；发布新软件版本前请同步升级两个文件中的版本号，可在 `docs/releases/版本号.md` 添加中文说明。桌面版默认使用已部署的 `https://www.yukino.bond/api/rail`；可通过 `RAIL_API_URL` 环境变量指定自己的 API。
 
 ## 网页部署
 

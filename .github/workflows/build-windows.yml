@@ -3,9 +3,14 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,4 +28,9 @@ jobs:
           name: Yukino-Rail-Watch-Windows
           path: release/*.exe
           if-no-files-found: error
-
+      - name: Publish versioned Windows release
+        if: github.repository == 'Le672/yukino-rail-watch'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/publish-windows-release.ps1
