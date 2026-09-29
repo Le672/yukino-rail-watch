@@ -1,22 +1,25 @@
 .rail-feature-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 24px; padding: 6px; border: 1px solid #dce5d6; border-radius: 12px; background: #f0f4eb; }
-.rail-feature-tabs button { flex: 1; min-height: 44px; padding: 10px 16px; border: 1px solid transparent; border-radius: 8px; color: #75876f; background: transparent; font-size: 13px; font-weight: 600; cursor: pointer; }
+.rail-feature-tabs button { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 10px 16px; border: 1px solid transparent; border-radius: 8px; color: #75876f; background: transparent; font-size: 13px; font-weight: 600; cursor: pointer; }
 .rail-feature-tabs button[aria-pressed="true"] { border-color: #bdcdb6; background: #fffefb; color: #315c42; }
 .rail-train-links { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
 .rail-train-links button { border: 0; background: none; padding: 0; color: #315c42; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }
-.rail-position-section { display: grid; gap: 18px; }
+.rail-position-section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .rail-position-form, .rail-position-summary, .rail-position-timetable { padding: 26px; }
-.rail-position-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 22px 0; }
+.rail-position-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 22px 0; }
+.rail-position-fields > * { min-width: 0; }
 .rail-position-fields label { display: grid; gap: 8px; color: #50654d; font-size: 12px; font-weight: 600; }
-.rail-position-fields input:not([type="checkbox"]) { min-width: 0; width: 100%; height: 44px; padding: 9px 12px; border: 1px solid #dce3d5; border-radius: 9px; background: #fafbf7; color: #334e38; font: inherit; outline: none; }
+.rail-position-fields input:not([type="checkbox"]) { box-sizing: border-box; min-width: 0; width: 100%; max-width: 100%; height: 44px; padding: 9px 12px; border: 1px solid #dce3d5; border-radius: 9px; background: #fafbf7; color: #334e38; font: inherit; outline: none; }
 .rail-position-fields input:not([type="checkbox"]):focus { border-color: #6e8b63; box-shadow: 0 0 0 3px #e8efdf; }
 .rail-position-fields .rail-clock-option { display: flex; flex-direction: row; align-items: center; gap: 9px; align-self: center; }
 .rail-clock-option input { width: 16px; height: 16px; accent-color: #315c42; }
 .rail-current-clock { display: flex; align-items: center; gap: 10px; color: #315c42; font-variant-numeric: tabular-nums; font-size: 13px; }
 .rail-current-clock small { display: block; margin-top: 5px; color: #89977e; font-size: 11px; }
+.rail-current-clock > span { min-width: 0; overflow-wrap: anywhere; }
 .rail-position-result { display: grid; grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr); gap: 18px; }
+.rail-position-result > * { min-width: 0; }
 .rail-position-identity { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
 .rail-position-identity h3 { margin: 8px 0 0; font: 700 28px Georgia, serif; color: #315c42; }
-.rail-position-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 6px; background: #eef4e8; color: #57744e; font-size: 11px; }
+.rail-position-status { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 6px 9px; border-radius: 6px; background: #eef4e8; color: #57744e; font-size: 11px; }
 .rail-position-current { margin: 15px 0 24px; color: #64775d; font-size: 14px; }
 .rail-next-stop { padding: 20px; border: 1px solid #d4e1c9; border-radius: 14px; background: #f2f6ec; }
 .rail-next-stop > span { display: block; color: #809372; font-size: 11px; letter-spacing: .04em; }
@@ -25,7 +28,7 @@
 .rail-next-stop small { color: #819175; font-size: 11px; }
 .rail-position-departure { margin: 15px 0; color: #667e5e; font-size: 12px; }
 .rail-position-progress { display: grid; gap: 8px; margin-top: 20px; }
-.rail-position-progress progress { width: 100%; height: 7px; border: 0; border-radius: 5px; accent-color: #5d8255; }
+.rail-position-progress progress { min-width: 0; width: 100%; height: 7px; border: 0; border-radius: 5px; accent-color: #5d8255; }
 .rail-position-progress progress::-webkit-progress-bar { border-radius: 5px; background: #e6eedf; }
 .rail-position-progress progress::-webkit-progress-value { border-radius: 5px; background: #5d8255; }
 .rail-position-progress small, .rail-position-observed { color: #8b9a82; font-size: 11px; }
@@ -33,7 +36,7 @@
 .rail-position-route { padding: 20px; overflow: hidden; }
 .rail-gps-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border: 1px solid #b6cbb0; border-radius: 8px; background: #f3f7ed; color: #315c42; font-size: 12px; font-weight: 600; cursor: pointer; }
 .rail-gps-button[aria-pressed="true"] { border-color: #74a0ba; background: #edf6fc; color: #286486; }
-.rail-gps-status { display: grid; gap: 5px; margin-top: 18px; padding: 13px 15px; border: 1px solid #e2e8da; border-radius: 9px; background: #f8faf4; font-size: 11px; color: #84927b; line-height: 1.7; }
+.rail-gps-status { display: grid; min-width: 0; gap: 5px; margin-top: 18px; padding: 13px 15px; border: 1px solid #e2e8da; border-radius: 9px; background: #f8faf4; font-size: 11px; color: #84927b; line-height: 1.7; overflow-wrap: anywhere; }
 .rail-gps-status strong { color: #61765a; font-size: 12px; font-weight: 600; }
 .rail-gps-status.is-matched { border-color: #bbd4e2; background: #f1f8fc; }
 .rail-gps-status.is-matched strong { color: #286486; }
@@ -54,7 +57,7 @@
 .rail-gps-late { display: block; margin-top: 8px; color: #9a793d !important; }
 .rail-map-shell { min-width: 0; overflow: hidden; border: 1px solid #dce5d6; border-radius: 13px; background: #f8faf4; }
 .rail-map-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px; }
-.rail-map-modes, .rail-map-view-actions { display: flex; align-items: center; gap: 4px; }
+.rail-map-modes, .rail-map-view-actions { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: 4px; }
 .rail-map-modes { border: 1px solid #d7e2d0; border-radius: 7px; padding: 3px; background: #edf2e7; }
 .rail-map-toolbar button { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; padding: 6px 9px; border: 1px solid transparent; border-radius: 5px; color: #6c8062; background: transparent; font-size: 11px; font-weight: 500; cursor: pointer; }
 .rail-map-modes button[aria-pressed="true"] { background: #fffefb; border-color: #c7d6be; color: #315c42; }
@@ -69,7 +72,7 @@
 .rail-map-canvas .leaflet-control-zoom a { color: #315c42; background: #fffefb; }
 .rail-map-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 11px 13px; color: #7c8e73; font-size: 10px; }
 .rail-map-legend span { display: inline-flex; align-items: center; gap: 6px; }
-.rail-map-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.rail-map-legend i { display: inline-block; flex: none; width: 8px; height: 8px; border-radius: 50%; }
 .rail-map-legend .is-gps { background: #2678b0; }
 .rail-map-legend .is-train { background: #315c42; }
 .rail-map-legend .is-next { background: #d6aa54; }
@@ -78,7 +81,7 @@
 .rail-position-explanation { margin: 16px 2px 0; color: #8b9982; font-size: 11px; line-height: 1.8; }
 .rail-position-timetable { grid-column: 1 / -1; }
 .rail-position-timetable h3 { margin: 7px 0 0; color: #315c42; font-size: 20px; font-weight: 500; }
-.rail-timetable-scroll { overflow-x: auto; margin-top: 18px; }
+.rail-timetable-scroll { max-width: 100%; overflow-x: auto; margin-top: 18px; }
 .rail-position-timetable table { width: 100%; border-collapse: collapse; white-space: nowrap; text-align: left; font-size: 12px; }
 .rail-position-timetable th, .rail-position-timetable td { padding: 13px 12px; border-bottom: 1px solid #e6ecdf; color: #7c8d73; }
 .rail-position-timetable thead th { color: #8b9a81; font-size: 11px; font-weight: 500; }
@@ -91,4 +94,19 @@
 .rail-position-section .rail-position-source { margin-top: 0; }
 .rail-position-section .rail-error { margin-top: 0; }
 @media (max-width: 760px) { .rail-position-result { grid-template-columns: minmax(0, 1fr); } .rail-position-timetable { grid-column: auto; } .rail-map-canvas { height: 390px; } }
-@media (max-width: 540px) { .rail-position-fields { grid-template-columns: minmax(0, 1fr); gap: 16px; } .rail-position-form, .rail-position-summary, .rail-position-timetable { padding: 20px; } .rail-position-route { padding: 14px; } .rail-feature-tabs button { padding: 10px 6px; font-size: 12px; } .rail-position-identity h3 { font-size: 25px; } .rail-next-stop strong { font-size: 28px; } }
+@media (max-width: 540px) {
+  .rail-position-fields { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .rail-position-fields input:not([type="checkbox"]) { font-size: 16px; padding: 9px 10px; }
+  .rail-position-form, .rail-position-summary, .rail-position-timetable { padding: 20px; }
+  .rail-position-route { padding: 14px; }
+  .rail-feature-tabs button { padding: 10px 6px; font-size: 12px; }
+  .rail-position-identity h3 { font-size: 25px; overflow-wrap: anywhere; }
+  .rail-position-identity > div { min-width: 0; max-width: 100%; }
+  .rail-next-stop { padding: 16px; }
+  .rail-next-stop strong { font-size: 28px; overflow-wrap: anywhere; }
+  .rail-speed-updated { overflow-wrap: anywhere; }
+  .rail-map-modes, .rail-map-view-actions { width: 100%; }
+  .rail-map-modes button { flex: 1 1 0; min-width: 0; justify-content: center; }
+  .rail-map-view-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto; }
+  .rail-map-toolbar button { justify-content: center; min-width: 0; min-height: 36px; padding: 7px; }
+}
