@@ -233,7 +233,7 @@ export default function Rail() {
                   <label>到达站<input list="rail-stations" placeholder="例如 上海虹桥" value={settings.to} onChange={(event) => update({ to: event.target.value })} aria-invalid={!!settings.to && stations.length > 0 && !knownStations.has(settings.to)} /></label>
                 </>}
               <label>关注席别<select value={settings.seat} onChange={(event) => update({ seat: event.target.value })}>{SEAT_OPTIONS.map((seat) => <option key={seat}>{seat}</option>)}</select></label>
-              <label>检查间隔 <small>1–60 分钟</small><div className="rail-interval"><input type="number" min="1" max="60" step="1" value={settings.intervalMinutes} onChange={(event) => update({ intervalMinutes: Number(event.target.value) })} /><span>分钟</span></div></label>
+              <label><span className="rail-field-heading">检查间隔 <small>1–60 分钟</small></span><div className="rail-interval"><input type="number" min="1" max="60" step="1" value={settings.intervalMinutes} onChange={(event) => update({ intervalMinutes: Number(event.target.value) })} /><span>分钟</span></div></label>
             </div>
             <datalist id="rail-stations">{stations.map((station) => <option key={station.code} value={station.name}>{station.pinyin}</option>)}</datalist>
             <div className="rail-actions">
