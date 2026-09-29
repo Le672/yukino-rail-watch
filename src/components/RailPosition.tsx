@@ -40,7 +40,7 @@ function RouteMap({ journey, route, position }: { journey: TrainJourney; route: 
       })}
       <g><title>列车估算位置</title><circle cx={markerX} cy={markerY} r="13" fill="#315c4224" /><circle cx={markerX} cy={markerY} r="7" fill="#315c42" stroke="#fffefb" strokeWidth="3" /></g>
     </svg>
-    <p>沿线路约 {Math.round(marker.coveredKm)} km／{Math.round(route.lengthKm)} km · GCJ-02 坐标</p>
+    <p>沿线路约 {Math.round(marker.coveredKm)} km／{Math.round(route.lengthKm)} km</p>
   </div>;
 }
 

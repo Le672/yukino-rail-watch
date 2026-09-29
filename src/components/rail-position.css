@@ -35,7 +35,7 @@
 .rail-position-map-heading { display: flex; justify-content: space-between; gap: 10px; padding: 14px 16px 0; color: #456740; font-size: 12px; }
 .rail-position-map-heading > span { display: flex; align-items: center; gap: 6px; }
 .rail-position-map-heading small { color: #86987d; font-size: 10px; }
-.rail-position-map svg { display: block; width: 100%; min-height: 240px; }
+.rail-position-map > svg { display: block; width: 100%; min-height: 240px; }
 .rail-position-map > p { margin: 0; padding: 0 16px 14px; color: #819175; font-size: 11px; }
 .rail-position-map-empty { display: grid; align-content: center; justify-items: center; gap: 15px; min-height: 290px; padding: 20px; color: #829778; text-align: center; font-size: 12px; }
 .rail-position-explanation { margin: 16px 2px 0; color: #8b9982; font-size: 11px; line-height: 1.8; }
@@ -53,5 +53,5 @@
 .rail-position-warning { margin: 0; padding: 12px 16px; border: 1px solid #e4d4ad; border-radius: 9px; background: #fcf8ed; color: #93752f; font-size: 12px; }
 .rail-position-section .rail-position-source { margin-top: 0; }
 .rail-position-section .rail-error { margin-top: 0; }
-@media (max-width: 760px) { .rail-position-result { grid-template-columns: minmax(0, 1fr); } .rail-position-timetable { grid-column: auto; } .rail-position-map svg { max-height: 380px; } }
+@media (max-width: 760px) { .rail-position-result { grid-template-columns: minmax(0, 1fr); } .rail-position-timetable { grid-column: auto; } .rail-position-map > svg { max-height: 380px; } }
 @media (max-width: 540px) { .rail-position-fields { grid-template-columns: minmax(0, 1fr); gap: 16px; } .rail-position-form, .rail-position-summary, .rail-position-timetable { padding: 20px; } .rail-position-route { padding: 14px; } .rail-feature-tabs button { padding: 10px 6px; font-size: 12px; } .rail-position-identity h3 { font-size: 25px; } .rail-next-stop strong { font-size: 28px; } }
