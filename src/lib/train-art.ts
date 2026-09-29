@@ -6,6 +6,7 @@ export type TrainArt = {
   aliases?: string[];
   accuracy: "reviewed" | "reference";
   referenceNote?: string;
+  referenceLabel?: string;
   livery: string;
   features: string;
   source: string;
@@ -48,9 +49,31 @@ export function resolveTrainArt(raw: string | null | undefined): ResolvedTrainAr
     model = normalized.replace(/\s*重联$/, "").trim();
     coupled = true;
   }
-  const reference = references.get(model);
+  let reference = references.get(model);
+  // A newly encountered description may still use the original image of that
+  // exact base model. Keep the full description and make uncertainty visible.
+  // Letter/number suffixes remain part of the identity and are never removed.
+  if (!reference) {
+    const described = model.match(/^([^()]+)(?:\([^()]+\))+$/);
+    const base = described && references.get(described[1]);
+    if (base) reference = {
+      ...base, accuracy: "reference",
+      referenceNote: `接口返回「${model}」，该说明尚未单独核对；图为 ${base.model} 的基础外观参考，不能确认此版本的车头、涂装或完整编组。`,
+    };
+  }
   const image = reference && assets[`../assets/trains/${reference.asset || reference.model}.svg`];
   return reference && image ? { ...reference, image, coupled, displayModel: model } : null;
+}
+
+export function resolveTrainArts(raw: string | null | undefined): ResolvedTrainArt[] {
+  const single = resolveTrainArt(raw);
+  if (single) return [single];
+  if (!raw) return [];
+  const parts = normalizeModel(raw).split("+");
+  if (parts.length < 2 || parts.length > 4) return [];
+  const matched = parts.map(resolveTrainArt);
+  // A partial match must not suggest the entire combination has been identified.
+  return matched.every((item): item is ResolvedTrainArt => item !== null) ? matched : [];
 }
 
 export const trainArtCatalogue: TrainArt[] = catalogue;

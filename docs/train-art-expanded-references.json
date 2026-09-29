@@ -1,0 +1,1746 @@
+[
+  {
+    "model": "CR400AF(双控)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-12003-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400AF-L.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-6",
+    "profile": {
+      "head": "af",
+      "paint": "af"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR400AF-X",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-12201-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-C.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-25",
+    "profile": {
+      "head": "afz",
+      "paint": "afc"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR400AF-AX",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-12202-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400AF-C.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-26",
+    "profile": {
+      "head": "afz",
+      "paint": "afc"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR400BF-A(纵向卧铺)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13308-102-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-E.webp",
+        "author": "图 / 来自网络"
+      }
+    ],
+    "asset": "full-model-31",
+    "profile": {
+      "head": "bf",
+      "paint": "sleeper",
+      "double": true
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR400BF-C",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13100-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-C.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-39",
+    "profile": {
+      "head": "bf",
+      "paint": "orange"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR400BF-C(冬奥版)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13101-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-C-5162.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-40",
+    "profile": {
+      "head": "bf",
+      "paint": "winter"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR400BF-Z(亚运版)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13112-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-Z-0524.webp",
+        "author": "图 / KoloFrankz"
+      }
+    ],
+    "asset": "full-model-42",
+    "profile": {
+      "head": "bfz",
+      "paint": "purple"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR400BF-Z(双层)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13400-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-K.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-48",
+    "profile": {
+      "head": "bf",
+      "paint": "orange",
+      "double": true
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR400BF-Z(纵向卧铺)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13401-102-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-EZ.webp",
+        "author": "图 / 中车长客宣传视频"
+      }
+    ],
+    "asset": "full-model-49",
+    "profile": {
+      "head": "bf",
+      "paint": "sleeper",
+      "double": true
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR400BF-GS",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13123-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR400BF-GS.webp",
+        "author": "图 / 董邱迪"
+      }
+    ],
+    "asset": "full-model-53",
+    "profile": {
+      "head": "bfz",
+      "paint": "upgrade"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR400BF-X",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13201-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-X.webp",
+        "author": "图 / 地铁狂人"
+      }
+    ],
+    "asset": "full-model-54",
+    "profile": {
+      "head": "bfz",
+      "paint": "modernRed"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR400BF-AX",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13202-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-K.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-55",
+    "profile": {
+      "head": "bfz",
+      "paint": "modernRed"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR400BF-GX",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-13205-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR400BF-K.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-56",
+    "profile": {
+      "head": "bfz",
+      "paint": "modernRed"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR300AF-H",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-11033-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR300AF-H.webp",
+        "author": "图 / Zhaisa"
+      }
+    ],
+    "asset": "full-model-59",
+    "profile": {
+      "head": "af",
+      "paint": "af"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR300BF-H",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-11037-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR300BF-H.webp",
+        "author": "图 / Zhaisa"
+      }
+    ],
+    "asset": "full-model-63",
+    "profile": {
+      "head": "bf",
+      "paint": "red"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR220J1",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10311-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR220J1.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-67",
+    "profile": {
+      "head": "j220",
+      "paint": "turquoise",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+      }
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR220J1-H",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10300-102-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR220J1.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-68",
+    "profile": {
+      "head": "j220",
+      "paint": "turquoise",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+      }
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR220J3",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10331-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR220J1.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-71",
+    "profile": {
+      "head": "j220",
+      "paint": "turquoise",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+      }
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR220J3-H",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10301-102-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR220J1.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-72",
+    "profile": {
+      "head": "j220",
+      "paint": "turquoise",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+      }
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR200J1-B(长编组)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10091-102-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J1-CL.webp",
+        "author": "图 / KoloFrankz"
+      }
+    ],
+    "asset": "full-model-87",
+    "profile": {
+      "head": "jPower",
+      "paint": "greenJ",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>",
+        "bodyColors": [
+          "#83cd80",
+          "#40a34a",
+          "#1e7833"
+        ]
+      }
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR200J3-B(跨国版)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10057-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J3-BK.webp",
+        "author": "图 / D94次笕桥站通过"
+      }
+    ],
+    "asset": "full-model-90",
+    "profile": {
+      "head": "jPower",
+      "paint": "crossGreen",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>",
+        "bodyColors": [
+          "#83cd80",
+          "#40a34a",
+          "#1e7833"
+        ]
+      }
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "LCR200J3-B",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10059-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/LCR200J3-B.webp",
+        "author": "图 / 幺三铁线"
+      }
+    ],
+    "asset": "full-model-91",
+    "profile": {
+      "head": "jPower",
+      "paint": "laos",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+      }
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR200J3-B(长编组)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10092-102-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J3-CL.webp",
+        "author": "图 / KoloFrankz"
+      }
+    ],
+    "asset": "full-model-92",
+    "profile": {
+      "head": "jPower",
+      "paint": "greenJ",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>",
+        "bodyColors": [
+          "#83cd80",
+          "#40a34a",
+          "#1e7833"
+        ]
+      }
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR200JS-G",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10058-106-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200JS-G.webp",
+        "author": "图 / DF4D3045是机破怪"
+      }
+    ],
+    "asset": "full-model-94",
+    "profile": {
+      "head": "jPower",
+      "paint": "greenJ",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>",
+        "bodyColors": [
+          "#83cd80",
+          "#40a34a",
+          "#1e7833"
+        ]
+      }
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR200J1-C(19编组)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10104-102-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J1-C.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-97",
+    "profile": {
+      "head": "jPower",
+      "paint": "whiteJ",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+      }
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CR200J3-C(19编组)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10114-102-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J3-CL19.webp",
+        "author": "图 / Zhaisa"
+      }
+    ],
+    "asset": "full-model-103",
+    "profile": {
+      "head": "jPower",
+      "paint": "whiteJ",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+      }
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CR200JN",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-10202-106-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200A.webp",
+        "author": "图 / E79707CA"
+      }
+    ],
+    "asset": "full-model-105",
+    "profile": {
+      "head": "jPower",
+      "paint": "whiteJ",
+      "noPassengerWindows": true,
+      "options": {
+        "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+      }
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380A(统型)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-30002-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380A-T.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-111",
+    "profile": {
+      "head": "rocketStandard",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380A(港铁)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-30003-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380A-H.webp",
+        "author": "图 / 秦浩博"
+      }
+    ],
+    "asset": "full-model-112",
+    "profile": {
+      "head": "rocketStandard",
+      "paint": "red"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380AL(一阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-30006-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380AL-1.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-115",
+    "profile": {
+      "head": "rocket",
+      "paint": "rocket"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380AL(二阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-30007-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380AL-2.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-116",
+    "profile": {
+      "head": "rocketStandard",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380AL(三阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-30008-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380AL-3.webp",
+        "author": "图 / 董邱迪"
+      }
+    ],
+    "asset": "full-model-117",
+    "profile": {
+      "head": "rocketStandard",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380AN",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-30010-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380AN.webp",
+        "author": "图 / 土豆有可爱的小狼牙"
+      }
+    ],
+    "asset": "full-model-119",
+    "profile": {
+      "head": "rocketStandard",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380BG(统型)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-31003-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380BG-T.webp",
+        "author": "图 / 捧一池星光"
+      }
+    ],
+    "asset": "full-model-122",
+    "profile": {
+      "head": "h380b",
+      "paint": "velaro"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380BL(一阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-31006-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380BL-1.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-124",
+    "profile": {
+      "head": "h380b",
+      "paint": "velaro"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380BL(二阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-31007-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380BL-2.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-125",
+    "profile": {
+      "head": "h380b",
+      "paint": "velaro"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380BL(三阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-31008-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380BL-3.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-126",
+    "profile": {
+      "head": "h380b",
+      "paint": "velaro"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH380D(统型)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-32002-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380D-T.webp",
+        "author": "图 / KoloFrankz"
+      }
+    ],
+    "asset": "full-model-131",
+    "profile": {
+      "head": "z380",
+      "paint": "z380"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH1A-200",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-21001-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH1A-200.webp",
+        "author": "图 / CRH380A-6059L"
+      }
+    ],
+    "asset": "full-model-134",
+    "profile": {
+      "head": "regina",
+      "paint": "regina"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH1A-250",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-21002-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH1A-250.webp",
+        "author": "图 / KoloFrankz"
+      }
+    ],
+    "asset": "full-model-135",
+    "profile": {
+      "head": "regina",
+      "paint": "regina"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH1E",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-21004-102-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH1E.webp",
+        "author": "图 / KoloFrankz"
+      }
+    ],
+    "asset": "full-model-137",
+    "profile": {
+      "head": "zefiro250",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH1B(1E头型)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-21005-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH1B-E.webp",
+        "author": "图 / KoloFrankz"
+      }
+    ],
+    "asset": "full-model-138",
+    "profile": {
+      "head": "zefiro250",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH1E(NG)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-21007-102-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH1E-A.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-140",
+    "profile": {
+      "head": "z250",
+      "paint": "z250"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH2A(统型)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22002-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2A-T.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-145",
+    "profile": {
+      "head": "duckStandard",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH2B(2A头型)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22005-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2B-2.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-147",
+    "profile": {
+      "head": "duckStandard",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH2E",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22010-102-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2E.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-148",
+    "profile": {
+      "head": "duck",
+      "paint": "blueGold"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH2C(一阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22006-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH2C-1.webp",
+        "author": "图 / CRH380A-6059L"
+      }
+    ],
+    "asset": "full-model-152",
+    "profile": {
+      "head": "duck",
+      "paint": "blue"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CRH2-300",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22000-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH2-300.webp",
+        "author": "图 / 来自网络"
+      }
+    ],
+    "asset": "full-model-153",
+    "profile": {
+      "head": "h2g",
+      "paint": "blue"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CRH2C(二阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22007-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2C-2.webp",
+        "author": "图 / 土豆有可爱的小狼牙"
+      }
+    ],
+    "asset": "full-model-154",
+    "profile": {
+      "head": "duck",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH2A(NG)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22012-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2A-2460.webp",
+        "author": "图 / 中华门的西柚"
+      }
+    ],
+    "asset": "full-model-156",
+    "profile": {
+      "head": "h2g",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH2E(NG高寒)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22013-102-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2E-2461.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-157",
+    "profile": {
+      "head": "h2g",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH2E(NG)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22014-102-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH2E-2462.webp",
+        "author": "图 / 京彩上铁"
+      }
+    ],
+    "asset": "full-model-158",
+    "profile": {
+      "head": "h2g",
+      "paint": "blue"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CRH2E(纵向)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22015-102-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2E-Z.webp",
+        "author": "图 / 中华门的西柚"
+      }
+    ],
+    "asset": "full-model-159",
+    "profile": {
+      "head": "h2g",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH2G(技术提升型)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22017-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2G-T.webp",
+        "author": "图 / 捧一池星光"
+      }
+    ],
+    "asset": "full-model-161",
+    "profile": {
+      "head": "h2g",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH2H",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-22018-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH2H.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-162",
+    "profile": {
+      "head": "h2g",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH3C(一阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-23011-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH3C-1.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-163",
+    "profile": {
+      "head": "h3c",
+      "paint": "velaro"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH3C(二阶段)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-23012-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH3C-2.webp",
+        "author": "图 / CRH380A-6059L"
+      }
+    ],
+    "asset": "full-model-164",
+    "profile": {
+      "head": "h3c",
+      "paint": "velaro"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH3A(城际版)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-23001-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CJ1.webp",
+        "author": "图 / 丰台的8K"
+      }
+    ],
+    "asset": "full-model-165",
+    "profile": {
+      "head": "h3a",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH3A",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-23002-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH3A.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-166",
+    "profile": {
+      "head": "h3a",
+      "paint": "orange"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH3A(技术提升型)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-23002-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH3A.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-167",
+    "profile": {
+      "head": "h3a",
+      "paint": "orange"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH3A-A",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-23005-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH3A-A.webp",
+        "author": "图 / 土豆有可爱的小狼牙"
+      }
+    ],
+    "asset": "full-model-169",
+    "profile": {
+      "head": "cinova",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH3E",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-23010-102-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CJ1.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-170",
+    "profile": {
+      "head": "h3a",
+      "paint": "blue"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CJ2",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-40020-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CJ2.webp",
+        "author": "图 / 魔光老徐"
+      }
+    ],
+    "asset": "full-model-171",
+    "profile": {
+      "head": "h3a",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH3X",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-23013-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH3X.webp",
+        "author": "图 / 来自网络"
+      }
+    ],
+    "asset": "full-model-172",
+    "profile": {
+      "head": "h3x",
+      "paint": "modernRed"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH3X-350",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-23014-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH3X-350.webp",
+        "author": "图 / 来自网络"
+      }
+    ],
+    "asset": "full-model-173",
+    "profile": {
+      "head": "h3x",
+      "paint": "modernRed"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH5G(大功率)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-25005-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH5GU.webp",
+        "author": "图 / 董邱迪"
+      }
+    ],
+    "asset": "full-model-176",
+    "profile": {
+      "head": "cinova",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH5H",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-25004-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH5G.webp",
+        "author": "图 / 中华门的西柚"
+      }
+    ],
+    "asset": "full-model-177",
+    "profile": {
+      "head": "h5",
+      "paint": "h5"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH5E",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-25002-102-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH5E.webp",
+        "author": "图 / 董邱迪"
+      }
+    ],
+    "asset": "full-model-179",
+    "profile": {
+      "head": "h5",
+      "paint": "h5"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH5E(纵向)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-25003-102-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/0None.webp",
+        "author": "图 / -"
+      }
+    ],
+    "asset": "full-model-180",
+    "profile": {
+      "head": "h5",
+      "paint": "h5"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CRH5G(技术提升型)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-25006-101-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH5G-T.webp",
+        "author": "图 / 中华门的西柚"
+      }
+    ],
+    "asset": "full-model-181",
+    "profile": {
+      "head": "cinova",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH6A-A(2.0)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-11101-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6A-A-2.webp",
+        "author": "图 / 秦浩博"
+      }
+    ],
+    "asset": "full-model-182",
+    "profile": {
+      "head": "cinova2",
+      "paint": "rainbow"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH6F(2.0)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-11102-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6F-2.0.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-183",
+    "profile": {
+      "head": "cinova2",
+      "paint": "greenWave"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH6F-A(2.0)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-11103-201-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR300AFs.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-184",
+    "profile": {
+      "head": "cinova2",
+      "paint": "red"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CRH6A(中期)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-26002-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6A-3.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-188",
+    "profile": {
+      "head": "cinova",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH6A(后期)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-26003-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6A-6.webp",
+        "author": "图 / 秦浩博"
+      }
+    ],
+    "asset": "full-model-189",
+    "profile": {
+      "head": "cinova",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH6A(舒适版)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-26004-101-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH6A-S.webp",
+        "author": "图 / CRH380A-6059L"
+      }
+    ],
+    "asset": "full-model-190",
+    "profile": {
+      "head": "cinova",
+      "paint": "blue"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CRH6A(智能版)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-26006-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6A-Z.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-191",
+    "profile": {
+      "head": "cinova",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH6A-A",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-26008-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6A-A.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-192",
+    "profile": {
+      "head": "cinova",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH6A-A(智能版)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-26009-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6A-A-Z2.webp",
+        "author": "图 / 董邱迪"
+      }
+    ],
+    "asset": "full-model-193",
+    "profile": {
+      "head": "cinova",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH6F-A",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-26012-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH6F-A.webp",
+        "author": "图 / HXD3CA7501"
+      }
+    ],
+    "asset": "full-model-195",
+    "profile": {
+      "head": "cinova",
+      "paint": "redWave"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CRH6F-A(智能版)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-26013-201-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CRH6A-1.webp",
+        "author": "中国动车组资料页署名"
+      }
+    ],
+    "asset": "full-model-196",
+    "profile": {
+      "head": "cinova",
+      "paint": "orangeBand"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CJ3",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-40030-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CJ3.webp",
+        "author": "图 / Leooo_young"
+      }
+    ],
+    "asset": "full-model-210",
+    "profile": {
+      "head": "cinova",
+      "paint": "orangeBand"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CJ4",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-40031-601-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CJ4.webp",
+        "author": "图 / 秦浩博"
+      }
+    ],
+    "asset": "full-model-211",
+    "profile": {
+      "head": "flat",
+      "paint": "flatBlue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CJ5(柴油)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-40050-302-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CJ5-0506.webp",
+        "author": "图 / Catpac_L"
+      }
+    ],
+    "asset": "full-model-217",
+    "profile": {
+      "head": "cinova",
+      "paint": "redWave"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CJ5(电池)",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-40051-302-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CJ5-0505.webp",
+        "author": "图 / 魔光老徐"
+      }
+    ],
+    "asset": "full-model-218",
+    "profile": {
+      "head": "cinova",
+      "paint": "orangeBand"
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "CJ5E",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-40052-302-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CJ5E.webp",
+        "author": "图 / Aiklld2364"
+      }
+    ],
+    "asset": "full-model-219",
+    "profile": {
+      "head": "cinova",
+      "paint": "orangeBand"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CJ5E-A",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-40053-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CJ5E-A.webp",
+        "author": "图 / 魔光老徐"
+      }
+    ],
+    "asset": "full-model-220",
+    "profile": {
+      "head": "cinova2",
+      "paint": "gold"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CJ5E-B",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-40054-302-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CJ5E-B.webp",
+        "author": "图 / E79707CA"
+      }
+    ],
+    "asset": "full-model-221",
+    "profile": {
+      "head": "cinova",
+      "paint": "greenWave"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "CJ6",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-40061-201-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CJ6.webp",
+        "author": "图 / KoloFrankz"
+      }
+    ],
+    "asset": "full-model-238",
+    "profile": {
+      "head": "cinova2",
+      "paint": "blue"
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "NDJ3",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-27701-304-S.html",
+    "photoMatchesModel": true,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/NDJ3.webp",
+        "author": "图 / DF4B-2274"
+      }
+    ],
+    "asset": "full-model-257",
+    "profile": {
+      "head": "ndj",
+      "paint": "blue",
+      "noPassengerWindows": true,
+      "options": {
+        "bodyColors": [
+          "#e5f4fa",
+          "#9fd5e9",
+          "#5d9fc5"
+        ]
+      }
+    },
+    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+  },
+  {
+    "model": "NDJ3N",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-27702-107-S.html",
+    "photoMatchesModel": false,
+    "photos": [
+      {
+        "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/NDJ3N.webp",
+        "author": "图 / 来自网络"
+      }
+    ],
+    "asset": "full-model-258",
+    "profile": {
+      "head": "ndj",
+      "paint": "blue",
+      "noPassengerWindows": true,
+      "options": {
+        "bodyColors": [
+          "#e5f4fa",
+          "#9fd5e9",
+          "#5d9fc5"
+        ]
+      }
+    },
+    "referenceNote": "资料页没有本型号实拍，图示仅为其展示的系列基础外观，不能确认本型号的车头、涂装或完整编组。"
+  },
+  {
+    "model": "22B",
+    "title": "File:7102 YZ22B.jpg",
+    "description": "7102次列车编组中的YZ22B型客车",
+    "source": "https://commons.wikimedia.org/wiki/File:7102_YZ22B.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/7102_YZ22B.jpg/1280px-7102_YZ22B.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "Flsxx",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  {
+    "model": "25A",
+    "title": "File:RW25A 550214@BJI (20160307154831).jpg",
+    "description": "Girls' Day Special: Carriages of K603; If you want to see 25As, turn to K603.",
+    "source": "https://commons.wikimedia.org/wiki/File:RW25A_550214@BJI_(20160307154831).jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/RW25A_550214%40BJI_%2820160307154831%29.jpg/1280px-RW25A_550214%40BJI_%2820160307154831%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "N509FZ",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "model": "25B",
+    "title": "File:CA25B 893159@BJX (20170524060701).jpg",
+    "description": "Another series of mysterious coaches.",
+    "source": "https://commons.wikimedia.org/wiki/File:CA25B_893159@BJX_(20170524060701).jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/CA25B_893159%40BJX_%2820170524060701%29.jpg/1280px-CA25B_893159%40BJX_%2820170524060701%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "N509FZ",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "model": "25C",
+    "title": "File:存放于广州的报废的25C型客车.jpg",
+    "description": "China Railways type 25C coaches for scrapping at Guangzhou.",
+    "source": "https://commons.wikimedia.org/wiki/File:%E5%AD%98%E6%94%BE%E4%BA%8E%E5%B9%BF%E5%B7%9E%E7%9A%84%E6%8A%A5%E5%BA%9F%E7%9A%8425C%E5%9E%8B%E5%AE%A2%E8%BD%A6.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/%E5%AD%98%E6%94%BE%E4%BA%8E%E5%B9%BF%E5%B7%9E%E7%9A%84%E6%8A%A5%E5%BA%9F%E7%9A%8425C%E5%9E%8B%E5%AE%A2%E8%BD%A6.jpg/1280px-%E5%AD%98%E6%94%BE%E4%BA%8E%E5%B9%BF%E5%B7%9E%E7%9A%84%E6%8A%A5%E5%BA%9F%E7%9A%8425C%E5%9E%8B%E5%AE%A2%E8%BD%A6.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "橙子木",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "model": "25DT",
+    "title": "File:RW25DT553265于嘉峪关站.jpg",
+    "description": "​RW25DT553265于嘉峪关站",
+    "source": "https://commons.wikimedia.org/wiki/File:RW25DT553265%E4%BA%8E%E5%98%89%E5%B3%AA%E5%85%B3%E7%AB%99.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/RW25DT553265%E4%BA%8E%E5%98%89%E5%B3%AA%E5%85%B3%E7%AB%99.jpg/1280px-RW25DT553265%E4%BA%8E%E5%98%89%E5%B3%AA%E5%85%B3%E7%AB%99.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "Liuxingy",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "model": "25G",
+    "title": "File:201607 YW25G for K1220.jpg",
+    "description": "201607 YW25G for K1220",
+    "source": "https://commons.wikimedia.org/wiki/File:201607_YW25G_for_K1220.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/93/201607_YW25G_for_K1220.jpg/1280px-201607_YW25G_for_K1220.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "MNXANL",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "model": "25K",
+    "title": "File:DF4C 0019 and YW25K 670205@MYN (20150106163712).JPG",
+    "description": "Why is there a sleeper?",
+    "source": "https://commons.wikimedia.org/wiki/File:DF4C_0019_and_YW25K_670205@MYN_(20150106163712).JPG",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/DF4C_0019_and_YW25K_670205%40MYN_%2820150106163712%29.JPG/1280px-DF4C_0019_and_YW25K_670205%40MYN_%2820150106163712%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "N509FZ",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "model": "25T",
+    "title": "File:201607 Z9 1YZ25T.jpg",
+    "description": "201607 Z9 1YZ25T",
+    "source": "https://commons.wikimedia.org/wiki/File:201607_Z9_1YZ25T.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/201607_Z9_1YZ25T.jpg/1280px-201607_Z9_1YZ25T.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "MNXANL",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "model": "25Z",
+    "title": "File:201606 RZ25Z-110722 at HZH.jpg",
+    "description": "201606 RZ25K-110722 at HZH",
+    "source": "https://commons.wikimedia.org/wiki/File:201606_RZ25Z-110722_at_HZH.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/201606_RZ25Z-110722_at_HZH.jpg/1280px-201606_RZ25Z-110722_at_HZH.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "MNXANL",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  {
+    "model": "19K",
+    "title": "File:RW19K 553317 20111029.jpg",
+    "description": "​南宁至北京西特快列车编组中的RW19K软卧车，拍摄于北京西客站",
+    "source": "https://commons.wikimedia.org/wiki/File:RW19K_553317_20111029.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/RW19K_553317_20111029.jpg/1280px-RW19K_553317_20111029.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "颐园新居",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  {
+    "model": "19T",
+    "title": "File:RW19T 554049 20120623.jpg",
+    "description": "​T43/44次特快列车编组中的RW19T型软卧车",
+    "source": "https://commons.wikimedia.org/wiki/File:RW19T_554049_20120623.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/RW19T_554049_20120623.jpg/1280px-RW19T_554049_20120623.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "author": "颐园新居",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  }
+]

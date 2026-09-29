@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { drawCr200Art } from './draw-cr200-art.mjs';
+import { drawExtendedArt } from './draw-extended-train-art.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 drawCr200Art(root);
 const catalogue=JSON.parse(fs.readFileSync(path.join(root,'src/data/train-art.json'),'utf8'));
@@ -55,26 +56,30 @@ function paintFor(p,h){
 }
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const out=path.join(root,'src/assets/trains');fs.mkdirSync(out,{recursive:true});
+function drawProfile(item, profile) {
+ const [head,paint,options={}]=profile,h=options.head || heads[head],silver=options.silver ?? ['af','afc','phoenix','dragon','upgrade','z380'].includes(paint),blueBody=['af300','bf300'].includes(paint);
+ const xs=head==='regina'?[145,173,201,229,257,285]:[157,184,211,238,265,291];
+ const windows=xs.map(x=>`<rect x="${x}" y="46" width="18" height="12" rx="1.8" fill="url(#glass)" stroke="#223746" stroke-width=".6"/>`).join('');
+ const door=h[4],bodyColors=options.bodyColors || [silver?'#eff2f3':'#fffef9',blueBody?'#d4e8f4':silver?'#cdd4da':'#f8faf7',blueBody?'#58a2d2':silver?'#adb8c1':'#dbe1e1'];
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 112" role="img" aria-labelledby="title desc">
+<title id="title">${esc(item.model)} Q版首车侧视图</title><desc id="desc">${esc(item.livery+'。'+item.features+'。外观核对：'+item.reviewSource+'。首车比例压缩，参考外观，非实际编组。')}</desc>
+<metadata>Yukino original side-view drawing, revision 2, 2026-09-29. CC BY-SA 4.0. Photo reference: ${esc(item.source)}; China-EMU review: ${esc(item.reviewSource)}. The site's front-view avatars are not reproduced.</metadata>
+<defs><linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${bodyColors[0]}"/><stop offset=".48" stop-color="${bodyColors[1]}"/><stop offset="1" stop-color="${bodyColors[2]}"/></linearGradient><linearGradient id="noseSilver" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d8e1e8"/><stop offset=".55" stop-color="#b8c6d0"/><stop offset="1" stop-color="#8b9fae"/></linearGradient><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b5264"/><stop offset="1" stop-color="#122938"/></linearGradient><clipPath id="car"><path d="${h[0]}"/></clipPath></defs>
+<ellipse cx="169" cy="102" rx="142" ry="3" fill="#315c42" opacity=".07"/>
+<g fill="#293740"><rect x="70" y="84" width="43" height="10" rx="3"/><rect x="251" y="84" width="43" height="10" rx="3"/><circle cx="79" cy="95" r="6"/><circle cx="105" cy="95" r="6"/><circle cx="260" cy="95" r="6"/><circle cx="286" cy="95" r="6"/></g><g fill="#b0bac0"><circle cx="79" cy="95" r="2.5"/><circle cx="105" cy="95" r="2.5"/><circle cx="260" cy="95" r="2.5"/><circle cx="286" cy="95" r="2.5"/></g>
+${options.roofSvg || ''}${el(h[0],'url(#body)')}<g clip-path="url(#car)">${el('M12 80H314V93H12Z',silver?'#687d8e':'#9daab1','opacity=".4"')}${h[5]?el(h[5],paint==='af'?'#6a737a':'#253d4e'):''}${options.paintSvg ?? paintFor(paint,h)}${options.windowsSvg ?? windows}
+${el(h[1],paint==='rocket'?'#284451':'#25323d')}${paint==='bf'?'':el(h[2],'url(#glass)','stroke="#253845" stroke-width="1.1"')}${line(h[1],['af','af300','dragon','upgrade'].includes(paint)?RED:paint==='bf300'?GOLD:'#435665',.9)}${el(h[3],'#f7f6db','stroke="#8a9293" stroke-width=".8"')}
+${line(`M${door} 34H${door+17}V80H${door}Z`,'#71838c',1)}<rect x="${door+4}" y="41" width="9" height="18" rx="4.5" fill="url(#glass)"/>${line(`M${door+14} 67v4`,'#41545e',1)}${line('M302 27V87','#697b84',1.2)}${line('M111 79H307','#82959f',.8)}
+${[166,196,226,256,284].map(x=>`<rect x="${x}" y="82" width="11" height="4" rx=".5" fill="#83949e" opacity=".6"/>`).join('')}${line('M181 24H207 M216 24H240 M251 24H278','#a5b5bc',1.4)}${line('M22 78Q28 73 37 73Q43 78 43 86','#788a94',.9)}${head==='rocket'&&item.model==='CRH380A'?xs.map(x=>line(`M${x+9} 47V57`,'#adbec7',1)).join(''):''}</g>${el(h[0],'none','stroke="#405666" stroke-width="1.5" stroke-linejoin="round"')}</svg>\n`;
+ fs.writeFileSync(path.join(out,(item.asset || item.model)+'.svg'),svg);
+}
+drawExtendedArt(root, drawProfile);
 for(const item of catalogue){
  if(item.accuracy==='reference'){
   if(!fs.existsSync(path.join(out,(item.asset||item.model)+'.svg'))) throw Error('Missing reference art: '+item.model);
   continue;
  }
  const profile=profiles[item.model];if(!profile) throw Error('No reviewed profile: '+item.model);
- const [head,paint]=profile,h=heads[head],silver=['af','afc','phoenix','dragon','upgrade','z380'].includes(paint),blueBody=['af300','bf300'].includes(paint);
- const xs=head==='regina'?[145,173,201,229,257,285]:[157,184,211,238,265,291];
- const windows=xs.map(x=>`<rect x="${x}" y="46" width="18" height="12" rx="1.8" fill="url(#glass)" stroke="#223746" stroke-width=".6"/>`).join('');
- const door=h[4];
- const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 112" role="img" aria-labelledby="title desc">
-<title id="title">${esc(item.model)} Q版首车侧视图</title><desc id="desc">${esc(item.livery+'。'+item.features+'。外观核对：'+item.reviewSource+'。首车比例压缩，参考外观，非实际编组。')}</desc>
-<metadata>Yukino original side-view drawing, revision 2, 2026-09-29. CC BY-SA 4.0. Photo reference: ${esc(item.source)}; China-EMU review: ${esc(item.reviewSource)}. The site's front-view avatars are not reproduced.</metadata>
-<defs><linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${silver?'#eff2f3':'#fffef9'}"/><stop offset=".48" stop-color="${blueBody?'#d4e8f4':silver?'#cdd4da':'#f8faf7'}"/><stop offset="1" stop-color="${blueBody?'#58a2d2':silver?'#adb8c1':'#dbe1e1'}"/></linearGradient><linearGradient id="noseSilver" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d8e1e8"/><stop offset=".55" stop-color="#b8c6d0"/><stop offset="1" stop-color="#8b9fae"/></linearGradient><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b5264"/><stop offset="1" stop-color="#122938"/></linearGradient><clipPath id="car"><path d="${h[0]}"/></clipPath></defs>
-<ellipse cx="169" cy="102" rx="142" ry="3" fill="#315c42" opacity=".07"/>
-<g fill="#293740"><rect x="70" y="84" width="43" height="10" rx="3"/><rect x="251" y="84" width="43" height="10" rx="3"/><circle cx="79" cy="95" r="6"/><circle cx="105" cy="95" r="6"/><circle cx="260" cy="95" r="6"/><circle cx="286" cy="95" r="6"/></g><g fill="#b0bac0"><circle cx="79" cy="95" r="2.5"/><circle cx="105" cy="95" r="2.5"/><circle cx="260" cy="95" r="2.5"/><circle cx="286" cy="95" r="2.5"/></g>
-${el(h[0],'url(#body)')}<g clip-path="url(#car)">${el('M12 80H314V93H12Z',silver?'#687d8e':'#9daab1','opacity=".4"')}${h[5]?el(h[5],paint==='af'?'#6a737a':'#253d4e'):''}${paintFor(paint,h)}${windows}
-${el(h[1],paint==='rocket'?'#284451':'#25323d')}${paint==='bf'?'':el(h[2],'url(#glass)','stroke="#253845" stroke-width="1.1"')}${line(h[1],['af','af300','dragon','upgrade'].includes(paint)?RED:paint==='bf300'?GOLD:'#435665',.9)}${el(h[3],'#f7f6db','stroke="#8a9293" stroke-width=".8"')}
-${line(`M${door} 34H${door+17}V80H${door}Z`,'#71838c',1)}<rect x="${door+4}" y="41" width="9" height="18" rx="4.5" fill="url(#glass)"/>${line(`M${door+14} 67v4`,'#41545e',1)}${line('M302 27V87','#697b84',1.2)}${line('M111 79H307','#82959f',.8)}
-${[166,196,226,256,284].map(x=>`<rect x="${x}" y="82" width="11" height="4" rx=".5" fill="#83949e" opacity=".6"/>`).join('')}${line('M181 24H207 M216 24H240 M251 24H278','#a5b5bc',1.4)}${line('M22 78Q28 73 37 73Q43 78 43 86','#788a94',.9)}${head==='rocket'&&item.model==='CRH380A'?xs.map(x=>line(`M${x+9} 47V57`,'#adbec7',1)).join(''):''}</g>${el(h[0],'none','stroke="#405666" stroke-width="1.5" stroke-linejoin="round"')}</svg>\n`;
- fs.writeFileSync(path.join(out,item.model+'.svg'),svg);
+ drawProfile(item, profile);
 }
 console.log(`Redrew ${catalogue.filter(item=>item.accuracy!=='reference').length} source-reviewed side views; retained ${catalogue.filter(item=>item.accuracy==='reference').length} reference images`);

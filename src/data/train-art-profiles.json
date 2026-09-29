@@ -1,0 +1,497 @@
+{
+  "full-model-6": {
+    "head": "af",
+    "paint": "af"
+  },
+  "full-model-25": {
+    "head": "afz",
+    "paint": "afc"
+  },
+  "full-model-26": {
+    "head": "afz",
+    "paint": "afc"
+  },
+  "full-model-31": {
+    "head": "bf",
+    "paint": "sleeper",
+    "double": true
+  },
+  "full-model-39": {
+    "head": "bf",
+    "paint": "orange"
+  },
+  "full-model-40": {
+    "head": "bf",
+    "paint": "winter"
+  },
+  "full-model-42": {
+    "head": "bfz",
+    "paint": "purple"
+  },
+  "full-model-48": {
+    "head": "bf",
+    "paint": "orange",
+    "double": true
+  },
+  "full-model-49": {
+    "head": "bf",
+    "paint": "sleeper",
+    "double": true
+  },
+  "full-model-53": {
+    "head": "bfz",
+    "paint": "upgrade"
+  },
+  "full-model-54": {
+    "head": "bfz",
+    "paint": "modernRed"
+  },
+  "full-model-55": {
+    "head": "bfz",
+    "paint": "modernRed"
+  },
+  "full-model-56": {
+    "head": "bfz",
+    "paint": "modernRed"
+  },
+  "full-model-59": {
+    "head": "af",
+    "paint": "af"
+  },
+  "full-model-63": {
+    "head": "bf",
+    "paint": "red"
+  },
+  "full-model-67": {
+    "head": "j220",
+    "paint": "turquoise",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+    }
+  },
+  "full-model-68": {
+    "head": "j220",
+    "paint": "turquoise",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+    }
+  },
+  "full-model-71": {
+    "head": "j220",
+    "paint": "turquoise",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+    }
+  },
+  "full-model-72": {
+    "head": "j220",
+    "paint": "turquoise",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+    }
+  },
+  "full-model-87": {
+    "head": "jPower",
+    "paint": "greenJ",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>",
+      "bodyColors": [
+        "#83cd80",
+        "#40a34a",
+        "#1e7833"
+      ]
+    }
+  },
+  "full-model-90": {
+    "head": "jPower",
+    "paint": "crossGreen",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>",
+      "bodyColors": [
+        "#83cd80",
+        "#40a34a",
+        "#1e7833"
+      ]
+    }
+  },
+  "full-model-91": {
+    "head": "jPower",
+    "paint": "laos",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+    }
+  },
+  "full-model-92": {
+    "head": "jPower",
+    "paint": "greenJ",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>",
+      "bodyColors": [
+        "#83cd80",
+        "#40a34a",
+        "#1e7833"
+      ]
+    }
+  },
+  "full-model-94": {
+    "head": "jPower",
+    "paint": "greenJ",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>",
+      "bodyColors": [
+        "#83cd80",
+        "#40a34a",
+        "#1e7833"
+      ]
+    }
+  },
+  "full-model-97": {
+    "head": "jPower",
+    "paint": "whiteJ",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+    }
+  },
+  "full-model-103": {
+    "head": "jPower",
+    "paint": "whiteJ",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+    }
+  },
+  "full-model-105": {
+    "head": "jPower",
+    "paint": "whiteJ",
+    "noPassengerWindows": true,
+    "options": {
+      "roofSvg": "<path d=\"M205 20h40v-4h-40Z\" fill=\"#6d7c81\"/><path d=\"M220 16 209 8 233 4 245 8 232 16\" fill=\"none\" stroke=\"#963845\" stroke-width=\"1.8\"/><path d=\"M222 3h26\" stroke=\"#485962\" stroke-width=\"2\"/>"
+    }
+  },
+  "full-model-111": {
+    "head": "rocketStandard",
+    "paint": "blue"
+  },
+  "full-model-112": {
+    "head": "rocketStandard",
+    "paint": "red"
+  },
+  "full-model-115": {
+    "head": "rocket",
+    "paint": "rocket"
+  },
+  "full-model-116": {
+    "head": "rocketStandard",
+    "paint": "blue"
+  },
+  "full-model-117": {
+    "head": "rocketStandard",
+    "paint": "blue"
+  },
+  "full-model-119": {
+    "head": "rocketStandard",
+    "paint": "blue"
+  },
+  "full-model-122": {
+    "head": "h380b",
+    "paint": "velaro"
+  },
+  "full-model-124": {
+    "head": "h380b",
+    "paint": "velaro"
+  },
+  "full-model-125": {
+    "head": "h380b",
+    "paint": "velaro"
+  },
+  "full-model-126": {
+    "head": "h380b",
+    "paint": "velaro"
+  },
+  "full-model-131": {
+    "head": "z380",
+    "paint": "z380"
+  },
+  "full-model-134": {
+    "head": "regina",
+    "paint": "regina"
+  },
+  "full-model-135": {
+    "head": "regina",
+    "paint": "regina"
+  },
+  "full-model-137": {
+    "head": "zefiro250",
+    "paint": "blue"
+  },
+  "full-model-138": {
+    "head": "zefiro250",
+    "paint": "blue"
+  },
+  "full-model-140": {
+    "head": "z250",
+    "paint": "z250"
+  },
+  "full-model-145": {
+    "head": "duckStandard",
+    "paint": "blue"
+  },
+  "full-model-147": {
+    "head": "duckStandard",
+    "paint": "blue"
+  },
+  "full-model-148": {
+    "head": "duck",
+    "paint": "blueGold"
+  },
+  "full-model-152": {
+    "head": "duck",
+    "paint": "blue"
+  },
+  "full-model-153": {
+    "head": "h2g",
+    "paint": "blue"
+  },
+  "full-model-154": {
+    "head": "duck",
+    "paint": "blue"
+  },
+  "full-model-156": {
+    "head": "h2g",
+    "paint": "blue"
+  },
+  "full-model-157": {
+    "head": "h2g",
+    "paint": "blue"
+  },
+  "full-model-158": {
+    "head": "h2g",
+    "paint": "blue"
+  },
+  "full-model-159": {
+    "head": "h2g",
+    "paint": "blue"
+  },
+  "full-model-161": {
+    "head": "h2g",
+    "paint": "blue"
+  },
+  "full-model-162": {
+    "head": "h2g",
+    "paint": "blue"
+  },
+  "full-model-163": {
+    "head": "h3c",
+    "paint": "velaro"
+  },
+  "full-model-164": {
+    "head": "h3c",
+    "paint": "velaro"
+  },
+  "full-model-165": {
+    "head": "h3a",
+    "paint": "blue"
+  },
+  "full-model-166": {
+    "head": "h3a",
+    "paint": "orange"
+  },
+  "full-model-167": {
+    "head": "h3a",
+    "paint": "orange"
+  },
+  "full-model-169": {
+    "head": "cinova",
+    "paint": "blue"
+  },
+  "full-model-170": {
+    "head": "h3a",
+    "paint": "blue"
+  },
+  "full-model-171": {
+    "head": "h3a",
+    "paint": "blue"
+  },
+  "full-model-172": {
+    "head": "h3x",
+    "paint": "modernRed"
+  },
+  "full-model-173": {
+    "head": "h3x",
+    "paint": "modernRed"
+  },
+  "full-model-176": {
+    "head": "cinova",
+    "paint": "blue"
+  },
+  "full-model-177": {
+    "head": "h5",
+    "paint": "h5"
+  },
+  "full-model-179": {
+    "head": "h5",
+    "paint": "h5"
+  },
+  "full-model-180": {
+    "head": "h5",
+    "paint": "h5"
+  },
+  "full-model-181": {
+    "head": "cinova",
+    "paint": "blue"
+  },
+  "full-model-182": {
+    "head": "cinova2",
+    "paint": "rainbow"
+  },
+  "full-model-183": {
+    "head": "cinova2",
+    "paint": "greenWave"
+  },
+  "full-model-184": {
+    "head": "cinova2",
+    "paint": "red"
+  },
+  "full-model-188": {
+    "head": "cinova",
+    "paint": "blue"
+  },
+  "full-model-189": {
+    "head": "cinova",
+    "paint": "blue"
+  },
+  "full-model-190": {
+    "head": "cinova",
+    "paint": "blue"
+  },
+  "full-model-191": {
+    "head": "cinova",
+    "paint": "blue"
+  },
+  "full-model-192": {
+    "head": "cinova",
+    "paint": "blue"
+  },
+  "full-model-193": {
+    "head": "cinova",
+    "paint": "blue"
+  },
+  "full-model-195": {
+    "head": "cinova",
+    "paint": "redWave"
+  },
+  "full-model-196": {
+    "head": "cinova",
+    "paint": "orangeBand"
+  },
+  "full-model-210": {
+    "head": "cinova",
+    "paint": "orangeBand"
+  },
+  "full-model-211": {
+    "head": "flat",
+    "paint": "flatBlue"
+  },
+  "full-model-217": {
+    "head": "cinova",
+    "paint": "redWave"
+  },
+  "full-model-218": {
+    "head": "cinova",
+    "paint": "orangeBand"
+  },
+  "full-model-219": {
+    "head": "cinova",
+    "paint": "orangeBand"
+  },
+  "full-model-220": {
+    "head": "cinova2",
+    "paint": "gold"
+  },
+  "full-model-221": {
+    "head": "cinova",
+    "paint": "greenWave"
+  },
+  "full-model-238": {
+    "head": "cinova2",
+    "paint": "blue"
+  },
+  "full-model-257": {
+    "head": "ndj",
+    "paint": "blue",
+    "noPassengerWindows": true,
+    "options": {
+      "bodyColors": [
+        "#e5f4fa",
+        "#9fd5e9",
+        "#5d9fc5"
+      ]
+    }
+  },
+  "full-model-258": {
+    "head": "ndj",
+    "paint": "blue",
+    "noPassengerWindows": true,
+    "options": {
+      "bodyColors": [
+        "#e5f4fa",
+        "#9fd5e9",
+        "#5d9fc5"
+      ]
+    }
+  },
+  "coach-22B": {
+    "coach": true,
+    "type": "22B"
+  },
+  "coach-25A": {
+    "coach": true,
+    "type": "25A"
+  },
+  "coach-25B": {
+    "coach": true,
+    "type": "25B"
+  },
+  "coach-25C": {
+    "coach": true,
+    "type": "25C"
+  },
+  "coach-25DT": {
+    "coach": true,
+    "type": "25DT"
+  },
+  "coach-25G": {
+    "coach": true,
+    "type": "25G"
+  },
+  "coach-25K": {
+    "coach": true,
+    "type": "25K"
+  },
+  "coach-25T": {
+    "coach": true,
+    "type": "25T"
+  },
+  "coach-25Z": {
+    "coach": true,
+    "type": "25Z"
+  },
+  "coach-19K": {
+    "coach": true,
+    "type": "19K"
+  },
+  "coach-19T": {
+    "coach": true,
+    "type": "19T"
+  }
+}

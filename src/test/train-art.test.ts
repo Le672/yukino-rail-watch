@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { TrainIllustration } from "../components/TrainIllustration";
-import { resolveTrainArt, trainArtCatalogue } from "../lib/train-art";
+import { resolveTrainArt, resolveTrainArts, trainArtCatalogue } from "../lib/train-art";
+import coverage from "../../docs/train-art-coverage.json";
 
 afterEach(cleanup);
 
@@ -17,13 +18,13 @@ describe("exact model illustrations", () => {
       expect(item.author).not.toBe("");
       if (item.licenseUrl) expect(item.licenseUrl).toMatch(/^https:/);
       else expect(item.license).toBe("原作者保留权利");
-      expect(item.reviewSource).toMatch(/^https:\/\/www\.china-emu\.cn\/Trains\/Model\/Detail-/);
+      expect(item.reviewSource).toMatch(/^https:\/\/(www\.china-emu\.cn\/Trains\/Model\/Detail-|commons\.wikimedia\.org\/wiki\/File:)/);
       expect(item.reviewAuthors).not.toBe("");
     }
   });
 
   it("never substitutes another model, a service code or an unlisted generation", () => {
-    for (const model of [null, "", "G547", "CR400", "CR400AF-BZZ", "CR400AF-UNKNOWN", "CRH1E", "CRH2C", "CRH2E", "CRH3A", "CR200J", "CR200J(长编)", "CR400AF/CR400BF", "CR400AF 或 CR400BF", "CR400AF（疑似）"]) {
+    for (const model of [null, "", "G547", "CR400", "CR400AF-BZZ", "CR400AF-UNKNOWN", "CRH999A", "CR400AF/CR400BF", "CR400AF 或 CR400BF"]) {
       expect(resolveTrainArt(model)).toBeNull();
     }
   });
@@ -55,7 +56,7 @@ describe("exact model illustrations", () => {
     }
     expect(resolveTrainArt("CR200J1-C")?.image).not.toBe(long?.image);
     expect(resolveTrainArt("CR200J1-C(短编)")?.model).toBe("CR200J1-C");
-    expect(resolveTrainArt("CR200J1-C(未知编组)")).toBeNull();
+    expect(resolveTrainArt("CR200J1-C(未知编组)")).toMatchObject({ accuracy: "reference", displayModel: "CR200J1-C(未知编组)" });
     expect(resolveTrainArt("CR200J1-C+CR200J3-C")).toBeNull();
   });
 
@@ -77,5 +78,35 @@ describe("exact model illustrations", () => {
     expect(resolveTrainArt("CR400AF + CR400AF")?.coupled).toBe(true);
     expect(resolveTrainArt("CR400AF 重联")?.coupled).toBe(true);
     expect(resolveTrainArt("CR400AF+CR400BF")).toBeNull();
+  });
+
+  it("covers the complete audited passenger inventories and every observed live model label", () => {
+    for (const model of [...coverage.chinaPassengerModels, ...coverage.railGoModels, ...coverage.observedRouteModels]) {
+      expect(resolveTrainArts(model).length, `Missing artwork: ${model}`).toBeGreaterThan(0);
+    }
+  });
+
+  it("renders G2949's standardised CRH380A as its independently catalogued version", () => {
+    expect(resolveTrainArt("CRH380A (统型)")?.image).not.toBe(resolveTrainArt("CRH380A")?.image);
+    render(createElement(TrainIllustration, { model: "CRH380A (统型)" }));
+    expect(screen.getByRole("img", { name: /^CRH380A\(统型\)，/ })).toBeTruthy();
+    expect(screen.queryByText("外观图待核实")).toBeNull();
+  });
+
+  it("retains the same base model's original image for a new description and makes that uncertainty visible", () => {
+    const art=resolveTrainArt("CRH380A（某新版本）");
+    expect(art).toMatchObject({ model: "CRH380A", accuracy: "reference", displayModel: "CRH380A(某新版本)" });
+    expect(art?.referenceNote).toContain("该说明尚未单独核对");
+    expect(resolveTrainArt("CRH380A-UNKNOWN")).toBeNull();
+    render(createElement(TrainIllustration, { model: "25G (DC600V 供电)" }));
+    expect(screen.getByRole("img", { name: /^25G\(DC600V供电\)，/ })).toBeTruthy();
+    expect(screen.getByText("参考外观 · 版本待核实")).toBeTruthy();
+  });
+
+  it("shows both known vehicles in a combination and never hides an unidentified part", () => {
+    render(createElement(TrainIllustration, { model: "CR400AF+CR400BF" }));
+    expect(screen.getAllByRole("img")).toHaveLength(2);
+    expect(resolveTrainArts("25G + 25K")).toHaveLength(2);
+    expect(resolveTrainArts("CR400AF+CRH999A")).toHaveLength(0);
   });
 });
