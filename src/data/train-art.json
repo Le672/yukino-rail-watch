@@ -610,5 +610,300 @@
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-26011-201-S.html",
     "reviewEdition": "CRH6F",
     "reviewAuthors": "Leooo_young / 京彩上铁"
+  },
+  {
+    "model": "CR200J1-A",
+    "asset": "CR200J1-A",
+    "aliases": [
+      "CR200J1-A(短编)",
+      "CR200J1-A(短编组)",
+      "CR200J1-A(9编组)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J1-A的控制车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "绿色车身、深色窗区与黄色侧带",
+    "features": "长斜鼻、分段侧驾驶窗、客室窗和控制端车门",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10021-101-S.html",
+    "title": "CR200J1-A 控制车实拍参考",
+    "author": "中华门的西柚",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10021-101-S.html",
+    "reviewEdition": "CR200J1-A · 控制车",
+    "reviewAuthors": "中华门的西柚"
+  },
+  {
+    "model": "CR200J1-A(长编)",
+    "asset": "CR200J1-A-long",
+    "aliases": [
+      "CR200J1-A(长编组)",
+      "CR200J1-A(18编组)",
+      "CR200J1-A(18编)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J1-A(长编组)的动力车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "绿色车身、深色窗区与黄色侧带",
+    "features": "圆弧驾驶端、独立侧驾驶窗、受电弓和动力车通风格栅",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10022-102-S.html",
+    "title": "CR200J1-A(长编组) 动力车实拍参考",
+    "author": "DF4D-2274",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10022-102-S.html",
+    "reviewEdition": "CR200J1-A(长编组) · 动力车",
+    "reviewAuthors": "DF4D-2274"
+  },
+  {
+    "model": "CR200J2-A",
+    "asset": "CR200J2-A",
+    "aliases": [
+      "CR200J2-A(短编)",
+      "CR200J2-A(短编组)",
+      "CR200J2-A(9编组)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J2-A的动力车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "绿色车身、深色窗区与黄色侧带",
+    "features": "圆弧驾驶端、独立侧驾驶窗、受电弓和动力车通风格栅",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10023-101-S.html",
+    "title": "CR200J2-A 动力车实拍参考",
+    "author": "襄渝闪过一只猫",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10023-101-S.html",
+    "reviewEdition": "CR200J2-A · 动力车",
+    "reviewAuthors": "襄渝闪过一只猫"
+  },
+  {
+    "model": "CR200J3-A",
+    "asset": "CR200J3-A",
+    "aliases": [
+      "CR200J3-A(短编)",
+      "CR200J3-A(短编组)",
+      "CR200J3-A(9编组)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J3-A的控制车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "绿色车身、深色窗区与黄色侧带",
+    "features": "长斜鼻、分段侧驾驶窗、客室窗和控制端车门",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10025-101-S.html",
+    "title": "CR200J3-A 控制车实拍参考",
+    "author": "E79707CA",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10025-101-S.html",
+    "reviewEdition": "CR200J3-A · 控制车",
+    "reviewAuthors": "E79707CA"
+  },
+  {
+    "model": "CR200J3-A(长编)",
+    "asset": "CR200J3-A-long",
+    "aliases": [
+      "CR200J3-A(长编组)",
+      "CR200J3-A(18编组)",
+      "CR200J3-A(18编)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J3-A(长编组)的动力车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "绿色车身、深色窗区与黄色侧带",
+    "features": "圆弧驾驶端、独立侧驾驶窗、受电弓和动力车通风格栅",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10026-102-S.html",
+    "title": "CR200J3-A(长编组) 动力车实拍参考",
+    "author": "D94次笕桥站通过",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10026-102-S.html",
+    "reviewEdition": "CR200J3-A(长编组) · 动力车",
+    "reviewAuthors": "D94次笕桥站通过"
+  },
+  {
+    "model": "CR200J1-B",
+    "asset": "CR200J1-B",
+    "aliases": [
+      "CR200J1-B(短编)",
+      "CR200J1-B(短编组)",
+      "CR200J1-B(9编组)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J1-B的控制车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "绿色车身、深色窗区与黄色侧带",
+    "features": "长斜鼻、分段侧驾驶窗、客室窗和控制端车门",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10051-101-S.html",
+    "title": "CR200J1-B 控制车实拍参考",
+    "author": "Aiklld2364",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10051-101-S.html",
+    "reviewEdition": "CR200J1-B · 控制车",
+    "reviewAuthors": "Aiklld2364"
+  },
+  {
+    "model": "CR200J2-B",
+    "asset": "CR200J2-B",
+    "aliases": [
+      "CR200J2-B(短编)",
+      "CR200J2-B(短编组)",
+      "CR200J2-B(9编组)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J2-B的动力车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "绿色车身、深色窗区与黄色侧带",
+    "features": "圆弧驾驶端、独立侧驾驶窗、受电弓和动力车通风格栅",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10053-101-S.html",
+    "title": "CR200J2-B 动力车实拍参考",
+    "author": "E79707CA",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10053-101-S.html",
+    "reviewEdition": "CR200J2-B · 动力车",
+    "reviewAuthors": "E79707CA"
+  },
+  {
+    "model": "CR200J3-B",
+    "asset": "CR200J3-B",
+    "aliases": [
+      "CR200J3-B(短编)",
+      "CR200J3-B(短编组)",
+      "CR200J3-B(9编组)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J3-B的控制车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "绿色车身、深色窗区与黄色侧带",
+    "features": "长斜鼻、分段侧驾驶窗、客室窗和控制端车门",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10055-101-S.html",
+    "title": "CR200J3-B 控制车实拍参考",
+    "author": "KoloFrankz",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10055-101-S.html",
+    "reviewEdition": "CR200J3-B · 控制车",
+    "reviewAuthors": "KoloFrankz"
+  },
+  {
+    "model": "CR200J1-C",
+    "asset": "CR200J1-C",
+    "aliases": [
+      "CR200J1-C(短编)",
+      "CR200J1-C(短编组)",
+      "CR200J1-C(9编组)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J1-C的控制车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "白色车身、绿色窗区与红色双曲线",
+    "features": "长斜鼻、分段侧驾驶窗、客室窗和控制端车门",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10101-101-S.html",
+    "title": "CR200J1-C 控制车实拍参考",
+    "author": "秦浩博",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10101-101-S.html",
+    "reviewEdition": "CR200J1-C · 控制车",
+    "reviewAuthors": "秦浩博"
+  },
+  {
+    "model": "CR200J1-C(长编)",
+    "asset": "CR200J1-C-long",
+    "aliases": [
+      "CR200J1-C(长编组)",
+      "CR200J1-C(18编组)",
+      "CR200J1-C(18编)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J1-C(18编组)的动力车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "白色车身、绿色窗区与红色双曲线",
+    "features": "圆弧驾驶端、独立侧驾驶窗、受电弓和动力车通风格栅",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10102-102-S.html",
+    "title": "CR200J1-C(18编组) 动力车实拍参考",
+    "author": "KoloFrankz",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10102-102-S.html",
+    "reviewEdition": "CR200J1-C(18编组) · 动力车",
+    "reviewAuthors": "KoloFrankz"
+  },
+  {
+    "model": "CR200J2-C(长编)",
+    "asset": "CR200J2-C-long",
+    "aliases": [
+      "CR200J2-C(长编组)",
+      "CR200J2-C(18编组)",
+      "CR200J2-C(18编)",
+      "CR200J2-C"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J2-C(18编组)的动力车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "白色车身、绿色窗区与红色双曲线",
+    "features": "圆弧驾驶端、独立侧驾驶窗、受电弓和动力车通风格栅",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10105-102-S.html",
+    "title": "CR200J2-C(18编组) 动力车实拍参考",
+    "author": "Zhaisa",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10105-102-S.html",
+    "reviewEdition": "CR200J2-C(18编组) · 动力车",
+    "reviewAuthors": "Zhaisa"
+  },
+  {
+    "model": "CR200J3-C",
+    "asset": "CR200J3-C",
+    "aliases": [
+      "CR200J3-C(短编)",
+      "CR200J3-C(短编组)",
+      "CR200J3-C(9编组)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J3-C的控制车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "白色车身、绿色窗区与红色双曲线",
+    "features": "长斜鼻、分段侧驾驶窗、客室窗和控制端车门",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10111-101-S.html",
+    "title": "CR200J3-C 控制车实拍参考",
+    "author": "秦浩博",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10111-101-S.html",
+    "reviewEdition": "CR200J3-C · 控制车",
+    "reviewAuthors": "秦浩博"
+  },
+  {
+    "model": "CR200J3-C(长编)",
+    "asset": "CR200J3-C-long",
+    "aliases": [
+      "CR200J3-C(长编组)",
+      "CR200J3-C(18编组)",
+      "CR200J3-C(18编)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J3-C(18编组)的动力车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "白色车身、绿色窗区与红色双曲线",
+    "features": "圆弧驾驶端、独立侧驾驶窗、受电弓和动力车通风格栅",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10112-102-S.html",
+    "title": "CR200J3-C(18编组) 动力车实拍参考",
+    "author": "捧一池星光",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10112-102-S.html",
+    "reviewEdition": "CR200J3-C(18编组) · 动力车",
+    "reviewAuthors": "捧一池星光"
+  },
+  {
+    "model": "CR200J1-D",
+    "asset": "CR200J1-D",
+    "aliases": [
+      "CR200J1-D(短编)",
+      "CR200J1-D(短编组)",
+      "CR200J1-D(9编组)"
+    ],
+    "accuracy": "reference",
+    "referenceNote": "图为CR200J1-D的动力车参考外观；尚未确认本次列车的车组编号、批次、涂装细节及运行方向，不表示完整编组。",
+    "livery": "白色车身、绿色窗区与红色双曲线",
+    "features": "圆弧驾驶端、独立侧驾驶窗、受电弓和动力车通风格栅",
+    "source": "https://www.china-emu.cn/Trains/Model/Detail-10103-101-S.html",
+    "title": "CR200J1-D 动力车实拍参考",
+    "author": "Aiklld2364",
+    "license": "原作者保留权利",
+    "licenseUrl": null,
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-10103-101-S.html",
+    "reviewEdition": "CR200J1-D · 动力车",
+    "reviewAuthors": "Aiklld2364"
   }
 ]

@@ -1,0 +1,230 @@
+{
+  "reviewedAt": "2026-09-29",
+  "note": "Original side views of the linked physical trains; source photographs and avatars are not redistributed.",
+  "references": [
+    {
+      "model": "CR200J1-A",
+      "key": "CR200J1-A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10021-101-S.html",
+      "label": "CR200J1-A",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J1-A.webp",
+          "author": "图 / 中华门的西柚"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J1-A.webp",
+          "author": "图 / 中华门的西柚"
+        }
+      ]
+    },
+    {
+      "model": "CR200J1-A (长编组)",
+      "key": "CR200J1-A-long",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10022-102-S.html",
+      "label": "CR200J1-A(长编组)",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J1-AL.webp",
+          "author": "图 / DF4D-2274"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J1-0.webp",
+          "author": "中国动车组资料页署名"
+        }
+      ]
+    },
+    {
+      "model": "CR200J2-A",
+      "key": "CR200J2-A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10023-101-S.html",
+      "label": "CR200J2-A",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J2-A.webp",
+          "author": "图 / 襄渝闪过一只猫"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J2-A.webp",
+          "author": "图 / 襄渝闪过一只猫"
+        }
+      ]
+    },
+    {
+      "model": "CR200J3-A",
+      "key": "CR200J3-A",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10025-101-S.html",
+      "label": "CR200J3-A",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J3-A.webp",
+          "author": "图 / 襄渝闪过一只猫"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J3-A.webp",
+          "author": "图 / E79707CA"
+        }
+      ]
+    },
+    {
+      "model": "CR200J3-A (长编组)",
+      "key": "CR200J3-A-long",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10026-102-S.html",
+      "label": "CR200J3-A(长编组)",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J3-AL.webp",
+          "author": "图 / D94次笕桥站通过"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J3-AL.webp",
+          "author": "图 / DF4D-2274"
+        }
+      ]
+    },
+    {
+      "model": "CR200J1-B",
+      "key": "CR200J1-B",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10051-101-S.html",
+      "label": "CR200J1-B",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J1-B.webp",
+          "author": "图 / Aiklld2364"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J1-B.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    },
+    {
+      "model": "CR200J2-B",
+      "key": "CR200J2-B",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10053-101-S.html",
+      "label": "CR200J2-B",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J2-B.webp",
+          "author": "图 / 秦浩博"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J2-B.webp",
+          "author": "图 / E79707CA"
+        }
+      ]
+    },
+    {
+      "model": "CR200J3-B",
+      "key": "CR200J3-B",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10055-101-S.html",
+      "label": "CR200J3-B",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J3-B.webp",
+          "author": "图 / Aiklld2364"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J3-B.webp",
+          "author": "图 / KoloFrankz"
+        }
+      ]
+    },
+    {
+      "model": "CR200J1-C",
+      "key": "CR200J1-C",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10101-101-S.html",
+      "label": "CR200J1-C",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J1-C.webp",
+          "author": "图 / 秦浩博"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J1-C.webp",
+          "author": "图 / 中华门的西柚"
+        }
+      ]
+    },
+    {
+      "model": "CR200J1-C (18编组)",
+      "key": "CR200J1-C-long",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10102-102-S.html",
+      "label": "CR200J1-C(18编组)",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J1-CL.webp",
+          "author": "图 / KoloFrankz"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J1-CL.webp",
+          "author": "图 / KoloFrankz"
+        }
+      ]
+    },
+    {
+      "model": "CR200J2-C (18编组)",
+      "key": "CR200J2-C-long",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10105-102-S.html",
+      "label": "CR200J2-C(18编组)",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J2-CL.webp",
+          "author": "图 / Zhaisa"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J2-CL.webp",
+          "author": "图 / Zhaisa"
+        }
+      ]
+    },
+    {
+      "model": "CR200J3-C",
+      "key": "CR200J3-C",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10111-101-S.html",
+      "label": "CR200J3-C",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J3-C.webp",
+          "author": "图 / 秦浩博"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J3-C.webp",
+          "author": "图 / 秦浩博"
+        }
+      ]
+    },
+    {
+      "model": "CR200J3-C (18编组)",
+      "key": "CR200J3-C-long",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10112-102-S.html",
+      "label": "CR200J3-C(18编组)",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J3-CL.webp",
+          "author": "图 / KoloFrankz"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J3-CL.webp",
+          "author": "图 / 捧一池星光"
+        }
+      ]
+    },
+    {
+      "model": "CR200J1-D",
+      "key": "CR200J1-D",
+      "page": "https://www.china-emu.cn/Trains/Model/Detail-10103-101-S.html",
+      "label": "CR200J1-D",
+      "photos": [
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CR200J1-D.webp",
+          "author": "图 / Aiklld2364"
+        },
+        {
+          "url": "https://www.china-emu.cn/assets/imgs/Trains/Pict/CR200J1-D.webp",
+          "author": "图 / Aiklld2364"
+        }
+      ]
+    }
+  ]
+}

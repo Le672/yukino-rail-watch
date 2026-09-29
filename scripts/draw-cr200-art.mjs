@@ -1,0 +1,74 @@
+// Original CR200J side views based on the linked physical train photographs.
+// No China-EMU avatar or photograph is reproduced in these SVG assets.
+import fs from "node:fs";
+import path from "node:path";
+
+const profiles = {
+  "CR200J1-A": ["A", "control", "FXD1"],
+  "CR200J1-A-long": ["A", "power", "FXD1"],
+  "CR200J2-A": ["A", "power", "FXD1"],
+  "CR200J3-A": ["A", "control", "FXD3"],
+  "CR200J3-A-long": ["A", "power", "FXD3"],
+  "CR200J1-B": ["B", "control", "FXD1"],
+  "CR200J2-B": ["B", "power", "FXD1"],
+  "CR200J3-B": ["B", "control", "FXD3"],
+  "CR200J1-C": ["C", "control", "FXD1"],
+  "CR200J1-C-long": ["C", "power", "FXD1"],
+  "CR200J2-C-long": ["C", "power", "FXD1"],
+  "CR200J3-C": ["C", "control", "FXD3"],
+  "CR200J3-C-long": ["C", "power", "FXD3"],
+  "CR200J1-D": ["C", "power", "FXD1"],
+};
+const escape = value => String(value).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[c]));
+
+export function drawCr200Art(root) {
+  const catalogue = JSON.parse(fs.readFileSync(path.join(root, "src/data/train-art.json"), "utf8"));
+  const out = path.join(root, "src/assets/trains");
+  fs.mkdirSync(out, { recursive: true });
+  let count = 0;
+  for (const item of catalogue.filter(item => item.model.startsWith("CR200J"))) {
+    const profile = profiles[item.asset];
+    if (!profile) throw new Error(`Missing CR200J drawing profile: ${item.model}`);
+    const [generation, end, manufacturer] = profile;
+    const power = end === "power", white = generation === "C";
+    const green = white ? "#166b4f" : "#18b938";
+    const body = power
+      ? "M19 82Q15 69 35 48Q53 22 92 20H302Q309 20 309 27V88H37Q21 88 19 82Z"
+      : white
+        ? "M14 82Q13 74 31 62L59 40Q76 22 112 20H302Q309 20 309 27V88H31Q16 88 14 82Z"
+        : "M23 82Q20 68 40 48Q57 22 101 20H302Q309 20 309 27V88H40Q25 88 23 82Z";
+    const frontMask = power
+      ? "M23 72Q27 45 56 29Q72 20 93 21L103 23Q73 28 54 45L31 75Z"
+      : white
+        ? "M28 63 62 37Q79 23 109 22L122 24Q86 30 71 43L38 67Z"
+        : "M28 67Q38 40 71 25L104 22Q71 32 57 47L37 70Z";
+    const cabWindow = white && !power
+      ? '<path d="M58 55 71 45 77 47 72 57Z" fill="url(#glass)"/><path d="M82 42 96 31 112 35 112 48 91 51Z" fill="url(#glass)"/>'
+      : '<path d="M54 54 74 34 90 34 87 49 66 58Z" fill="url(#glass)"/><path d="M93 35 103 37 101 46 93 49Z" fill="url(#glass)"/>';
+    const paint = white
+      ? '<path d="M52 59 88 36 111 44H314V64H110L78 61Z" fill="'+green+'"/><path d="M72 47 102 39 109 43 87 53Z" fill="#f7faf8"/><path d="M34 76Q65 57 85 59Q103 58 121 69H314" fill="none" stroke="#b93150" stroke-width="2.7"/><path d="M39 74Q68 62 86 64Q104 64 120 73H314" fill="none" stroke="#b93150" stroke-width="1.5"/><path d="M18 83Q40 73 66 77Q93 85 121 81H314V90H18Z" fill="'+green+'"/>'
+      : '<path d="M70 55 103 43H314V65H85Z" fill="#334a45"/><path d="M70 52 106 65H314V69H103L58 74Z" fill="#e7dc2e"/>';
+    const passengerWindows = !power ? [163,190,217,244,271,296].map(x=>`<rect x="${x}" y="46" width="18" height="13" rx="1.3" fill="url(#glass)" stroke="#667e77" stroke-width=".7"/>`).join("") : "";
+    const roofEquipment = power
+      ? `<g stroke="#45575c" stroke-width="1.1"><path d="M159 20h43v7h-43Z M252 20h43v7h-43Z" fill="#bcc7cb"/>${[164,170,176,182,188,194,257,263,269,275,281,287].map(x=>`<path d="M${x} 21v5"/>`).join("")}<path d="M214 18h37v-3h-37Z" fill="#677c83"/><path d="M225 15 216 8 238 4 248 7 239 16" fill="none" stroke="#9d3340" stroke-width="1.8"/><path d="M227 3h24" stroke-width="2"/></g>`
+      : '<path d="M182 20h68v4h-68Z" fill="#b4c1c5"/>';
+    const powerDetails = power
+      ? `<g stroke="#7d918e" stroke-width=".6" fill="none">${[manufacturer==="FXD3"?155:172,manufacturer==="FXD3"?196:208,264].map(x=>`<path d="M${x} 29h23v6h-23Z"/>`+[1,3,5].map(y=>`<path d="M${x+1} ${29+y}h21"/>`).join("")).join("")}</g><text x="222" y="57" font-family="Arial" font-style="italic" font-weight="bold" font-size="11" fill="#eaf5ee">CR</text>`
+      : "";
+    const doorX = power ? 121 : 131;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 112" role="img" aria-labelledby="title desc">
+<title id="title">${escape(item.model)} Q版${power?"动力车":"控制车"}参考侧视图</title>
+<desc id="desc">${escape(item.livery+"。"+item.features+"。参考外观，具体版本待核实："+item.referenceNote)}</desc>
+<metadata>Yukino original vector side-view reference, 2026-09-29. CC BY-SA 4.0. Physical train photo reference: ${escape(item.reviewSource)}. Photographers: ${escape(item.reviewAuthors)}. Does not reproduce source photographs or front-view avatars.</metadata>
+<defs><linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${white?"#fcfcf8":"#68cf69"}"/><stop offset=".48" stop-color="${white?"#e5ecea":green}"/><stop offset="1" stop-color="${white?"#c1cdd1":"#168b32"}"/></linearGradient><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4b626a"/><stop offset="1" stop-color="#172c34"/></linearGradient><clipPath id="bodyClip"><path d="${body}"/></clipPath></defs>
+<ellipse cx="169" cy="103" rx="140" ry="3" fill="#315c42" opacity=".08"/>
+<g fill="#334046"><rect x="66" y="84" width="51" height="10" rx="3"/><rect x="247" y="84" width="49" height="10" rx="3"/>${[75,105,257,286].map(x=>`<circle cx="${x}" cy="95" r="6"/>`).join("")}</g><g fill="#a6b3b8">${[75,105,257,286].map(x=>`<circle cx="${x}" cy="95" r="2.4"/>`).join("")}</g>
+${roofEquipment}<path d="${body}" fill="url(#body)"/><g clip-path="url(#bodyClip)">${paint}<path d="M14 85H314V93H14Z" fill="#536b77"/><path d="${frontMask}" fill="#344a56"/>${cabWindow}${passengerWindows}${powerDetails}
+<path d="M${doorX} 36h15v45h-15Z" fill="none" stroke="#677f7c" stroke-width=".9"/><rect x="${doorX+4}" y="43" width="7" height="15" rx="3.2" fill="url(#glass)"/><path d="M${doorX+12} 67v4 M302 26v61 M117 80H306" stroke="#84978f" fill="none" stroke-width=".8"/>
+<path d="M27 69 39 59 44 60 35 73Z" fill="#f4f4dd" stroke="#556d71" stroke-width=".6"/><path d="M22 79Q30 74 39 76L42 85" fill="none" stroke="#82948c" stroke-width=".8"/></g><path d="${body}" fill="none" stroke="#455d65" stroke-width="1.4" stroke-linejoin="round"/>
+</svg>\n`;
+    fs.writeFileSync(path.join(out,item.asset+".svg"),svg);
+    count++;
+  }
+  console.log(`Drew ${count} CR200J reference side views`);
+}

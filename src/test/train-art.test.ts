@@ -12,10 +12,11 @@ describe("exact model illustrations", () => {
     for (const item of trainArtCatalogue) {
       const art = resolveTrainArt(item.model);
       expect(art?.model).toBe(item.model);
-      expect(art?.image).toContain(item.model);
-      expect(item.source).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+      expect(art?.image).toContain(item.asset || item.model);
+      expect(item.source).toMatch(/^https:\/\/(commons\.wikimedia\.org\/wiki\/File:|www\.china-emu\.cn\/Trains\/Model\/Detail-)/);
       expect(item.author).not.toBe("");
-      expect(item.licenseUrl).toMatch(/^https:/);
+      if (item.licenseUrl) expect(item.licenseUrl).toMatch(/^https:/);
+      else expect(item.license).toBe("原作者保留权利");
       expect(item.reviewSource).toMatch(/^https:\/\/www\.china-emu\.cn\/Trains\/Model\/Detail-/);
       expect(item.reviewAuthors).not.toBe("");
     }
@@ -29,7 +30,6 @@ describe("exact model illustrations", () => {
 
   it("restores the ten original images with an explicit uncertainty flag", () => {
     const models = ["CR400AF-S", "CR400BF-S", "CR400BF-A", "CR400BF-Z", "CRH1B", "CRH2A", "CRH2B", "CRH5G", "CRH6A", "CRH6F"];
-    expect(trainArtCatalogue.filter((item) => item.accuracy === "reference").map((item) => item.model).sort()).toEqual([...models].sort());
     for (const model of models) {
       expect(resolveTrainArt(model)).toMatchObject({ model, accuracy: "reference" });
       expect(resolveTrainArt(model)?.referenceNote).toBeTruthy();
@@ -41,9 +41,29 @@ describe("exact model illustrations", () => {
     const view = render(createElement(TrainIllustration, { model: "CRH2A" }));
     expect(screen.getByRole("img", { name: /^CRH2A，/ })).toBeTruthy();
     expect(screen.getByText("参考外观 · 版本待核实")).toBeTruthy();
-    expect(view.container.querySelector("figure")?.title).toContain("原版参考图，具体版本待核实");
+    expect(view.container.querySelector("figure")?.title).toContain("参考图，具体版本待核实");
     view.rerender(createElement(TrainIllustration, { model: "CR400AF" }));
     expect(screen.queryByText("参考外观 · 版本待核实")).toBeNull();
+  });
+
+  it("resolves the reported CR200J1-C long formation and keeps short and long end cars distinct", () => {
+    const long = resolveTrainArt("CR200J1-C(长编)");
+    expect(long).toMatchObject({ model: "CR200J1-C(长编)", accuracy: "reference", displayModel: "CR200J1-C(长编)" });
+    expect(long?.image).toContain("CR200J1-C-long");
+    for (const model of ["CR200J1-C（长编）", "CR200J1-C (长编组)", "CR200J1-C(18编组)"]) {
+      expect(resolveTrainArt(model)?.image).toBe(long?.image);
+    }
+    expect(resolveTrainArt("CR200J1-C")?.image).not.toBe(long?.image);
+    expect(resolveTrainArt("CR200J1-C(短编)")?.model).toBe("CR200J1-C");
+    expect(resolveTrainArt("CR200J1-C(未知编组)")).toBeNull();
+    expect(resolveTrainArt("CR200J1-C+CR200J3-C")).toBeNull();
+  });
+
+  it("renders the reported train model with an image and uncertainty caption, not an empty placeholder", () => {
+    render(createElement(TrainIllustration, { model: "CR200J1-C(长编)" }));
+    expect(screen.getByRole("img", { name: /^CR200J1-C\(长编\)，/ })).toBeTruthy();
+    expect(screen.getByText("参考外观 · 版本待核实")).toBeTruthy();
+    expect(screen.queryByText("外观图待核实")).toBeNull();
   });
 
   it("keeps the complete suffix and does not cross AF, BF, A, B, Z or S variants", () => {
