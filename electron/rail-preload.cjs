@@ -1,5 +1,15 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
+contextBridge.exposeInMainWorld("railLocation", {
+  start: () => ipcRenderer.invoke("rail:location-start"),
+  stop: () => ipcRenderer.invoke("rail:location-stop"),
+  onUpdate: listener => {
+    const handler = (_event, data) => listener(data);
+    ipcRenderer.on("rail:location", handler);
+    return () => ipcRenderer.removeListener("rail:location", handler);
+  },
+});
+
 contextBridge.exposeInMainWorld("railDesktop", {
   getState: () => ipcRenderer.invoke("rail:get-state"),
   configure: (settings) => ipcRenderer.invoke("rail:configure", settings),

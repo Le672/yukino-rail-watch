@@ -9,7 +9,7 @@ export type TrainJourney = {
 };
 export type TrainDelay = { station: string; telecode: string; code: string; minutes: number };
 export type DelayReport = { rows: TrainDelay[]; checkedAt: number };
-export type Coordinate = [number, number]; // GCJ-02 longitude, latitude; no basemap is mixed in.
+export type Coordinate = [number, number]; // longitude, latitude; RailGo routes are GCJ-02 until explicitly converted.
 export type RailwayRoute = {
   points: Coordinate[]; distances: number[]; stopDistances: number[]; stops: Coordinate[]; lengthKm: number;
 };

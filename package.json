@@ -1,7 +1,7 @@
 {
   "name": "yukino-rail-watch",
   "private": true,
-  "version": "1.4.0",
+  "version": "1.5.0",
   "type": "module",
   "main": "electron/rail-main.cjs",
   "description": "12306 余票查询与 Windows 通知",
@@ -12,6 +12,8 @@
     "desktop:build": "pnpm build && node node_modules/electron-builder/out/cli/cli.js --config electron-builder.json --win portable"
   },
   "dependencies": {
+    "coordtransform": "2.1.2",
+    "leaflet": "1.9.4",
     "lucide-react": "^0.511.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -19,6 +21,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "^16.1.0",
+    "@types/leaflet": "1.9.21",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.4.1",

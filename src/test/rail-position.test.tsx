@@ -1,10 +1,13 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RailPosition } from "../components/RailPosition";
 import { parseJourney } from "../lib/train-position";
+import { distanceKm } from "../lib/train-position";
+import { wgs84togcj02 } from "coordtransform";
 
 const loaders = vi.hoisted(() => ({ loadJourney: vi.fn(), loadDelays: vi.fn(), loadRailway: vi.fn() }));
 vi.mock("../lib/rail-position-data", () => loaders);
+vi.mock("../components/RailMap", () => ({ RailMap: () => <div>完整交互地图</div> }));
 const payload = { success: true, data: { numberFull: ["G6003"], rundays: ["20260929"], car: "CR400AF-A", timetable: [
   { station: "长沙南", stationTelecode: "CWQ", day: 0, arrive: "10:00", depart: "10:00" },
   { station: "广州南", stationTelecode: "IZQ", day: 0, arrive: "12:02", depart: "12:06" },
@@ -17,6 +20,7 @@ beforeEach(() => {
   loaders.loadRailway.mockRejectedValue(new Error("Route unavailable"));
   loaders.loadDelays.mockRejectedValue(new Error("Delay unavailable"));
 });
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("position query user workflow", () => {
   it("shows Guangzhou South at 10:01 even if map and delay data are unavailable", async () => {
@@ -46,5 +50,29 @@ describe("position query user workflow", () => {
     await act(async () => finish!(parseJourney(payload, "G6003", "2026-09-29")));
     expect(screen.queryByRole("heading", { name: "G6003" })).toBeNull();
     expect(loaders.loadRailway).not.toHaveBeenCalled();
+  });
+  it("GPS corrects next station when a delayed train is still before Guangzhou after planned departure", async () => {
+    const now = Date.parse("2026-09-29T12:15:00+08:00");
+    vi.spyOn(Date, "now").mockReturnValue(now);
+    vi.stubGlobal("isSecureContext", true);
+    const watchPosition = vi.fn().mockReturnValue(8), clearWatch = vi.fn();
+    vi.stubGlobal("navigator", { geolocation: { watchPosition, clearWatch } });
+    const points = [[113.06, 28.15], [113.11, 26], [113.26, 22.99], [114.03, 22.61]].map(point => wgs84togcj02(point[0], point[1]));
+    const distances = [0];
+    for (let i = 1; i < points.length; i++) distances.push(distances[i - 1] + distanceKm(points[i - 1], points[i]));
+    loaders.loadRailway.mockResolvedValue({ points, distances, stops: [points[0], points[2], points[3]], stopDistances: [0, distances[2], distances[3]], lengthKm: distances[3] });
+    render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" />);
+    fireEvent.click(screen.getByRole("button", { name: "查询位置" }));
+    await screen.findByText("广州南 → 深圳北");
+    expect(watchPosition).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "开启 GPS 实时定位" }));
+    act(() => watchPosition.mock.calls[0][0]({ coords: { longitude: 113.12, latitude: 25.8, accuracy: 20, speed: 65, heading: 180 }, timestamp: now }));
+    await screen.findByText("长沙南 → 广州南");
+    expect(within(screen.getByLabelText("下一停靠站")).getByText("广州南")).toBeInTheDocument();
+    expect(screen.getByText(/GPS 实时匹配/)).toBeInTheDocument();
+    expect(screen.getByText(/距下一站沿铁路约/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "停止 GPS 定位" }));
+    expect(clearWatch).toHaveBeenCalledWith(8);
+    expect(within(screen.getByLabelText("下一停靠站")).getByText("深圳北")).toBeInTheDocument();
   });
 });

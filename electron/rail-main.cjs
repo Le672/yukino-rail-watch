@@ -1,8 +1,9 @@
 const { app, BrowserWindow, ipcMain, Menu, Notification, powerMonitor, shell, Tray } = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
+const { createLocationWatcher } = require("./rail-location.cjs");
 
-const API = process.env.RAIL_API_URL || "https://www.yukino.bond/api/rail";
+const API = "https://www.yukino.bond/api/rail";
 const ICON = path.join(__dirname, "../public/icon-512.png");
 const DEFAULT_SETTINGS = {
   queryMode: "train", date: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10),
@@ -19,6 +20,9 @@ let error = null;
 let checking = false;
 let availability = {};
 let revision = 0;
+const locationWatcher = createLocationWatcher(event => {
+  if (window && !window.isDestroyed() && window.isVisible()) window.webContents.send("rail:location", event);
+});
 const TRAIN_CODE = /^(?:[GDCZTKYS]\d{1,4}[A-Z]?|\d{4})$/;
 
 function configPath() { return path.join(app.getPath("userData"), "rail-monitor.json"); }
@@ -139,6 +143,9 @@ function createWindow() {
   window.on("close", (event) => {
     if (!quitting) { event.preventDefault(); window.hide(); }
   });
+  window.on("hide", () => locationWatcher.stop());
+  window.on("closed", () => locationWatcher.stop());
+  window.webContents.setUserAgent(`${window.webContents.getUserAgent()} YukinoRailWatch/${app.getVersion()} (+https://cr.yukino.bond/)`);
   window.webContents.setWindowOpenHandler(({ url }) => {
     if (url === "https://www.12306.cn/" || url.startsWith("https://www.yukino.bond/") ||
         url === "https://railgo.dev/" || url === "https://api.railgo.dev/" ||
@@ -147,12 +154,13 @@ function createWindow() {
         url === "https://www.china-emu.cn/Trains/ALL/" ||
         /^https:\/\/www\.china-emu\.cn\/Trains\/Model\/Detail-\d+-\d+-[A-Z]\.html$/.test(url) ||
         url.startsWith("https://creativecommons.org/licenses/") ||
-        url.startsWith("https://creativecommons.org/publicdomain/")) {
+        url.startsWith("https://creativecommons.org/publicdomain/") ||
+        ["https://www.openstreetmap.org/copyright", "https://s2maps.eu", "https://eox.at", "https://maps.eox.at"].includes(url.replace(/\/$/, ""))) {
       void shell.openExternal(url);
     }
     return { action: "deny" };
   });
-  window.loadFile(path.join(__dirname, "../dist/index.html"));
+  window.loadFile(path.join(__dirname, "../dist/index.html"), { hash: "/cr" });
 }
 
 if (!app.requestSingleInstanceLock()) {
@@ -171,6 +179,9 @@ if (!app.requestSingleInstanceLock()) {
     ]));
     tray.on("double-click", showWindow);
     ipcMain.handle("rail:get-state", () => snapshot());
+    const localLocationRequest = event => window && !window.isDestroyed() && event.sender === window.webContents && event.sender.getURL().startsWith("file://");
+    ipcMain.handle("rail:location-start", event => { if (!localLocationRequest(event) || !window.isVisible()) throw new Error("位置请求来源无效"); locationWatcher.start(); });
+    ipcMain.handle("rail:location-stop", event => { if (localLocationRequest(event)) locationWatcher.stop(); });
     ipcMain.handle("rail:stations", () => apiRequest(`${API}?mode=stations`));
     ipcMain.handle("rail:configure", (_event, value) => {
       settings = validate(value);
@@ -188,6 +199,6 @@ if (!app.requestSingleInstanceLock()) {
     powerMonitor.on("resume", () => { if (settings.enabled && !checking) void check(settings, true).catch(() => {}); });
     schedule();
   });
-  app.on("before-quit", () => { quitting = true; });
+  app.on("before-quit", () => { quitting = true; locationWatcher.stop(); });
   app.on("window-all-closed", () => { /* monitoring continues in the tray */ });
 }
