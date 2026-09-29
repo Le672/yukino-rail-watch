@@ -8,6 +8,7 @@ import { useRailLocation } from "../hooks/useRailLocation";
 import { RailMap } from "./RailMap";
 import { RailSpeed } from "./RailSpeed";
 import { readRailSpeed } from "../lib/rail-speed";
+import { estimateRailMotion } from "../lib/rail-motion";
 import { TrainIllustration } from "./TrainIllustration";
 import "./rail-position.css";
 
@@ -115,7 +116,9 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
     matchGpsJourney(journey, wgsRoute, plannedPosition, gps.fix, now, gpsHistory.current) : null;
   const gpsPosition = gpsMatch?.position;
   const speed = useMemo(() => readRailSpeed(gps.samples, now), [gps.samples, now]);
-  const position = gpsPosition || plannedPosition;
+  const motion = useMemo(() => journey && plannedPosition ? estimateRailMotion(journey, wgsRoute, observation, live ? delays : null) : null,
+    [journey, plannedPosition, wgsRoute, observation, live, delays]);
+  const position = gpsPosition || motion?.position || plannedPosition;
   useEffect(() => {
     if (gpsMatch?.position && gps.fix) gpsHistory.current = { distanceKm: gpsMatch.distanceKm, timestamp: gps.fix.timestamp };
   }, [gps.fix, gpsMatch?.position, gpsMatch?.distanceKm]);
@@ -143,7 +146,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
         <strong>{gps.enabled ? gps.fix && now - gps.fix.timestamp <= 30000 ? `定位精度 ±${Math.round(gps.fix.accuracy)} 米` : "正在等待 GPS／设备定位信号" : "GPS 未开启"}</strong>
         <span>{gps.error || gpsMatch?.reason || (gpsPosition ? `已匹配本车次线路 · 距线路约 ${Math.round(gpsMatch!.errorMeters)} 米` : gps.enabled ? journey ? route ? "等待有效定位后判断下一站。" : "正在读取铁路线路，暂按时刻表显示。" : "输入车次并查询后，将用定位匹配下一站。" : "仅在乘坐此车次时开启；GPS 未开启时按时刻表估算。")}</span>
         {gps.fix && gps.enabled && <small>定位更新于 {timeLabel(gps.fix.timestamp)}</small>}
-      </div><RailSpeed reading={speed} enabled={gps.enabled} live={live} matched={Boolean(gpsPosition)} now={now} error={gps.error} /></div>
+      </div><RailSpeed reading={speed} estimate={motion} enabled={gps.enabled} live={live} matched={Boolean(gpsPosition)} now={now} error={gps.error} /></div>
       <p className="rail-gps-privacy">定位在设备上匹配，不保存位置历史或上传到本站。地图服务会接收当前视野的瓦片请求；精度取决于 GPS 和系统定位，车厢或隧道内可能暂时无信号。</p>
       <p className="rail-hint">跨日列车请填首站发车的日期。下一站仅指本车次实际停靠站；自定义观察时间按计划时刻推算。</p>
     </div>

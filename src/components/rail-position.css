@@ -48,8 +48,7 @@
 .rail-speed-value { display: block; margin: 8px 0 2px; color: #294d35; font-size: 44px; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .rail-speed-source { font-size: 11px; color: #57744e; }
 .rail-speed-card p { margin: 8px 0; font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
-.rail-speed-updated, .rail-speed-atp { display: block; font-size: 10px; line-height: 1.7; }
-.rail-speed-atp { margin-top: 7px; color: #8b9982; }
+.rail-speed-updated { display: block; font-size: 10px; line-height: 1.7; color: #8b9982; }
 @media (max-width: 760px) { .rail-gps-overview { grid-template-columns: minmax(0, 1fr); } }
 .rail-gps-privacy { margin: 12px 0 0; color: #8b9982; font-size: 11px; line-height: 1.8; }
 .rail-gps-late { display: block; margin-top: 8px; color: #9a793d !important; }

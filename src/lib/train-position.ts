@@ -77,7 +77,7 @@ export function parseDelays(payload: unknown, checkedAt = Date.now()): DelayRepo
   return { rows, checkedAt };
 }
 
-function adjustedStops(journey: TrainJourney, now: number, report?: DelayReport | null) {
+export function adjustedStops(journey: TrainJourney, now: number, report?: DelayReport | null) {
   const usable = report && now >= report.checkedAt - 5000 && now - report.checkedAt <= 180000;
   let used = false;
   const stops = journey.stops.map(stop => {
