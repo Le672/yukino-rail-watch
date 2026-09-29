@@ -69,6 +69,8 @@ button { cursor: pointer; }
 .rail-train-art { margin: 0; width: 160px; flex: none; text-align: center; }
 .rail-train-art img { display: block; width: 160px; height: 56px; object-fit: contain; }
 .rail-train-art figcaption { margin-top: 1px; color: #617861; font-size: 10px; line-height: 1.4; letter-spacing: .02em; }
+.rail-art-reference-label { display: block; margin-top: 3px; color: #8a641f; font-size: 10px; line-height: 1.5; }
+.rail-art-reference-note { color: #8a641f; }
 .rail-art-missing { color: #929d91; font-size: 11px; }
 .rail-art-references { margin-top: 16px; border: 1px solid #dce5d6; border-radius: 12px; padding: 12px 18px; color: #72836e; font-size: 12px; line-height: 1.8; }
 .rail-art-references summary { cursor: pointer; color: #45664d; }

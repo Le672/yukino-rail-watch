@@ -54,6 +54,10 @@ function paintFor(p,h){
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const out=path.join(root,'src/assets/trains');fs.mkdirSync(out,{recursive:true});
 for(const item of catalogue){
+ if(item.accuracy==='reference'){
+  if(!fs.existsSync(path.join(out,item.model+'.svg'))) throw Error('Missing original reference art: '+item.model);
+  continue;
+ }
  const profile=profiles[item.model];if(!profile) throw Error('No reviewed profile: '+item.model);
  const [head,paint]=profile,h=heads[head],silver=['af','afc','phoenix','dragon','upgrade','z380'].includes(paint),blueBody=['af300','bf300'].includes(paint);
  const xs=head==='regina'?[145,173,201,229,257,285]:[157,184,211,238,265,291];
@@ -71,4 +75,4 @@ ${line(`M${door} 34H${door+17}V80H${door}Z`,'#71838c',1)}<rect x="${door+4}" y="
 ${[166,196,226,256,284].map(x=>`<rect x="${x}" y="82" width="11" height="4" rx=".5" fill="#83949e" opacity=".6"/>`).join('')}${line('M181 24H207 M216 24H240 M251 24H278','#a5b5bc',1.4)}${line('M22 78Q28 73 37 73Q43 78 43 86','#788a94',.9)}${head==='rocket'&&item.model==='CRH380A'?xs.map(x=>line(`M${x+9} 47V57`,'#adbec7',1)).join(''):''}</g>${el(h[0],'none','stroke="#405666" stroke-width="1.5" stroke-linejoin="round"')}</svg>\n`;
  fs.writeFileSync(path.join(out,item.model+'.svg'),svg);
 }
-console.log(`Redrew ${catalogue.length} source-reviewed side views`);
+console.log(`Redrew ${catalogue.filter(item=>item.accuracy!=='reference').length} source-reviewed side views; preserved ${catalogue.filter(item=>item.accuracy==='reference').length} original reference images`);

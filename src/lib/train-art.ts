@@ -1,7 +1,9 @@
-import catalogue from "../data/train-art.json";
+import catalogueData from "../data/train-art.json";
 
 export type TrainArt = {
   model: string;
+  accuracy: "reviewed" | "reference";
+  referenceNote?: string;
   livery: string;
   features: string;
   source: string;
@@ -14,6 +16,7 @@ export type TrainArt = {
   reviewAuthors: string;
 };
 
+const catalogue = catalogueData as TrainArt[];
 const references = new Map<string, TrainArt>(catalogue.map((item) => [item.model, item]));
 const assets = import.meta.glob<string>("../assets/trains/*.svg", { eager: true, query: "?url&no-inline", import: "default" });
 

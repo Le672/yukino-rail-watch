@@ -10,7 +10,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12002-101-S.html",
     "reviewEdition": "CR400AF",
-    "reviewAuthors": "捧一池星光 / 幺三铁线"
+    "reviewAuthors": "捧一池星光 / 幺三铁线",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400AF-A",
@@ -23,7 +24,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12010-101-S.html",
     "reviewEdition": "CR400AF-A",
-    "reviewAuthors": "幺三铁线"
+    "reviewAuthors": "幺三铁线",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400AF-B",
@@ -36,7 +38,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12011-101-S.html",
     "reviewEdition": "CR400AF-B",
-    "reviewAuthors": "幺三铁线 / 京彩上铁"
+    "reviewAuthors": "幺三铁线 / 京彩上铁",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400AF-G",
@@ -49,7 +52,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12012-101-S.html",
     "reviewEdition": "CR400AF-G",
-    "reviewAuthors": "捧一池星光 / Aiklld2364"
+    "reviewAuthors": "捧一池星光 / Aiklld2364",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400AF-C",
@@ -62,7 +66,8 @@
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12110-101-S.html",
     "reviewEdition": "CR400AF-C",
-    "reviewAuthors": "魔光老徐 / Aiklld2364"
+    "reviewAuthors": "魔光老徐 / Aiklld2364",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400AF-Z",
@@ -75,7 +80,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12111-101-S.html",
     "reviewEdition": "CR400AF-Z",
-    "reviewAuthors": "KoloFrankz / 幺三铁线"
+    "reviewAuthors": "KoloFrankz / 幺三铁线",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400AF-AZ",
@@ -88,7 +94,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12112-101-S.html",
     "reviewEdition": "CR400AF-AZ",
-    "reviewAuthors": "秦浩博"
+    "reviewAuthors": "秦浩博",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400AF-BZ",
@@ -101,7 +108,23 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12113-101-S.html",
     "reviewEdition": "CR400AF-BZ",
-    "reviewAuthors": "Aiklld2364 / 中国动车组资料页署名"
+    "reviewAuthors": "Aiklld2364 / 中国动车组资料页署名",
+    "accuracy": "reviewed"
+  },
+  {
+    "model": "CR400AF-S",
+    "livery": "银灰车身、红金飘带",
+    "features": "细长低鼻、上置驾驶窗、黑色客窗带",
+    "source": "https://commons.wikimedia.org/wiki/File:CR400AF-S-1082_near_Shijingshannan_(20250414100653).jpg",
+    "title": "File:CR400AF-S-1082 near Shijingshannan (20250414100653).jpg",
+    "author": "N509FZ",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "同名包含原 AF 系列和智能系列，车头与涂装不同，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12015-101-S.html",
+    "reviewEdition": "CR400AF-S",
+    "reviewAuthors": "秦浩博 / 来自网络"
   },
   {
     "model": "CR400AF-AS",
@@ -114,7 +137,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12123-101-S.html",
     "reviewEdition": "CR400AF-AS",
-    "reviewAuthors": "Zhaisa"
+    "reviewAuthors": "Zhaisa",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400AF-BS",
@@ -127,7 +151,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12124-101-S.html",
     "reviewEdition": "CR400AF-BS",
-    "reviewAuthors": "董邱迪 / 秦浩博"
+    "reviewAuthors": "董邱迪 / 秦浩博",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400AF-AE",
@@ -140,7 +165,8 @@
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-12125-102-S.html",
     "reviewEdition": "CR400AF-AE",
-    "reviewAuthors": "秦浩博"
+    "reviewAuthors": "秦浩博",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400BF",
@@ -153,7 +179,23 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13032-101-S.html",
     "reviewEdition": "CR400BF",
-    "reviewAuthors": "KoloFrankz / 京彩上铁"
+    "reviewAuthors": "KoloFrankz / 京彩上铁",
+    "accuracy": "reviewed"
+  },
+  {
+    "model": "CR400BF-A",
+    "livery": "白色车身、金色色带",
+    "features": "较高圆弧车头、金色侧边楔形",
+    "source": "https://commons.wikimedia.org/wiki/File:A_CR400BF-A_train_going_past_Huyi_Railway_Station,_Feb_25_2023.jpg",
+    "title": "File:A CR400BF-A train going past Huyi Railway Station, Feb 25 2023.jpg",
+    "author": "A Chinese ID",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "座席版与纵向卧铺版外观不同，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13033-101-S.html",
+    "reviewEdition": "CR400BF-A",
+    "reviewAuthors": "捧一池星光 / KoloFrankz"
   },
   {
     "model": "CR400BF-B",
@@ -166,7 +208,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13034-101-S.html",
     "reviewEdition": "CR400BF-B",
-    "reviewAuthors": "秦浩博 / Aiklld2364"
+    "reviewAuthors": "秦浩博 / Aiklld2364",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400BF-G",
@@ -179,7 +222,23 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13036-101-S.html",
     "reviewEdition": "CR400BF-G",
-    "reviewAuthors": "捧一池星光 / Aiklld2364"
+    "reviewAuthors": "捧一池星光 / Aiklld2364",
+    "accuracy": "reviewed"
+  },
+  {
+    "model": "CR400BF-Z",
+    "livery": "银灰车身、红金飘带",
+    "features": "尖长低鼻、黑色驾驶区、侧面红色飘带",
+    "source": "https://commons.wikimedia.org/wiki/File:CR400BF-Z-0513_near_Shijingshannan_(20230523101248).jpg",
+    "title": "File:CR400BF-Z-0513 near Shijingshannan (20230523101248).jpg",
+    "author": "N509FZ",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "普通版、亚运版、双层及纵向卧铺版外观不同，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13111-101-S.html",
+    "reviewEdition": "CR400BF-Z",
+    "reviewAuthors": "Aiklld2364"
   },
   {
     "model": "CR400BF-AZ",
@@ -192,7 +251,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13113-101-S.html",
     "reviewEdition": "CR400BF-AZ",
-    "reviewAuthors": "董邱迪"
+    "reviewAuthors": "董邱迪",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400BF-BZ",
@@ -205,7 +265,23 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13114-101-S.html",
     "reviewEdition": "CR400BF-BZ",
-    "reviewAuthors": "Aiklld2364"
+    "reviewAuthors": "Aiklld2364",
+    "accuracy": "reviewed"
+  },
+  {
+    "model": "CR400BF-S",
+    "livery": "银灰车身、红金飘带",
+    "features": "尖长低鼻、黑色驾驶区、侧面红色飘带",
+    "source": "https://commons.wikimedia.org/wiki/File:CR400BF-S_Fuxing_Intelligent_EMU.jpg",
+    "title": "File:CR400BF-S Fuxing Intelligent EMU.jpg",
+    "author": "Samson Ng . D201@EAL",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "同名包含原 BF 系列和智能技术提升型，车头与涂装不同，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13309-101-S.html",
+    "reviewEdition": "CR400BF-S",
+    "reviewAuthors": "来自网络 / 中国动车组资料页署名"
   },
   {
     "model": "CR400BF-AS",
@@ -218,7 +294,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13121-101-S.html",
     "reviewEdition": "CR400BF-AS",
-    "reviewAuthors": "董邱迪 / HXD3CA7501"
+    "reviewAuthors": "董邱迪 / HXD3CA7501",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400BF-BS",
@@ -231,7 +308,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13122-101-S.html",
     "reviewEdition": "CR400BF-BS",
-    "reviewAuthors": "秦浩博"
+    "reviewAuthors": "秦浩博",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR400BF-GZ",
@@ -244,7 +322,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-13115-101-S.html",
     "reviewEdition": "CR400BF-GZ",
-    "reviewAuthors": "捧一池星光 / Aiklld2364"
+    "reviewAuthors": "捧一池星光 / Aiklld2364",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR300AF",
@@ -257,7 +336,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-11032-101-S.html",
     "reviewEdition": "CR300AF",
-    "reviewAuthors": "幺三铁线"
+    "reviewAuthors": "幺三铁线",
+    "accuracy": "reviewed"
   },
   {
     "model": "CR300BF",
@@ -270,7 +350,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-11036-101-S.html",
     "reviewEdition": "CR300BF",
-    "reviewAuthors": "捧一池星光 / Aiklld2364"
+    "reviewAuthors": "捧一池星光 / Aiklld2364",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH1A",
@@ -283,7 +364,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-21002-101-S.html",
     "reviewEdition": "CRH1A-250",
-    "reviewAuthors": "KoloFrankz / 捧一池星光"
+    "reviewAuthors": "KoloFrankz / 捧一池星光",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH1A-A",
@@ -296,7 +378,53 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-21006-101-S.html",
     "reviewEdition": "CRH1A-A",
-    "reviewAuthors": "讨账刘 / 京彩上铁"
+    "reviewAuthors": "讨账刘 / 京彩上铁",
+    "accuracy": "reviewed"
+  },
+  {
+    "model": "CRH1B",
+    "livery": "白色车身、蓝色细带",
+    "features": "Regina 短鼻、倾斜驾驶面、连续客窗带",
+    "source": "https://commons.wikimedia.org/wiki/File:201604_Two_kinds_of_CRH1B_EMUs_at_SHQ.JPG",
+    "title": "File:201604 Two kinds of CRH1B EMUs at SHQ.JPG",
+    "author": "MNXANL",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "Regina 头型与 1E 头型并存，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-21003-101-S.html",
+    "reviewEdition": "CRH1B",
+    "reviewAuthors": "幺三铁线 / 京彩上铁"
+  },
+  {
+    "model": "CRH2A",
+    "livery": "白色车身、蓝色色带",
+    "features": "圆润鸭嘴头、上置小驾驶窗、独立客窗",
+    "source": "https://commons.wikimedia.org/wiki/File:201603_2_CRH2A_at_Jinshanwei_Station.JPG",
+    "title": "File:201603 2 CRH2A at Jinshanwei Station.JPG",
+    "author": "MNXANL",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "原型、统型与 NG 头型不同，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-22001-101-S.html",
+    "reviewEdition": "CRH2A",
+    "reviewAuthors": "Aiklld2364"
+  },
+  {
+    "model": "CRH2B",
+    "livery": "白色车身、蓝色色带",
+    "features": "圆润鸭嘴头、上置小驾驶窗、独立客窗",
+    "source": "https://commons.wikimedia.org/wiki/File:201712_CRH2B-4105_near_Huaqiao_Station.jpg",
+    "title": "File:201712 CRH2B-4105 near Huaqiao Station.jpg",
+    "author": "MNXANL",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "原头型与 2A 头型并存，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-22004-101-S.html",
+    "reviewEdition": "CRH2B",
+    "reviewAuthors": "Aiklld2364"
   },
   {
     "model": "CRH2G",
@@ -309,7 +437,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-22016-101-S.html",
     "reviewEdition": "CRH2G",
-    "reviewAuthors": "中华门的西柚 / 京彩上铁"
+    "reviewAuthors": "中华门的西柚 / 京彩上铁",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH3C",
@@ -322,7 +451,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-23012-101-S.html",
     "reviewEdition": "CRH3C (二阶段)",
-    "reviewAuthors": "CRH380A-6059L"
+    "reviewAuthors": "CRH380A-6059L",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH380A",
@@ -335,7 +465,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-30001-101-S.html",
     "reviewEdition": "CRH380A",
-    "reviewAuthors": "DF4B-2274 / CRH380A-6059L"
+    "reviewAuthors": "DF4B-2274 / CRH380A-6059L",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH380AL",
@@ -348,7 +479,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-30008-101-S.html",
     "reviewEdition": "CRH380AL (三阶段)",
-    "reviewAuthors": "董邱迪"
+    "reviewAuthors": "董邱迪",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH380B",
@@ -361,7 +493,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-31002-101-S.html",
     "reviewEdition": "CRH380B",
-    "reviewAuthors": "KoloFrankz / Aiklld2364"
+    "reviewAuthors": "KoloFrankz / Aiklld2364",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH380BG",
@@ -374,7 +507,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-31001-101-S.html",
     "reviewEdition": "CRH380BG",
-    "reviewAuthors": "DF4B-2274 / Aiklld2364"
+    "reviewAuthors": "DF4B-2274 / Aiklld2364",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH380BL",
@@ -387,7 +521,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-31008-101-S.html",
     "reviewEdition": "CRH380BL (三阶段)",
-    "reviewAuthors": "Aiklld2364"
+    "reviewAuthors": "Aiklld2364",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH380CL",
@@ -400,7 +535,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-31010-101-S.html",
     "reviewEdition": "CRH380CL",
-    "reviewAuthors": "幺三铁线"
+    "reviewAuthors": "幺三铁线",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH380D",
@@ -413,7 +549,8 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-32001-101-S.html",
     "reviewEdition": "CRH380D",
-    "reviewAuthors": "KoloFrankz / 土豆有可爱的小狼牙"
+    "reviewAuthors": "KoloFrankz / 土豆有可爱的小狼牙",
+    "accuracy": "reviewed"
   },
   {
     "model": "CRH5A",
@@ -426,6 +563,52 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
     "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-25001-101-S.html",
     "reviewEdition": "CRH5A",
-    "reviewAuthors": "董邱迪 / Aiklld2364"
+    "reviewAuthors": "董邱迪 / Aiklld2364",
+    "accuracy": "reviewed"
+  },
+  {
+    "model": "CRH5G",
+    "livery": "白色车身、蓝色细带",
+    "features": "高位驾驶窗、短圆弧鼻、斜向侧窗",
+    "source": "https://commons.wikimedia.org/wiki/File:CRH5G-5224_(D2655)_Train_in_Xianyang_West_Railway_Station,_Sep_21_2023.jpg",
+    "title": "File:CRH5G-5224 (D2655) Train in Xianyang West Railway Station, Sep 21 2023.jpg",
+    "author": "A Chinese ID",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "原系列与技术提升型外观不同，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-25004-101-S.html",
+    "reviewEdition": "CRH5G",
+    "reviewAuthors": "中华门的西柚 / 捧一池星光"
+  },
+  {
+    "model": "CRH6A",
+    "livery": "白色车身、蓝色细带",
+    "features": "较直立驾驶面、宽驾驶窗、短圆弧下鼻",
+    "source": "https://commons.wikimedia.org/wiki/File:CRH6A_Hexie_EMU.jpg",
+    "title": "File:CRH6A Hexie EMU.jpg",
+    "author": "Samson Ng . D201@EAL",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "早期、中期、后期、舒适版及智能版外观不同，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-26001-201-S.html",
+    "reviewEdition": "CRH6A",
+    "reviewAuthors": "CRH380A-6059L"
+  },
+  {
+    "model": "CRH6F",
+    "livery": "银白车身、蓝色细带",
+    "features": "圆弧驾驶面、连续黑色客窗带、宽客室门",
+    "source": "https://commons.wikimedia.org/wiki/File:CRH6F-0230_with_at_Lianyuqiao_(20260714091758).jpg",
+    "title": "File:CRH6F-0230 with at Lianyuqiao (20260714091758).jpg",
+    "author": "N509FZ",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "accuracy": "reference",
+    "referenceNote": "原系列与 2.0 版本外观不同，当前数据无法确认具体版本。",
+    "reviewSource": "https://www.china-emu.cn/Trains/Model/Detail-26011-201-S.html",
+    "reviewEdition": "CRH6F",
+    "reviewAuthors": "Leooo_young / 京彩上铁"
   }
 ]
