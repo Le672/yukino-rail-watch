@@ -6,7 +6,7 @@ import type { DelayReport, RailwayRoute, TrainJourney } from "../lib/train-posit
 import { matchGpsJourney, railwayToWgs84 } from "../lib/rail-gps";
 import { useRailLocation } from "../hooks/useRailLocation";
 import { RailMap } from "./RailMap";
-import { TrainIllustration, TrainArtReferences } from "./TrainIllustration";
+import { TrainIllustration } from "./TrainIllustration";
 import "./rail-position.css";
 
 function timeLabel(at: number) { return chinaDateTime(at).replace("T", " "); }
@@ -178,7 +178,6 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
     {!journey && !loading && !error && <div className="rail-empty">输入车次和始发日期，查看运行区间、下一停靠站及铁路线路图。</div>}
     {!position && <div className="rail-card rail-position-route"><RailMap journey={journey} route={wgsRoute} position={null} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} /></div>}
     {(delayError || position?.warning) && journey && <p className="rail-position-warning">{position?.warning || delayError}</p>}
-    {journey && <TrainArtReferences models={[journey.model]} />}
     <p className="rail-hint rail-position-source">时刻表、线路点与正晚点来自 RailGo 数据服务。开启 GPS 后使用设备位置匹配下一站；未获得有效定位时按时刻表估算。实际到发及临时停站请以列车广播、站内显示和 12306 为准。</p>
   </section>;
 }
