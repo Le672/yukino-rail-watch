@@ -4,6 +4,22 @@
 
 2026-09-29：网页与 Windows 1.5.0 改用完整交互地图，新增 GPS／设备实时定位。
 
+2026-09-29：网页与 Windows 1.6.0 新增实时速度卡片。
+
+## 实时速度
+
+开启 GPS 后显示独立测速卡片，以设备测量时间更新读数。优先使用网页 `GeolocationCoordinates.speed` 或 Windows `GeoCoordinate.Speed` 提供的当前水平速度，单位从 m/s 换为 km/h；不使用停站区间距离除以时刻表时间，也不对设备速度取区间均值。设备报告的零速度保留为 0。
+
+设备没有返回速度时，至少收集 3 个定位点、跨度至少 3 秒，最多使用最近 8 秒，在 WGS84 局部米制坐标中按位置精度加权拟合移动速度。此结果标注「GPS 短时估算」，显示采样跨度及由两端定位精度计算的误差参考，可能落后加减速过程几秒；这个误差参考不是校准后的速度置信区间。移动幅度不足以与 GPS 漂移区分时不报假零或假车速。
+
+定位超过 10 秒未更新、误差超过 100 米、采样不连续、异常位置跳跃、轨迹漂移或设备速度极端突变时暂停读数。600 km/h 与速度变化检查仅用于剔除明显异常，不代表线路限速或 ATP 制动曲线。设备没有提供速度精度，因此不宣称 GPS／系统读数具备 ATP 仪表精度。浏览器请求最多 1 秒的缓存，Windows 每秒读取系统定位；提供方实际更新频率由设备决定。
+
+定位点只在当前开启的会话内存中保留最近 12 秒（最多 50 点），停止、隐藏页面／窗口或定位错误时清空，不写入本地存储或上传。未匹配所选车次时仍可查看设备移动速度，卡片明确说明它尚不能归属于所选列车。自定义历史观察时间不显示实时测速。
+
+**未接入 ATP 车载速度数据。** 当前使用的 12306 余票与 RailGo 时刻表、线路、正晚点接口没有提供此遥测字段。本功能不把线路设计速度、理论加减速或 GPS 估算标成 ATP 读数。如将来获得合法的实际车载遥测接口，需核实车次、编组、时间戳与单位后另行接入。
+
+速度字段依据：[W3C Geolocation](https://www.w3.org/TR/geolocation/#speed-attribute)、[Microsoft GeoCoordinate.Speed](https://learn.microsoft.com/en-us/dotnet/api/system.device.location.geocoordinate.speed?view=netframework-4.8.1)。
+
 ## GPS 定位与完整地图
 
 点击「开启 GPS 实时定位」后才请求定位权限。网页通过 `navigator.geolocation.watchPosition` 请求 `enableHighAccuracy: true`，持续接收设备 WGS84 位置；Windows 使用系统 `GeoCoordinateWatcher(High)`，无需 Google API key，不以 IP 城市定位替代 GPS。系统可能结合 GPS、Wi-Fi 和其他位置传感器，网页无法强制选择硬件 GPS，电脑也不一定具有 GPS 接收器。界面显示设备返回的精度和更新时间。
@@ -55,5 +71,6 @@ GPS 未开启或无有效匹配时，按上一停靠站发车到下一停靠站�
 - `src/test/train-position.test.ts`：G6003 10:01、起终点边界、停站、跨日、正晚点、同名错车／错日期、折线插值和不完整线路。
 - `src/test/rail-position.test.tsx`：用户选择时间、地图失效、停站及终点、切换车次后旧响应丢弃。
 - `src/test/rail-position-data.test.ts`：显式始发日期、请求合并、缓存真实时间、非法参数及资料缺失。
+- `src/test/rail-speed.test.ts`：设备瞬时读数、真实零速度、加减速、短时定位估算、过期、漂移、突变及不连续采样；`rail-speed-ui.test.tsx` 核对来源、误差、时间和无效信号清空数值。
 
 实际到发和临时停站请以铁路广播、站内显示及 12306 为准。

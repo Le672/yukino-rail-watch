@@ -8,7 +8,7 @@ $ErrorActionPreference = 'Stop'
 try {
   Add-Type -AssemblyName System.Device
   $railWatcher = New-Object System.Device.Location.GeoCoordinateWatcher ([System.Device.Location.GeoPositionAccuracy]::High)
-  $railWatcher.MovementThreshold = 5
+  $railWatcher.MovementThreshold = 0
   $railWatcher.Start($false)
   $railLastTimestamp = 0
   $railStarted = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
@@ -33,7 +33,7 @@ try {
         @{ error = @{ code = 3; message = 'Windows location timeout' } } | ConvertTo-Json -Compress
         $railStarted = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
       }
-      Start-Sleep -Milliseconds 2000
+      Start-Sleep -Milliseconds 1000
     }
   } finally { $railWatcher.Stop(); $railWatcher.Dispose() }
 } catch {

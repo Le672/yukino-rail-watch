@@ -14,18 +14,27 @@ const locationError = (code: number) => code === 1 ? "定位权限未开启。�
 export function useRailLocation() {
   const [enabled, setEnabled] = useState(false);
   const [fix, setFix] = useState<LocationFix | null>(null);
+  const [samples, setSamples] = useState<LocationFix[]>([]);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    if (!enabled) { setFix(null); return; }
-    let active = true, watch: number | null = null;
+    if (!enabled) { setFix(null); setSamples([]); return; }
+    let active = true, watch: number | null = null, lastTimestamp = 0, generation = 0;
     const desktop = window.railLocation;
     const update = (event: LocationEvent) => {
-      if (!active) return;
-      if (event.fix && validLocation(event.fix)) { setFix(event.fix); setError(null); }
-      else if (event.error) { setError(locationError(event.error.code)); if (event.error.code === 1) setEnabled(false); }
+      if (!active || document.hidden) return;
+      if (event.fix && validLocation(event.fix) && event.fix.timestamp > lastTimestamp) {
+        const point = event.fix;
+        lastTimestamp = point.timestamp;
+        setFix(point); setError(null);
+        setSamples(previous => [...previous.filter(sample => point.timestamp - sample.timestamp <= 12000).slice(-49), point]);
+      } else if (event.error) {
+        setFix(null); setSamples([]); lastTimestamp = 0;
+        setError(locationError(event.error.code)); if (event.error.code === 1) setEnabled(false);
+      }
     };
     const unsubscribe = desktop?.onUpdate(update);
     const stop = () => {
+      generation++;
       if (desktop) void desktop.stop().catch(() => {});
       if (watch !== null) { navigator.geolocation.clearWatch(watch); watch = null; }
     };
@@ -36,17 +45,18 @@ export function useRailLocation() {
       if (!window.isSecureContext || !navigator.geolocation) {
         setError("当前环境不支持安全定位，请使用 HTTPS 页面或 Windows 版。"); setEnabled(false); return;
       }
-      watch = navigator.geolocation.watchPosition(position => update({ fix: {
+      const current = ++generation;
+      watch = navigator.geolocation.watchPosition(position => { if (generation !== current) return; update({ fix: {
         longitude: position.coords.longitude, latitude: position.coords.latitude, accuracy: position.coords.accuracy,
         speed: Number.isFinite(position.coords.speed) && position.coords.speed! >= 0 ? position.coords.speed : null,
         heading: Number.isFinite(position.coords.heading) ? position.coords.heading : null, timestamp: position.timestamp,
-      } }), cause => update({ error: { code: cause.code, message: cause.message } }),
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+      } }); }, cause => { if (generation === current) update({ error: { code: cause.code, message: cause.message } }); },
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 });
     };
     start();
-    const onVisibility = () => { stop(); if (!document.hidden) start(); };
+    const onVisibility = () => { stop(); setFix(null); setSamples([]); lastTimestamp = 0; if (!document.hidden) start(); };
     document.addEventListener("visibilitychange", onVisibility);
     return () => { active = false; stop(); unsubscribe?.(); document.removeEventListener("visibilitychange", onVisibility); };
   }, [enabled]);
-  return { enabled, fix, error, start: () => { setFix(null); setError(null); setEnabled(true); }, stop: () => { setEnabled(false); setFix(null); setError(null); } };
+  return { enabled, fix, samples, error, start: () => { setFix(null); setSamples([]); setError(null); setEnabled(true); }, stop: () => { setEnabled(false); setFix(null); setSamples([]); setError(null); } };
 }

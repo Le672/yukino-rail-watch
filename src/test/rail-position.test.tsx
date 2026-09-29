@@ -71,8 +71,13 @@ describe("position query user workflow", () => {
     expect(within(screen.getByLabelText("下一停靠站")).getByText("广州南")).toBeInTheDocument();
     expect(screen.getByText(/GPS 实时匹配/)).toBeInTheDocument();
     expect(screen.getByText(/距下一站沿铁路约/)).toBeInTheDocument();
+    const speed = within(screen.getByRole("group", { name: "实时速度" }));
+    expect(speed.getByText("234")).toBeInTheDocument();
+    expect(speed.getByText("设备瞬时读数")).toBeInTheDocument();
+    expect(speed.getByText(/未接入 ATP/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "停止 GPS 定位" }));
     expect(clearWatch).toHaveBeenCalledWith(8);
     expect(within(screen.getByLabelText("下一停靠站")).getByText("深圳北")).toBeInTheDocument();
+    expect(speed.queryByText("234")).toBeNull();
   });
 });

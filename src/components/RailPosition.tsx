@@ -6,6 +6,8 @@ import type { DelayReport, RailwayRoute, TrainJourney } from "../lib/train-posit
 import { matchGpsJourney, railwayToWgs84 } from "../lib/rail-gps";
 import { useRailLocation } from "../hooks/useRailLocation";
 import { RailMap } from "./RailMap";
+import { RailSpeed } from "./RailSpeed";
+import { readRailSpeed } from "../lib/rail-speed";
 import { TrainIllustration } from "./TrainIllustration";
 import "./rail-position.css";
 
@@ -112,6 +114,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   const gpsMatch = gps.enabled && live && journey && wgsRoute && plannedPosition && gps.fix ?
     matchGpsJourney(journey, wgsRoute, plannedPosition, gps.fix, now, gpsHistory.current) : null;
   const gpsPosition = gpsMatch?.position;
+  const speed = useMemo(() => readRailSpeed(gps.samples, now), [gps.samples, now]);
   const position = gpsPosition || plannedPosition;
   useEffect(() => {
     if (gpsMatch?.position && gps.fix) gpsHistory.current = { distanceKm: gpsMatch.distanceKm, timestamp: gps.fix.timestamp };
@@ -136,11 +139,11 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
         <div className="rail-actions"><button className="rail-primary" type="submit" disabled={loading}><RefreshCw size={16} className={loading ? "rail-spin" : ""} />{loading ? "正在查时刻表" : "查询位置"}</button>
           <button className="rail-gps-button" type="button" aria-pressed={gps.enabled} onClick={() => { if (gps.enabled) gps.stop(); else { setLive(true); setNow(Date.now()); gps.start(); } }}><LocateFixed size={16} />{gps.enabled ? "停止 GPS 定位" : "开启 GPS 实时定位"}</button></div>
       </form>
-      <div className={`rail-gps-status${gpsPosition ? " is-matched" : ""}`} role="status">
+      <div className="rail-gps-overview"><div className={`rail-gps-status${gpsPosition ? " is-matched" : ""}`} role="status">
         <strong>{gps.enabled ? gps.fix && now - gps.fix.timestamp <= 30000 ? `定位精度 ±${Math.round(gps.fix.accuracy)} 米` : "正在等待 GPS／设备定位信号" : "GPS 未开启"}</strong>
         <span>{gps.error || gpsMatch?.reason || (gpsPosition ? `已匹配本车次线路 · 距线路约 ${Math.round(gpsMatch!.errorMeters)} 米` : gps.enabled ? journey ? route ? "等待有效定位后判断下一站。" : "正在读取铁路线路，暂按时刻表显示。" : "输入车次并查询后，将用定位匹配下一站。" : "仅在乘坐此车次时开启；GPS 未开启时按时刻表估算。")}</span>
-        {gps.fix && gps.enabled && <small>定位更新于 {timeLabel(gps.fix.timestamp)}{gps.fix.speed !== null && gpsPosition ? ` · 设备速度约 ${Math.round(gps.fix.speed * 3.6)} km/h` : ""}</small>}
-      </div>
+        {gps.fix && gps.enabled && <small>定位更新于 {timeLabel(gps.fix.timestamp)}</small>}
+      </div><RailSpeed reading={speed} enabled={gps.enabled} live={live} matched={Boolean(gpsPosition)} now={now} error={gps.error} /></div>
       <p className="rail-gps-privacy">定位在设备上匹配，不保存位置历史或上传到本站。地图服务会接收当前视野的瓦片请求；精度取决于 GPS 和系统定位，车厢或隧道内可能暂时无信号。</p>
       <p className="rail-hint">跨日列车请填首站发车的日期。下一站仅指本车次实际停靠站；自定义观察时间按计划时刻推算。</p>
     </div>
