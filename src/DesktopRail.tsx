@@ -6,7 +6,7 @@ import { useRailMonitor, SEAT_OPTIONS, matchingSeats, formatCheckedAt } from "./
 export default function DesktopRail() {
   const { desktop, settings, stations, knownStations, result, error, checking, matched, update, runCheck, toggleMonitor, feature, setFeature, positionSelection, setPositionSelection } = useRailMonitor();
   return <div className="desktop-app">
-    <header className="desktop-header"><div className="desktop-brand"><TrainFront size={23} /><div><strong>Yukino Rail Watch</strong><span>Windows 余票与行程工具</span></div></div><span className="desktop-connection"><i />{desktop ? "已连接桌面服务" : "桌面界面预览"}</span></header>
+    <header className="desktop-header"><div className="desktop-brand"><img src="./rail-icon.png" width={34} height={34} alt="" aria-hidden="true" /><div><strong>Yukino Rail Watch</strong><span>Windows 余票与行程工具</span></div></div><span className="desktop-connection"><i />{desktop ? "已连接桌面服务" : "桌面界面预览"}</span></header>
     <div className="desktop-workspace">
       <nav className="desktop-nav" aria-label="桌面功能"><button aria-pressed={feature === "tickets"} onClick={() => setFeature("tickets")}><Ticket size={19} />余票监控</button><button aria-pressed={feature === "position"} onClick={() => setFeature("position")}><MapPin size={19} />列车位置</button><span>关闭窗口可留在托盘<br />退出请使用托盘菜单</span></nav>
       <main className="desktop-main">
@@ -42,6 +42,6 @@ export default function DesktopRail() {
         {feature === "position" && <div className="desktop-position"><RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} /><a className="desktop-position-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer">车型、时刻表及线路数据由 RailGo Data Service 提供 ↗</a></div>}
       </main>
     </div>
-    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票以 12306 为准 · 定位与速度请查看数据来源</span><span>v1.8.2</span></footer>
+    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票以 12306 为准 · 定位与速度请查看数据来源</span><span>v1.8.3</span></footer>
   </div>;
 }

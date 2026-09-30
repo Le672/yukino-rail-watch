@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs><linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5f8ec"/><stop offset="1" stop-color="#e5edd9"/></linearGradient></defs>
+  <g transform="rotate(-6 256 256)">
+    <rect x="26" y="26" width="460" height="460" rx="117" fill="url(#tile)" stroke="#d9e3d2" stroke-width="3.9"/>
+    <!-- Lucide TrainFront (ISC), with the same proportions and stroke as the rail page hero. -->
+    <g transform="translate(150.75 150.75) scale(8.7708333333)" fill="none" stroke="#3d684d" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/>
+      <path d="m9 15-1-1"/><path d="m15 15 1-1"/>
+      <path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/>
+      <path d="m8 19-2 3"/><path d="m16 19 2 3"/>
+    </g>
+  </g>
+</svg>

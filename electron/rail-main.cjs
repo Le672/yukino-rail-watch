@@ -4,7 +4,7 @@ const path = require("node:path");
 const { createLocationWatcher } = require("./rail-location.cjs");
 
 const API = "https://www.yukino.bond/api/rail";
-const ICON = path.join(__dirname, "../public/icon-512.png");
+const ICON = path.join(__dirname, "../public/rail-icon.png");
 const DEFAULT_SETTINGS = {
   queryMode: "train", date: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10),
   from: "", to: "", train: "", seat: "任意席别", intervalMinutes: 5, enabled: false,
