@@ -1,0 +1,125 @@
+{
+  "checkedAt": "2026-09-30",
+  "note": "Manually verified orange Vibrant Express dots on all three pages of both MTR editions. Both editions mark the same 77 services. G6585 and weekend-only G5679/G5680/G5865/G5866 are not marked. This list does not assert that a service runs on every date.",
+  "editions": [
+    {
+      "validFrom": "2026-07-01",
+      "validThrough": "2026-10-10",
+      "source": "https://www.highspeed.mtr.com.hk/res/pdf/short-haul-train-timetable.pdf"
+    },
+    {
+      "validFrom": "2026-10-11",
+      "validThrough": null,
+      "source": "https://www.highspeed.mtr.com.hk/res/pdf/short-haul-train-timetable-new.pdf"
+    }
+  ],
+  "groups": [
+    {
+      "corridor": [
+        "IOQ",
+        "NZQ",
+        "XJA"
+      ],
+      "trains": [
+        "G5620",
+        "G5621",
+        "G5622",
+        "G5623",
+        "G5624",
+        "G5625",
+        "G5626",
+        "G5627",
+        "G5628",
+        "G5629",
+        "G5630",
+        "G5631",
+        "G5632",
+        "G5633",
+        "G5634",
+        "G5635",
+        "G5636",
+        "G5637",
+        "G5638",
+        "G5639",
+        "G5640",
+        "G5641",
+        "G5642",
+        "G5643",
+        "G5644",
+        "G5645",
+        "G5646",
+        "G5647",
+        "G5648",
+        "G5649",
+        "G5650",
+        "G5651",
+        "G5652",
+        "G5653",
+        "G5654",
+        "G5655"
+      ]
+    },
+    {
+      "corridor": [
+        "NZQ",
+        "XJA"
+      ],
+      "trains": [
+        "G5805",
+        "G5806",
+        "G5807",
+        "G5808",
+        "G5809",
+        "G5810",
+        "G5811",
+        "G5812",
+        "G5813",
+        "G5814",
+        "G5815",
+        "G5816",
+        "G5817",
+        "G5818",
+        "G5819",
+        "G5820",
+        "G5821",
+        "G5822",
+        "G5823",
+        "G5824",
+        "G5825",
+        "G5826",
+        "G5827",
+        "G5828",
+        "G5829",
+        "G5830",
+        "G5831",
+        "G5832",
+        "G5857",
+        "G5858",
+        "G5859",
+        "G5860",
+        "G5861",
+        "G5862"
+      ]
+    },
+    {
+      "corridor": [
+        "IZQ",
+        "QSQ",
+        "IUQ",
+        "IMQ",
+        "IOQ",
+        "NZQ",
+        "XJA"
+      ],
+      "trains": [
+        "G6581",
+        "G6582",
+        "G6583",
+        "G6584",
+        "G6586",
+        "G6587",
+        "G6588"
+      ]
+    }
+  ]
+}

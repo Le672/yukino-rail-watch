@@ -14,7 +14,7 @@ describe("exact model illustrations", () => {
       const art = resolveTrainArt(item.model);
       expect(art?.model).toBe(item.model);
       expect(art?.image).toContain(item.asset || item.model);
-      expect(item.source).toMatch(/^https:\/\/(commons\.wikimedia\.org\/wiki\/File:|www\.china-emu\.cn\/Trains\/Model\/Detail-)/);
+      expect(item.source).toMatch(/^https:\/\/(commons\.wikimedia\.org\/wiki\/File:|www\.china-emu\.cn\/Trains\/Model\/Detail-|www\.mtr\.com\.hk\/archive\/corporate\/en\/press_release\/)/);
       expect(item.author).not.toBe("");
       if (item.licenseUrl) expect(item.licenseUrl).toMatch(/^https:/);
       else expect(item.license).toBe("原作者保留权利");
@@ -91,6 +91,19 @@ describe("exact model illustrations", () => {
     render(createElement(TrainIllustration, { model: "CRH380A (统型)" }));
     expect(screen.getByRole("img", { name: /^CRH380A\(统型\)，/ })).toBeTruthy();
     expect(screen.queryByText("外观图待核实")).toBeNull();
+  });
+
+  it("resolves MTR aliases and trainsets to a reviewed silver, orange and red livery", () => {
+    for (const model of ["CRH380A(港铁动感号)", "CRH380A（港鐵）", "CRH380A(MTR)", "CRH380A-0251", "CRH380A-0259"]) {
+      const art = resolveTrainArt(model);
+      expect(art).toMatchObject({ model: "CRH380A(港铁)", accuracy: "reviewed" });
+      expect(art?.image).not.toBe(resolveTrainArt("CRH380A")?.image);
+      expect(art?.livery).toContain("橙色弧线");
+    }
+    expect(resolveTrainArt("CRH380A-0250")).toBeNull();
+    render(createElement(TrainIllustration, { model: "CRH380A(港铁动感号)" }));
+    expect(screen.getByRole("img", { name: /港铁动感号/ })).toBeTruthy();
+    expect(screen.queryByText("参考外观 · 版本待核实")).toBeNull();
   });
 
   it("retains the same base model's original image for a new description and makes that uncertainty visible", () => {

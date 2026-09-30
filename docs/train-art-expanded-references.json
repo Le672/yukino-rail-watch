@@ -548,20 +548,26 @@
   },
   {
     "model": "CRH380A(港铁)",
-    "page": "https://www.china-emu.cn/Trains/Model/Detail-30003-101-S.html",
+    "page": "https://www.china-emu.cn/Trains/Model/Detail-30003-101-1.html",
     "photoMatchesModel": true,
     "photos": [
       {
-        "url": "https://www.china-emu.cn/assets/imgs/Trains/TopPic/CRH380A-H.webp",
-        "author": "图 / 秦浩博"
+        "url": "https://www.mtr.com.hk/archive/corporate/en/press_release/PR-16-083-C.pdf",
+        "pages": [
+          3,
+          6
+        ],
+        "author": "港铁公司"
       }
     ],
     "asset": "full-model-112",
     "profile": {
-      "head": "rocketStandard",
-      "paint": "red"
+      "head": "rocket",
+      "paint": "mtr",
+      "silver": true
     },
-    "referenceNote": "按资料页所示外观绘制的参考图；尚未确认本次车次的车组编号、批次、运行方向及特殊涂装，不表示完整编组。"
+    "referenceNote": "按港铁官方车身设计说明及实拍重绘标准动感号涂装；不表示本次列车临时主题贴纸、完整编组或车组号。",
+    "checkedAt": "2026-09-30"
   },
   {
     "model": "CRH380AL(一阶段)",

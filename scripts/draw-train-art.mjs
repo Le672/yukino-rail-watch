@@ -8,6 +8,12 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 drawCr200Art(root);
 const catalogue=JSON.parse(fs.readFileSync(path.join(root,'src/data/train-art.json'),'utf8'));
 const profiles={
+ 'CRH380A(港铁)':['rocket','mtr',{silver:true,head:[
+  'M12 83Q10 76 27 67L59 43Q76 21 113 21H302Q309 21 309 28V88H31Q14 88 12 83Z',
+  'M44 53Q63 27 94 23L112 25Q82 30 62 49Z', '',
+  'M41 60 55 53 66 53 57 60Z',142,
+  'M117 40H312V62H112Q84 62 82 55Q82 48 99 43Q107 40 117 40Z'
+ ],windowsSvg:[178,205,232,259,286].map(x=>`<rect x="${x}" y="44" width="18" height="14" rx="2.7" fill="url(#glass)" stroke="#223746" stroke-width=".6"/>`).join('')}],
  'CR400AF':['af','af'],'CR400AF-A':['af','af'],'CR400AF-B':['af','af'],'CR400AF-G':['af','af'],
  'CR400AF-C':['afz','afc'],'CR400AF-Z':['afz','phoenix'],'CR400AF-AZ':['afz','phoenix'],'CR400AF-BZ':['afz','phoenix'],'CR400AF-AS':['afz','phoenix'],'CR400AF-BS':['afz','phoenix'],'CR400AF-AE':['afz','phoenix'],
  'CR400BF':['bf','bf'],'CR400BF-B':['bf','bf'],'CR400BF-G':['bf','bf'],
@@ -38,6 +44,9 @@ const el=(d,f,extra='')=>`<path d="${d}" fill="${f}" ${extra}/>`;
 const line=(d,c,w=1)=>el(d,'none',`stroke="${c}" stroke-width="${w}" stroke-linejoin="round"`);
 const RED='#dc3040',GOLD='#d99b39',BLUE='#174e92';
 function paintFor(p,h){
+ // MTR's official exterior photos (PR-16-083-C, pages 3 and 6): silver body,
+ // red surrounds, an orange curved flank and red/white waves below the windows.
+ if(p==='mtr') return el('M40 55Q61 24 95 21L119 24Q82 30 61 51L71 53Q64 66 41 66L33 63Z','#d53e50')+el('M115 23Q93 30 78 44Q67 56 79 65Q88 72 112 72L130 69Q91 72 87 57Q82 43 119 29Z','#ec7427')+el('M111 68Q143 76 167 80Q194 84 220 73Q245 62 273 72Q294 81 314 77V86Q292 91 269 81Q247 71 222 81Q193 93 163 87Q135 78 111 74Z','#f9faf9')+el('M137 76Q159 78 175 83Q195 88 218 79Q245 67 270 77Q291 86 314 80V85Q291 91 267 83Q245 74 221 84Q195 95 172 88Q154 82 137 81Z','#bd3042');
  if(p==='af'||p==='af300') return el('M51 76Q68 48 104 43L92 57 70 64Z',RED)+line('M69 64Q104 63 119 63H314',RED,2.6);
  if(p==='bf') return el('M41 73 94 30 121 42 99 64Z',GOLD)+el(h[2],'url(#glass)')+line('M54 69 114 66H314',GOLD,4)+line('M59 73 114 71H314',GOLD,1.5)+line('M48 58 88 27 106 25',GOLD,1.4);
  if(p==='bf300') return el('M42 72 89 28 114 41 88 61Z',GOLD)+line('M63 69Q101 63 122 63H314',GOLD,2.3);
@@ -63,12 +72,12 @@ function drawProfile(item, profile) {
  const door=h[4],bodyColors=options.bodyColors || [silver?'#eff2f3':'#fffef9',blueBody?'#d4e8f4':silver?'#cdd4da':'#f8faf7',blueBody?'#58a2d2':silver?'#adb8c1':'#dbe1e1'];
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 112" role="img" aria-labelledby="title desc">
 <title id="title">${esc(item.model)} Q版首车侧视图</title><desc id="desc">${esc(item.livery+'。'+item.features+'。外观核对：'+item.reviewSource+'。首车比例压缩，参考外观，非实际编组。')}</desc>
-<metadata>Yukino original side-view drawing, revision 2, 2026-09-29. CC BY-SA 4.0. Photo reference: ${esc(item.source)}; China-EMU review: ${esc(item.reviewSource)}. The site's front-view avatars are not reproduced.</metadata>
+<metadata>Yukino original side-view drawing, revision ${paint==='mtr'?'3, 2026-09-30':'2, 2026-09-29'}. CC BY-SA 4.0. Photo reference: ${esc(item.source)}; China-EMU review: ${esc(item.reviewSource)}. The site's front-view avatars are not reproduced.</metadata>
 <defs><linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${bodyColors[0]}"/><stop offset=".48" stop-color="${bodyColors[1]}"/><stop offset="1" stop-color="${bodyColors[2]}"/></linearGradient><linearGradient id="noseSilver" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d8e1e8"/><stop offset=".55" stop-color="#b8c6d0"/><stop offset="1" stop-color="#8b9fae"/></linearGradient><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b5264"/><stop offset="1" stop-color="#122938"/></linearGradient><clipPath id="car"><path d="${h[0]}"/></clipPath></defs>
 <ellipse cx="169" cy="102" rx="142" ry="3" fill="#315c42" opacity=".07"/>
 <g fill="#293740"><rect x="70" y="84" width="43" height="10" rx="3"/><rect x="251" y="84" width="43" height="10" rx="3"/><circle cx="79" cy="95" r="6"/><circle cx="105" cy="95" r="6"/><circle cx="260" cy="95" r="6"/><circle cx="286" cy="95" r="6"/></g><g fill="#b0bac0"><circle cx="79" cy="95" r="2.5"/><circle cx="105" cy="95" r="2.5"/><circle cx="260" cy="95" r="2.5"/><circle cx="286" cy="95" r="2.5"/></g>
 ${options.roofSvg || ''}${el(h[0],'url(#body)')}<g clip-path="url(#car)">${el('M12 80H314V93H12Z',silver?'#687d8e':'#9daab1','opacity=".4"')}${h[5]?el(h[5],paint==='af'?'#6a737a':'#253d4e'):''}${options.paintSvg ?? paintFor(paint,h)}${options.windowsSvg ?? windows}
-${el(h[1],paint==='rocket'?'#284451':'#25323d')}${paint==='bf'?'':el(h[2],'url(#glass)','stroke="#253845" stroke-width="1.1"')}${line(h[1],['af','af300','dragon','upgrade'].includes(paint)?RED:paint==='bf300'?GOLD:'#435665',.9)}${el(h[3],'#f7f6db','stroke="#8a9293" stroke-width=".8"')}
+${el(h[1],paint==='rocket'?'#284451':'#25323d')}${paint==='bf'?'':el(h[2],'url(#glass)','stroke="#253845" stroke-width="1.1"')}${line(h[1],paint==='mtr'?'#d53e50':['af','af300','dragon','upgrade'].includes(paint)?RED:paint==='bf300'?GOLD:'#435665',paint==='mtr'?2:.9)}${el(h[3],'#f7f6db','stroke="#8a9293" stroke-width=".8"')}
 ${line(`M${door} 34H${door+17}V80H${door}Z`,'#71838c',1)}<rect x="${door+4}" y="41" width="9" height="18" rx="4.5" fill="url(#glass)"/>${line(`M${door+14} 67v4`,'#41545e',1)}${line('M302 27V87','#697b84',1.2)}${line('M111 79H307','#82959f',.8)}
 ${[166,196,226,256,284].map(x=>`<rect x="${x}" y="82" width="11" height="4" rx=".5" fill="#83949e" opacity=".6"/>`).join('')}${line('M181 24H207 M216 24H240 M251 24H278','#a5b5bc',1.4)}${line('M22 78Q28 73 37 73Q43 78 43 86','#788a94',.9)}${head==='rocket'&&item.model==='CRH380A'?xs.map(x=>line(`M${x+9} 47V57`,'#adbec7',1)).join(''):''}</g>${el(h[0],'none','stroke="#405666" stroke-width="1.5" stroke-linejoin="round"')}</svg>\n`;
  fs.writeFileSync(path.join(out,(item.asset || item.model)+'.svg'),svg);

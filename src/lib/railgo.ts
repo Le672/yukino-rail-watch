@@ -1,3 +1,5 @@
+import { applyMtrLivery, mtrLiveryModel } from "./mtr-vibrant";
+
 const RAILGO_ENDPOINT = "https://data.railgo.zenglingkun.cn/api/train/sts_query";
 const CACHE_MS = 30 * 60 * 1000;
 const RETRY_MS = 5 * 60 * 1000;
@@ -44,15 +46,17 @@ export function matchRailGoModel<R extends RailResult<TrainWithModel>>(
         row.fromStationTelecode === result.fromCode &&
         row.toStationTelecode === result.toCode &&
         row.fromDepart === train.departure &&
-        (!Array.isArray(row.rundays) || !row.rundays.length || row.rundays.includes(compactDate)) &&
-        typeof row.car === "string" && !["", "-", "--", "未知", "暂无", "null"].includes(row.car.trim()),
+        (!Array.isArray(row.rundays) || !row.rundays.length || row.rundays.includes(compactDate)),
       );
-      const models = [...new Set(matches.map((row) => row.car!.trim()))];
-      if (models.length !== 1) return train;
+      const models = [...new Set(matches.flatMap(row => typeof row.car === "string" &&
+        !["", "-", "--", "未知", "暂无", "null"].includes(row.car.trim()) ? [row.car.trim()] : []))];
+      if (models.length > 1) return train;
       const owners = [...new Set(matches.flatMap((row) =>
         typeof row.carOwner === "string" && row.carOwner.trim() ? [row.carOwner.trim()] : [],
       ))];
-      return { ...train, trainsetModel: models[0].slice(0, 80), trainsetOwner: owners.length === 1 ? owners[0].slice(0, 80) : null };
+      const enriched = { ...train, trainsetModel: models.length ? models[0].slice(0, 80) : train.trainsetModel,
+        trainsetOwner: owners.length === 1 ? owners[0].slice(0, 80) : train.trainsetOwner ?? null };
+      return owners.length > 1 ? enriched : { ...enriched, trainsetModel: mtrLiveryModel(enriched, result) };
     }),
   };
 }
@@ -77,9 +81,9 @@ export async function enrichWithRailGo<R extends RailResult<TrainWithModel>>(res
       cache.set(key, item);
     } catch {
       cache.set(key, { at: Date.now(), trains: null });
-      return result;
+      return applyMtrLivery(result);
     }
   }
-  if (item.trains === null) return result;
+  if (item.trains === null) return applyMtrLivery(result);
   return matchRailGoModel(result, item.trains, new Date(item.at).toISOString());
 }
