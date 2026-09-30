@@ -205,6 +205,27 @@ jobs:
             echo "The mobile version already exists; increment mobile-version.json before publishing another build."
             exit 1
           fi
-          cd mobile-build/artifacts
+          RAIL_RELEASE_VERSION="$version" python3 - <<'PY'
+          import os, shutil
+          from pathlib import Path
+          root = Path('mobile-build/artifacts')
+          target = Path('mobile-build/publish')
+          target.mkdir(parents=True, exist_ok=True)
+          version = os.environ['RAIL_RELEASE_VERSION']
+          names = [f'Yukino-Rail-Watch-Android-{version}-debug.apk', f'Yukino-Rail-Watch-iOS-{version}-simulator.zip']
+          bundles = list(root.rglob(f'Yukino-Rail-Watch-Android-{version}-*.aab'))
+          if len(bundles) != 1:
+              raise SystemExit('Expected exactly one clearly labelled Android App Bundle')
+          names.append(bundles[0].name)
+          signed = list(root.rglob(f'Yukino-Rail-Watch-Android-{version}-release.apk'))
+          if signed:
+              names.append(signed[0].name)
+          for name in names:
+              files = list(root.rglob(name))
+              if len(files) != 1:
+                  raise SystemExit(f'Expected exactly one package: {name}')
+              shutil.copy2(files[0], target / name)
+          PY
+          cd mobile-build/publish
           sha256sum *.apk *.aab *-simulator.zip > SHA256SUMS-mobile.txt
           gh release create "$tag" --target "$GITHUB_SHA" --prerelease --title "Android / iOS ${version} Preview" --notes-file "$GITHUB_WORKSPACE/docs/releases/mobile-${version}.md" *.apk *.aab *-simulator.zip SHA256SUMS-mobile.txt
