@@ -95,12 +95,36 @@ jobs:
             cp android/app/build/outputs/bundle/release/app-release.aab "mobile-build/android/Yukino-Rail-Watch-Android-${version}-unsigned.aab"
           fi
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Enable hardware acceleration for the Android emulator
+        run: sudo chmod 666 /dev/kvm
+      - name: Check the real native query and launch the Android app
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            cd android && ./gradlew --no-daemon :app:connectedDebugAndroidTest
+            adb shell am start -W -n bond.yukino.rail/.MainActivity
+            sleep 15
+            adb exec-out screencap -p > mobile-build/android/Android-emulator.png
+            adb logcat -d -s AndroidRuntime > mobile-build/android/Android-emulator.log
       - name: Upload Android packages
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: Yukino-Rail-Watch-Android
           path: mobile-build/android/*
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Yukino-Rail-Watch-Android-test-report
+          path: android/app/build/reports/androidTests/connected/
+          if-no-files-found: ignore
       - name: Remove private signing material
         if: always()
         run: rm -f "$RUNNER_TEMP/rail-release.jks"
