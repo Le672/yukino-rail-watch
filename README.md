@@ -1,12 +1,20 @@
 # Yukino Rail Watch · 余票提醒
 
-独立的 12306 余票查询、网页通知和 Windows 托盘提醒项目。网页入口为 [cr.yukino.bond](https://cr.yukino.bond)，也可通过主站 [余票提醒](https://www.yukino.bond/cr) 使用。子域已完成 Pages 绑定和 DNS 配置，并验证 HTTPS 页面可以访问。
+独立的 12306 余票查询、网页通知、Windows 托盘提醒与 Android / iOS 手机客户端项目。网页入口为 [cr.yukino.bond](https://cr.yukino.bond)，也可通过主站 [余票提醒](https://www.yukino.bond/cr) 使用。子域已完成 Pages 绑定和 DNS 配置，并验证 HTTPS 页面可以访问。
 
 ## 下载
 
 [下载最新 Windows 便携版](https://github.com/Le672/yukino-rail-watch/releases/latest) · [全部版本](https://github.com/Le672/yukino-rail-watch/releases)
 
 在版本页的 Assets 中下载 `.exe`，双击运行即可。每个正式版本同时提供 `SHA256SUMS.txt`。
+
+## Android / iOS 手机版
+
+手机版采用独立底部导航、车次卡片和原生通知 / 定位，不加载整张网页。Android 提供测试 APK；iOS 提供原生工程与模拟器构建，真机和商店发行需要自己的 Apple 开发者账号签名。
+
+[手机安装与发行教程](docs/mobile-distribution.md) · [手机预览版本](https://github.com/Le672/yukino-rail-watch/releases/tag/mobile-v1.0.0) · [隐私政策](https://cr.yukino.bond/rail-privacy.html)
+
+前台按所设 1–60 分钟间隔检查；Android 后台最短约 15 分钟，iOS 后台由系统安排，无法保证固定频率。GPS 仅在前台位置页主动开启后读取。
 
 ## 功能
 

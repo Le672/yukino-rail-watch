@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Yukino 余票 Android 与 iOS 客户端的查询、定位、通知和数据使用说明。">
+  <title>隐私政策 · Yukino 余票</title>
+  <style>
+    :root{color-scheme:light;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#315642;background:#f6f8f3;line-height:1.8}
+    *{box-sizing:border-box}body{margin:0}main{max-width:850px;margin:auto;padding:36px 22px 64px}a{color:#315c42;text-underline-offset:4px;overflow-wrap:anywhere}.brand{display:flex;gap:12px;align-items:center;margin-bottom:32px;text-decoration:none;font-weight:700}.brand img{width:48px;height:48px}h1{font-family:Georgia,"Songti SC",serif;font-size:clamp(28px,6vw,42px);line-height:1.3;margin:0 0 12px}h2{font-size:20px;margin:0 0 12px}p{margin:10px 0}small,.meta{color:#708374}.meta{font-size:14px;margin-bottom:28px}section{background:#fff;border:1px solid #dde6da;border-radius:20px;padding:24px;margin:18px 0}ul{padding-left:22px;margin:10px 0}li+li{margin-top:8px}.service{border-top:1px solid #e5ebe3;padding:12px 0}.service strong{display:block}footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;margin-top:30px;font-size:14px}@media(max-width:380px){main{padding:24px 14px 40px}section{padding:18px}}
+  </style>
+</head>
+<body><main>
+  <a class="brand" href="https://cr.yukino.bond/"><img src="/rail-icon.svg" alt="">Yukino 余票</a>
+  <h1>隐私政策</h1>
+  <p class="meta">适用于 Yukino 余票 Android / iOS 客户端 · 生效日期：2026 年 9 月 30 日</p>
+  <p>开发与维护者为 Yukino（GitHub：Le672）。本应用查询公开余票、车型、停站时刻，并提供到票提醒和列车位置辅助判断。无需注册，不登录 12306，不处理身份证、旅客姓名、订单或支付信息。</p>
+  <section><h2>1. 查询与本机保存</h2>
+    <ul><li>你填写的车次、出行日期、出发站和到达站会发送给 Yukino 查询服务，由服务向 12306 获取公开余票。车型和运行资料由客户端直接向 RailGo 查询。</li>
+    <li>查询条件、所选席别、检查间隔、最近结果及用于避免重复通知的余票状态保存在应用私有存储。关闭监控可停止后续自动查询；卸载应用可清除这些本机记录。</li>
+    <li>应用没有广告、账号体系或用户行为统计 SDK，不创建用于跨应用追踪的广告标识。HTTPS 服务商在处理请求时可接收到 IP 地址、请求时间和请求路径等基础网络信息，相关日志由各服务商按其政策管理。</li></ul>
+  </section>
+  <section><h2>2. GPS、速度和地图</h2>
+    <ul><li>只在你点击开启 GPS 后申请定位权限。位置页面可见且应用在前台时读取坐标、精度、速度、方向和时间；用于在设备上计算线路位置、下一停靠站和实时速度。</li>
+    <li>停止定位、离开位置页或进入后台会停止位置监听。本应用不申请后台定位，不保存位置轨迹，不向 Yukino 或 RailGo 上传设备的精确坐标。</li>
+    <li>地图需要向第三方请求当前视野的瓦片；请求包含瓦片坐标和 IP 地址，地图服务商可能据此推断你查看的近似区域。启用位置跟随后，这一区域可能接近设备所在地。该地图请求不等同于上传完整 GPS 轨迹。</li>
+    <li>拒绝定位权限仍可使用余票查询、时刻表位置和标明来源的预估速度。地图和测速仅用于辅助参考。</li></ul>
+  </section>
+  <section><h2>3. 通知与后台检查</h2>
+    <p>开启监控时申请通知权限。提醒内容包含车次、日期、乘车区间及关注席别的余票情况，由设备发送本地系统通知，不注册 APNs、FCM 推送令牌。</p>
+    <p>后台任务仅查询公开余票。Android 后台周期最短约 15 分钟，可能受省电和网络限制而延迟；iOS 的后台检查由系统安排，无法保证固定频率，强制退出后不会继续检查。打开应用时按所设 1–60 分钟间隔检查。</p>
+  </section>
+  <section><h2>4. 使用的服务</h2>
+    <div class="service"><strong>Yukino 查询服务 / Cloudflare</strong><a href="https://www.yukino.bond/api/rail?mode=stations">www.yukino.bond/api/rail</a> · 接收查询条件并提供 12306 公开结果；网络传输与托管由 <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a> 提供。</div>
+    <div class="service"><strong>12306</strong><a href="https://www.12306.cn/">中国铁路 12306</a> · 公开余票数据。点击购票网站链接后，后续操作适用 12306 自身政策。</div>
+    <div class="service"><strong>RailGo Data Service</strong><a href="https://api.railgo.dev/">数据服务说明</a> · 接收车次、日期或区间，用于车型、停站、线路与正晚点查询。</div>
+    <div class="service"><strong>OpenStreetMap / EOX</strong><a href="https://osmfoundation.org/wiki/Privacy_Policy">OpenStreetMap 隐私政策</a> · 2D 地图；<a href="https://maps.eox.at/">EOX::Maps</a> · 卫星影像瓦片。接收当前地图视野的瓦片请求。</div>
+  </section>
+  <section><h2>5. 你的选择与联系</h2>
+    <p>可随时关闭监控、停止 GPS，或在手机系统设置中撤销通知和定位权限。权限撤销不会影响基础余票查询。清除应用数据或卸载应用可移除本机保存的信息。</p>
+    <p>如有隐私问题或需要协助，请联系 <a href="mailto:Raptor@yukino.bond">Raptor@yukino.bond</a>。代码与问题反馈见 <a href="https://github.com/Le672/yukino-rail-watch">GitHub 项目</a>。数据使用范围改变时，本页会更新生效日期并在应用更新说明中说明。</p>
+  </section>
+  <footer><a href="https://cr.yukino.bond/">返回余票查询 ↗</a><span>© 2026 Yukino</span></footer>
+</main></body></html>
