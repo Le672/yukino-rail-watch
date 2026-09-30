@@ -110,8 +110,8 @@ jobs:
             cd android && ./gradlew --no-daemon :app:connectedDebugAndroidTest
             adb shell am start -W -n bond.yukino.rail/.MainActivity
             sleep 15
-            adb exec-out screencap -p > mobile-build/android/Android-emulator.png
-            adb logcat -d -s AndroidRuntime > mobile-build/android/Android-emulator.log
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/mobile-build/android/Android-emulator.png"
+            adb logcat -d -s AndroidRuntime > "$GITHUB_WORKSPACE/mobile-build/android/Android-emulator.log"
       - name: Upload Android packages
         uses: actions/upload-artifact@v4
         if: always()
