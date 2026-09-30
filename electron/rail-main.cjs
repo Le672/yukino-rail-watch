@@ -136,8 +136,8 @@ function showWindow() {
 
 function createWindow() {
   window = new BrowserWindow({
-    width: 1150, height: 860, minWidth: 380, minHeight: 580,
-    title: "Yukino 余票提醒", icon: ICON, backgroundColor: "#f8f9f5", autoHideMenuBar: true,
+    width: 1280, height: 820, minWidth: 920, minHeight: 640,
+    title: "Yukino 余票提醒", icon: ICON, backgroundColor: "#edf1f6", autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, "rail-preload.cjs"), contextIsolation: true, nodeIntegration: false },
   });
   window.on("close", (event) => {
@@ -160,7 +160,7 @@ function createWindow() {
     }
     return { action: "deny" };
   });
-  window.loadFile(path.join(__dirname, "../dist/index.html"), { hash: "/cr" });
+  window.loadFile(path.join(__dirname, "../dist/desktop.html"));
 }
 
 if (!app.requestSingleInstanceLock()) {

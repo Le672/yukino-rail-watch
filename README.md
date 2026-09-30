@@ -10,6 +10,8 @@
 
 ## 功能
 
+- Windows 1.8.2 使用独立桌面界面：功能侧栏、紧凑查询工具栏、车次表格、监控面板与状态栏；不再加载网页页面。现有查询、托盘通知、GPS 地图与测速功能保留。
+
 - Windows 1.8.1 与网页新增港铁动感号识别及银橙红专属涂装插图，核对 77 个官方车次，支持配属判断与实际换车信息优先；详见 [核对记录](docs/mtr-vibrant.md)。
 
 - 普速车支持 Z／T／K 和四位数字车次。缺少完整铁路线路时保留停靠站地图，首次 GPS 定位自动居中并跟随；下一站按首站始发日期的时刻表判断。
@@ -33,7 +35,7 @@
 
 ## 车型来源
 
-车型数据由 [RailGo](https://railgo.dev/) 提供，网页和 Windows 客户端直接访问 RailGo 服务，公开的余票 API 不中转车型数据。按区间缓存 30 分钟，服务失败后暂缓 5 分钟重试；车型缺失或冲突不影响 12306 余票查询。页面底部统一显示 RailGo 数据服务署名卡片，点击可打开数据服务文档，实际编组可能调整。
+车型数据由 [RailGo](https://railgo.dev/) 提供，网页和 Windows 客户端直接访问 RailGo 服务，公开的余票 API 不中转车型数据。按区间缓存 30 分钟，服务失败后暂缓 5 分钟重试；车型缺失或冲突不影响 12306 余票查询。网页底部、桌面监控面板和位置视图统一显示 RailGo 数据服务署名，点击可打开数据服务文档，实际编组可能调整。
 
 使用须遵守 [RailGo 数据服务说明](https://api.railgo.dev/) 的非商业、署名和禁止公开接口中转要求。
 
@@ -56,7 +58,7 @@ pnpm exec wrangler pages dev dist
 pnpm desktop:build
 ```
 
-产物位于 `release/`，GitHub Actions 会在推送 `main` 时运行测试、构建便携版并保留 Actions 附件；当 `package.json` 与 `electron-builder.json` 的版本一致且该版本尚未发布时，自动创建对应 `v版本号` 的 Release，上传 `.exe` 和校验文件后发布。已发布版本的附件保持不变；发布新软件版本前请同步升级两个文件中的版本号，可在 `docs/releases/版本号.md` 添加中文说明。桌面版默认使用已部署的 `https://www.yukino.bond/api/rail`；可通过 `RAIL_API_URL` 环境变量指定自己的 API。
+产物位于 `release/`，GitHub Actions 会在推送 `main` 时运行测试、构建便携版并保留 Actions 附件；当 `package.json` 与 `electron-builder.json` 的版本一致且该版本尚未发布时，自动创建对应 `v版本号` 的 Release，上传 `.exe` 和校验文件后发布。已发布版本的附件保持不变；发布新软件版本前请同步升级两个文件中的版本号，可在 `docs/releases/版本号.md` 添加中文说明。桌面版从独立的 `desktop.html` 和 `src/desktop.tsx` 构建，网页仍使用 `index.html`；两者共用查询控制器，不共享页面布局。桌面版默认使用已部署的 `https://www.yukino.bond/api/rail`；可通过 `RAIL_API_URL` 环境变量指定自己的 API。
 
 ## 网页部署
 
