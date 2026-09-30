@@ -91,7 +91,11 @@ try {
 
 ### 直接分享或国内 Android 商店
 
-正式签名 APK 可作为 GitHub Release 附件或网站下载发行；用户需要允许下载来源安装。国内商店分别有开发者实名认证、APP 备案、隐私和权限审核要求，按所选商店的官方流程准备。应用包内已提供隐私入口和按需授权，但备案和主体信息须由你本人办理。
+正式签名 APK 可作为 GitHub Release 附件或网站下载发行；用户需要允许下载来源安装。国内商店分别有开发者实名认证、APP 备案、隐私和权限审核要求，按所选商店的官方流程准备。应用包内已提供隐私入口和按需授权，但备案和主体信息须由你本人办理。[工信部 APP 备案通知](https://wap.miit.gov.cn/jgsj/xgj/wjfb/art/2023/art_dd783a581c9644a4aee10afa582811db.html)。
+
+**Android 开发者验证新规（2026 年 9 月 30 日起）：**Google 当前规则先覆盖巴西、印度尼西亚、新加坡和泰国的指定商店安装；其最新 FAQ 说明，当下直接侧载和不在参与名单中的商店暂不受这次期限影响，2027 年起再扩大。不要把现在的测试 APK 当作已注册开发者的正式应用。[官方现行范围与 FAQ](https://developer.android.com/developer-verification/guides/faq)。
+
+准备广泛分发时，在 Play Console 或 Android Developer Console 完成对应开发者验证和包名 / 签名证书注册；只给少量亲友或同学试用可了解免费的 Limited Distribution 账号，支持最多 20 台已授权设备。注册须使用最终固定签名，CI 的临时 debug 签名不适合作为正式身份。[有限分发说明](https://developer.android.com/developer-verification/guides/limited-distribution)。
 
 ## 4. iOS：真机、TestFlight 和 App Store
 
@@ -114,7 +118,7 @@ pnpm mobile:ios
 Xcode 会打开 `ios/App/App.xcodeproj`；工程采用 Swift Package Manager，不需要安装 CocoaPods。
 
 1. 选中左侧 **App** 项目，再选 **App target → Signing & Capabilities**。
-2. 登录自己的 Apple ID，选择你的 Team，勾选 **Automatically manage signing**。Bundle Identifier 使用 `bond.yukino.rail`；若它已被其他团队注册，须同时修改 Capacitor 配置和两个原生工程的标识再构建，不能只改网页名称。
+2. 登录自己的 Apple ID，选择你的 Team，勾选 **Automatically manage signing**。Bundle Identifier 使用 `bond.yukino.rail`；若它已被其他团队注册，需统一更新 `capacitor.config.ts`、`mobile-version.json`、`scripts/configure-mobile.mjs` 的包名校验、Android 的 namespace / applicationId / Java 包名、iOS Bundle ID 和后台任务标识，再同步构建。
 3. 连接 iPhone，按手机系统要求打开开发者模式并信任 Mac，在 Xcode 选择这台 iPhone，点 Run。
 4. 免费个人团队可用来短期在自己的设备上测试，受 Apple 的免费签名限制；它不能代替付费账号公开发行。
 
@@ -137,7 +141,7 @@ Xcode 会打开 `ios/App/App.xcodeproj`；工程采用 Swift Package Manager，�
 仓库的 [Build Android and iOS apps](https://github.com/Le672/yukino-rail-watch/actions/workflows/build-mobile.yml) 会在手机相关代码推送到 `main` 时执行：
 
 1. 安装锁定依赖，运行测试，打包独立手机版资源。
-2. Android / Java 21 环境编译测试 APK 和 release AAB；有签名 Secrets 时额外生成正式签名 APK。
+2. Android / Java 21 环境编译测试 APK 和 release AAB；在 Android 模拟器中真实查询次日 G101，检查本机保存与无效条件停监控，再安装并启动应用截图；有签名 Secrets 时额外生成正式签名 APK。
 3. macOS / Xcode 环境编译 iOS 模拟器应用，实际启动并保存模拟器截图和日志。模拟器附件只用于 Mac 模拟器；不替代真机签名与审核。
 
 构建成功后打开运行记录，在底部 **Artifacts** 下载 `Yukino-Rail-Watch-Android` 或 `Yukino-Rail-Watch-iOS`。下载 Actions 附件通常需要登录 GitHub；Release 附件可公开下载。
