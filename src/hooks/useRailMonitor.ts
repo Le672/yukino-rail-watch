@@ -84,8 +84,7 @@ function notifyAvailable(settings: Settings, train: Train, seats: Seat[]) {
   notification.onclick = () => { window.focus(); window.open("https://www.12306.cn/", "_blank", "noopener,noreferrer"); };
 }
 
-export function useRailMonitor() {
-  const desktop = window.railDesktop;
+export function useRailMonitor(desktop = window.railDesktop) {
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [stations, setStations] = useState<Station[]>([]);
   const [result, setResult] = useState<Result | null>(null);
@@ -176,7 +175,10 @@ export function useRailMonitor() {
     if (settings.enabled) {
       const next = { ...settings, enabled: false };
       setSettings(next);
-      if (desktop) await desktop.configure(next);
+      if (desktop) {
+        try { await desktop.configure(next); }
+        catch (cause) { setSettings(settings); setError(cause instanceof Error ? cause.message : String(cause)); }
+      }
       return;
     }
     if (!validSettings(settings)) { setError("先选择查询方式，填写日期及车次或乘车区间，并设置 1–60 分钟的间隔"); return; }
@@ -187,7 +189,7 @@ export function useRailMonitor() {
     setSettings(next);
     availability.current = {};
     if (desktop) {
-      try { await desktop.configure(next); } catch (cause) { setError(String(cause)); }
+      try { await desktop.configure(next); } catch (cause) { setSettings({ ...settings, enabled: false }); setError(cause instanceof Error ? cause.message : String(cause)); }
     }
   };
 

@@ -5,3 +5,13 @@ release/
 *.tsbuildinfo
 .env*
 !.env.example
+
+dist-mobile/
+mobile-build/
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+*.ipa
+.env*
+!.env.example

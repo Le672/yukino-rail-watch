@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Yukino 余票</string>
+    <string name="title_activity_main">Yukino 余票</string>
+    <string name="package_name">bond.yukino.rail</string>
+    <string name="custom_url_scheme">bond.yukino.rail</string>
+</resources>

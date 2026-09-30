@@ -1,0 +1,173 @@
+name: Build Android and iOS apps
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'ios/**'
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/**'
+      - 'mobile*'
+      - 'capacitor.config.ts'
+      - 'vite.mobile.config.ts'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/build-mobile.yml'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish a mobile prerelease after both native builds pass
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm mobile:sync
+      - name: Restore optional private release signing key
+        env:
+          RAIL_KEYSTORE_BASE64: ${{ secrets.RAIL_ANDROID_KEYSTORE_BASE64 }}
+          RAIL_STORE_PASSWORD: ${{ secrets.RAIL_ANDROID_STORE_PASSWORD }}
+          RAIL_KEY_ALIAS: ${{ secrets.RAIL_ANDROID_KEY_ALIAS }}
+          RAIL_KEY_PASSWORD: ${{ secrets.RAIL_ANDROID_KEY_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import base64, os
+          from pathlib import Path
+          names = ['RAIL_KEYSTORE_BASE64', 'RAIL_STORE_PASSWORD', 'RAIL_KEY_ALIAS', 'RAIL_KEY_PASSWORD']
+          values = [os.environ.get(name, '') for name in names]
+          if any(values) and not all(values):
+              raise SystemExit('All four Android signing secrets must be configured together')
+          if all(values):
+              key = Path(os.environ['RUNNER_TEMP']) / 'rail-release.jks'
+              key.write_bytes(base64.b64decode(values[0], validate=True))
+              key.chmod(0o600)
+              with open(os.environ['GITHUB_ENV'], 'a') as output:
+                  for name, value in zip(['RAIL_ANDROID_KEYSTORE_PATH', 'RAIL_ANDROID_STORE_PASSWORD', 'RAIL_ANDROID_KEY_ALIAS', 'RAIL_ANDROID_KEY_PASSWORD'], [str(key), *values[1:]]):
+                      if '\n' in value or '\r' in value:
+                          raise SystemExit('Signing values must be single-line secrets')
+                      output.write(f'{name}={value}\n')
+          PY
+      - name: Compile native Android packages
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleDebug :app:assembleRelease :app:bundleRelease :app:testDebugUnitTest
+      - name: Prepare clearly labelled packages
+        run: |
+          version=$(node -p "require('./mobile-version.json').version")
+          mkdir -p mobile-build/android
+          cp android/app/build/outputs/apk/debug/app-debug.apk "mobile-build/android/Yukino-Rail-Watch-Android-${version}-debug.apk"
+          if [ -n "${RAIL_ANDROID_KEYSTORE_PATH:-}" ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk "mobile-build/android/Yukino-Rail-Watch-Android-${version}-release.apk"
+            cp android/app/build/outputs/bundle/release/app-release.aab "mobile-build/android/Yukino-Rail-Watch-Android-${version}-signed.aab"
+          else
+            cp android/app/build/outputs/bundle/release/app-release.aab "mobile-build/android/Yukino-Rail-Watch-Android-${version}-unsigned.aab"
+          fi
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload Android packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: Yukino-Rail-Watch-Android
+          path: mobile-build/android/*
+          if-no-files-found: error
+      - name: Remove private signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/rail-release.jks"
+
+  ios:
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm mobile:sync
+      - name: Compile native iOS simulator app
+        run: |
+          xcodebuild -version
+          set -o pipefail
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath mobile-build/ios CODE_SIGNING_ALLOWED=NO build > mobile-build-ios.log 2>&1 || { tail -n 100 mobile-build-ios.log; exit 1; }
+          tail -n 5 mobile-build-ios.log
+      - name: Launch on iPhone simulator and capture the app
+        run: |
+          xcrun simctl list devices available -j > /tmp/rail-simulators.json
+          device=$(python3 -c 'import json; d=json.load(open("/tmp/rail-simulators.json")); print(next(x["udid"] for runtime, xs in d["devices"].items() if "iOS" in runtime for x in xs if x["isAvailable"] and "iPhone" in x["name"]))')
+          xcrun simctl boot "$device"
+          xcrun simctl bootstatus "$device" -b
+          xcrun simctl install "$device" mobile-build/ios/Build/Products/Debug-iphonesimulator/App.app
+          xcrun simctl launch "$device" bond.yukino.rail
+          sleep 15
+          mkdir -p mobile-build/ios-output
+          xcrun simctl io "$device" screenshot mobile-build/ios-output/iPhone-simulator.png
+          xcrun simctl spawn "$device" log show --last 2m --predicate 'process == "App"' --style compact > mobile-build/ios-output/simulator.log
+          version=$(node -p "require('./mobile-version.json').version")
+          ditto -c -k --sequesterRsrc --keepParent mobile-build/ios/Build/Products/Debug-iphonesimulator/App.app "mobile-build/ios-output/Yukino-Rail-Watch-iOS-${version}-simulator.zip"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Yukino-Rail-Watch-iOS
+          path: |
+            mobile-build/ios-output/*
+            mobile-build-ios.log
+          if-no-files-found: error
+
+  publish:
+    if: github.event_name == 'workflow_dispatch' && inputs.publish && github.repository == 'Le672/yukino-rail-watch'
+    needs: [android, ios]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: Yukino-Rail-Watch-*
+          path: mobile-build/artifacts
+          merge-multiple: true
+      - name: Publish mobile preview, preserving the Windows latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./mobile-version.json').version")
+          tag="mobile-v${version}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "The mobile version already exists; increment mobile-version.json before publishing another build."
+            exit 1
+          fi
+          cd mobile-build/artifacts
+          sha256sum *.apk *.aab *-simulator.zip > SHA256SUMS-mobile.txt
+          gh release create "$tag" --target "$GITHUB_SHA" --prerelease --title "Android / iOS ${version} Preview" --notes-file "$GITHUB_WORKSPACE/docs/releases/mobile-${version}.md" *.apk *.aab *-simulator.zip SHA256SUMS-mobile.txt

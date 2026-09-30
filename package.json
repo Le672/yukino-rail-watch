@@ -9,9 +9,20 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
-    "desktop:build": "pnpm build && node node_modules/electron-builder/out/cli/cli.js --config electron-builder.json --win portable"
+    "desktop:build": "pnpm build && node node_modules/electron-builder/out/cli/cli.js --config electron-builder.json --win portable",
+    "mobile:build": "tsc --noEmit && vite build --config vite.mobile.config.ts && node scripts/finalize-mobile.mjs",
+    "mobile:sync": "pnpm mobile:build && cap sync && node scripts/configure-mobile.mjs",
+    "mobile:android": "pnpm mobile:sync && cap open android",
+    "mobile:ios": "pnpm mobile:sync && cap open ios"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/browser": "^8.0.4",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/geolocation": "^8.2.2",
+    "@capacitor/ios": "^8.5.2",
+    "@capacitor/local-notifications": "^8.3.1",
     "coordtransform": "2.1.2",
     "leaflet": "1.9.4",
     "lucide-react": "^0.511.0",
@@ -19,6 +30,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "^16.1.0",
     "@types/leaflet": "1.9.21",
