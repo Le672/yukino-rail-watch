@@ -108,6 +108,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
             cd android && ./gradlew --no-daemon :app:connectedDebugAndroidTest
+            adb install -r "$GITHUB_WORKSPACE/android/app/build/outputs/apk/debug/app-debug.apk"
             adb shell am start -W -n bond.yukino.rail/.MainActivity
             sleep 15
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/mobile-build/android/Android-emulator.png"
@@ -154,7 +155,16 @@ jobs:
           xcrun simctl list devices available -j > /tmp/rail-simulators.json
           device=$(python3 -c 'import json; d=json.load(open("/tmp/rail-simulators.json")); print(next(x["udid"] for runtime, xs in d["devices"].items() if "iOS" in runtime for x in xs if x["isAvailable"] and "iPhone" in x["name"]))')
           xcrun simctl boot "$device"
-          xcrun simctl bootstatus "$device" -b
+          RAIL_SIMULATOR_ID="$device" python3 - <<'PY'
+          import os, subprocess
+          device = os.environ['RAIL_SIMULATOR_ID']
+          try:
+              subprocess.run(['xcrun', 'simctl', 'bootstatus', device, '-b'], check=True, timeout=300)
+          except subprocess.TimeoutExpired:
+              subprocess.run(['xcrun', 'simctl', 'shutdown', device], check=False, timeout=30)
+              subprocess.run(['xcrun', 'simctl', 'boot', device], check=True, timeout=30)
+              subprocess.run(['xcrun', 'simctl', 'bootstatus', device, '-b'], check=True, timeout=180)
+          PY
           xcrun simctl install "$device" mobile-build/ios/Build/Products/Debug-iphonesimulator/App.app
           xcrun simctl launch "$device" bond.yukino.rail
           sleep 15
