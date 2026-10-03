@@ -135,9 +135,12 @@ export function useRailMonitor(desktop = window.railDesktop) {
     setChecking(true);
     setError(null);
     try {
-      const next = desktop ? await desktop.checkNow(settings) : await enrichWithRailGo(await query(settings));
+      const next = desktop ? await desktop.checkNow(settings) : await query(settings);
       if (generation !== requestGeneration.current) return;
       setResult(next);
+      if (!desktop) void enrichWithRailGo(next).then(enriched => {
+        if (generation === requestGeneration.current) setResult(enriched);
+      });
       if (!desktop && notify) {
         const current: Record<string, boolean> = {};
         for (const train of next.trains) {

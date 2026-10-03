@@ -77,13 +77,13 @@ export default function Rail() {
         </div>
         {feature === "position" && <RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} />}
         <p className="rail-disclaimer">本工具仅展示公开查询结果，不提供购票或抢票。车票状态会随时变化，最终以 12306 官网为准。</p>
-        <a className="rail-attribution" href="https://api.railgo.dev/" target="_blank" rel="noreferrer" aria-label="车型、时刻表与线路数据来源：RailGo 数据服务（打开数据服务文档）">
+        <a className="rail-attribution" href="https://api.railgo.dev/" target="_blank" rel="noreferrer" aria-label="车型、配属与铁路坐标补充来源：RailGo 数据服务（打开数据服务文档）">
           <span className="rail-attribution-main">
             <span className="rail-attribution-icon" aria-hidden="true"><TrainFront size={28} strokeWidth={1.4} /></span>
             <span className="rail-attribution-copy"><strong>RailGo Data Service</strong><span>api.railgo.dev</span></span>
             <ExternalLink className="rail-attribution-external" size={17} aria-hidden="true" />
           </span>
-          <span className="rail-attribution-caption">车型、时刻表、线路与正晚点数据由 RailGo 数据服务提供</span>
+          <span className="rail-attribution-caption">车型、配属与铁路坐标由 RailGo 数据服务补充</span>
         </a>
         <footer className="rail-site-footer" role="contentinfo" aria-label="Yukino 页脚">
           <div className="rail-site-footer-main">

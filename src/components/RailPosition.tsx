@@ -1,6 +1,6 @@
 import { Clock3, LocateFixed, MapPin, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { loadDelays, loadJourney, loadRailway } from "../lib/rail-position-data";
+import { loadDelays, loadJourney, loadJourneyEquipment, loadRailway } from "../lib/rail-position-data";
 import { chinaDateTime, locateJourney, observationTime } from "../lib/train-position";
 import type { DelayReport, RailwayMapData, TrainJourney } from "../lib/train-position";
 import { gcjToWgs84, matchGpsJourney, railwayToWgs84 } from "../lib/rail-gps";
@@ -67,11 +67,14 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
       const next = await loadJourney(train.trim().toUpperCase(), date);
       if (version !== generation.current) return;
       setJourney(next); setLoading(false); setDetailsLoading(true);
+      void loadJourneyEquipment(next).then(equipment => {
+        if (version === generation.current) setJourney(current => current ? { ...current, ...equipment } : current);
+      }).catch(() => {});
       const extra = await Promise.allSettled([loadRailway(next), live ? loadDelays(next.train, next.date) : Promise.resolve(null)]);
       if (version !== generation.current) return;
       if (extra[0].status === "fulfilled") setMapData(extra[0].value);
       else setRouteError("线路资料暂不可用或与停站表不一致，仍可查看运行区间和下一站。");
-      if (extra[1].status === "fulfilled") setDelays(extra[1].value);
+      if (extra[1].status === "fulfilled") { setDelays(extra[1].value); setDelayError(extra[1].value?.warning || null); }
       else setDelayError("正晚点资料暂不可用，当前按计划时刻估算。");
     } catch (cause) { if (version === generation.current) setError(cause instanceof Error ? cause.message : "位置查询失败"); }
     finally { if (version === generation.current) { setLoading(false); setDetailsLoading(false); } }
@@ -95,11 +98,11 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
           setMapData(extra[0].status === "fulfilled" ? extra[0].value : null);
           setRouteError(extra[0].status === "fulfilled" ? null : "线路资料暂不可用，仍可查看运行区间和下一站。");
           setDelays(extra[1].status === "fulfilled" ? extra[1].value : null);
-          setDelayError(extra[1].status === "fulfilled" ? null : "正晚点资料暂不可用，当前按计划时刻估算。");
+          setDelayError(extra[1].status === "fulfilled" ? extra[1].value?.warning || null : "12306 正晚点资料暂不可用，当前按官方计划时刻估算。");
           return;
         }
         const updated = await loadDelays(journey.train, journey.date);
-        if (active && version === generation.current) { setDelays(updated); setDelayError(null); }
+        if (active && version === generation.current) { setDelays(updated); setDelayError(updated.warning || null); }
       } catch { if (active && version === generation.current) setDelayError("资料刷新失败；正晚点超过 3 分钟自动停用，时刻表超过 20 分钟不再推算。"); }
       finally { refreshing.current = false; }
     };
@@ -187,6 +190,6 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
     {!journey && !loading && !error && <div className="rail-empty">输入车次和始发日期，查看运行区间、下一停靠站及铁路线路图。</div>}
     {!position && <div className="rail-card rail-position-route"><RailMap journey={journey} route={wgsRoute} stations={wgsStations} position={null} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} /></div>}
     {(delayError || position?.warning) && journey && <p className="rail-position-warning">{position?.warning || delayError}</p>}
-    <p className="rail-hint rail-position-source">时刻表、站点、线路与正晚点来自 RailGo 数据服务。开启 GPS 后显示设备实时位置；有完整线路时匹配下一站，缺少线路或有效定位时按时刻表估算。实际到发及临时停站请以列车广播、站内显示和 12306 为准。</p>
+    <p className="rail-hint rail-position-source">车次、停站时刻表和正晚点来自 12306；车型、配属及铁路坐标由 RailGo 补充。开启 GPS 后显示设备实时位置；有完整线路时匹配下一站，缺少线路或有效定位时按官方时刻表估算。正晚点仅覆盖未来 3 小时，实际到发及临时停站请以列车广播、站内显示和 12306 为准。</p>
   </section>;
 }

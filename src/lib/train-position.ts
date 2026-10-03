@@ -6,9 +6,10 @@ export type TimetableStop = {
 export type TrainJourney = {
   train: string; date: string; codes: string[]; model: string | null; owner: string | null;
   stops: TimetableStop[]; checkedAt: number;
+  source?: "12306";
 };
-export type TrainDelay = { station: string; telecode: string; code: string; minutes: number };
-export type DelayReport = { rows: TrainDelay[]; checkedAt: number };
+export type TrainDelay = { station: string; telecode: string; code: string; minutes: number; kind?: "arrival" | "departure" };
+export type DelayReport = { rows: TrainDelay[]; checkedAt: number; source?: "12306"; warning?: string };
 export type Coordinate = [number, number]; // longitude, latitude; RailGo routes are GCJ-02 until explicitly converted.
 export type RailwayRoute = {
   points: Coordinate[]; distances: number[]; stopDistances: number[]; stops: Coordinate[]; lengthKm: number;
@@ -89,7 +90,7 @@ export function adjustedStops(journey: TrainJourney, now: number, report?: Delay
     used = true;
     const row = matches[0];
     const offset = row.code.startsWith("DELAY") ? row.minutes : row.code.startsWith("EARLY") ? -row.minutes : 0;
-    const arrivalAt = stop.arrivalAt + offset * 60000;
+    const arrivalAt = stop.arrivalAt + (row.kind === "departure" ? 0 : offset) * 60000;
     // Arrival lateness informs an estimate. An early arrival never means early departure.
     const departureAt = Math.max(arrivalAt, stop.departureAt + Math.max(0, offset) * 60000);
     return { ...stop, arrivalAt, departureAt };

@@ -42,6 +42,6 @@ export default function DesktopRail() {
         {feature === "position" && <div className="desktop-position"><RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} /><a className="desktop-position-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer">车型、时刻表及线路数据由 RailGo Data Service 提供 ↗</a></div>}
       </main>
     </div>
-    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票以 12306 为准 · 定位与速度请查看数据来源</span><span>v1.8.3</span></footer>
+    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票与停站表来自 12306 · 车型与铁路坐标为补充资料</span><span>v1.8.4</span></footer>
   </div>;
 }

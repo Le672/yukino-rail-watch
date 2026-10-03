@@ -2,9 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseJourney } from "../lib/train-position";
 import { k123, k123Map } from "./fixtures/conventional-position";
 
-const response = { success: true, data: { numberFull: ["G6003"], rundays: ["20260929"], timetable: [
-  { station: "长沙南", stationTelecode: "CWQ", day: 0, arrive: "10:00", depart: "10:00" },
-  { station: "广州南", stationTelecode: "IZQ", day: 0, arrive: "12:02", depart: "12:06" },
+const response = { source: "12306", status: true, train: "G6003", date: "2026-09-29", checkedAt: Date.parse("2026-09-29T02:01:00Z"), data: { data: [
+  { station_no: "01", station_name: "长沙南", station_telecode: "CWQ", station_train_code: "G6003", arrive_day_diff: "0", arrive_time: "----", start_time: "10:00" },
+  { station_no: "02", station_name: "广州南", station_telecode: "IZQ", station_train_code: "G6003", arrive_day_diff: "0", arrive_time: "12:02", start_time: "12:06" },
 ] } };
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 describe("position data dates and caching", () => {
@@ -22,16 +22,18 @@ describe("position data dates and caching", () => {
     const { loadJourney } = await import("../lib/rail-position-data");
     const [a, b] = await Promise.all([loadJourney("G6003", "2026-09-29"), loadJourney("G6003", "2026-09-29")]);
     expect(fetchMock).toHaveBeenCalledTimes(1); expect(a.checkedAt).toBe(b.checkedAt);
-    const url = new URL(String(fetchMock.mock.calls[0][0]));
-    expect(url.hostname).toBe("rg-api.zenglingkun.cn"); expect(url.searchParams.get("date")).toBe("20260929");
+    const url = new URL(String(fetchMock.mock.calls[0][0]), "https://cr.yukino.bond");
+    expect(url.hostname).toBe("cr.yukino.bond"); expect(url.searchParams.get("date")).toBe("2026-09-29");
+    expect(url.searchParams.get("mode")).toBe("journey");
     vi.advanceTimersByTime(60000);
     const cached = await loadJourney("G6003", "2026-09-29");
     expect(cached.checkedAt).toBe(a.checkedAt); expect(fetchMock).toHaveBeenCalledTimes(1);
   });
   it("does not turn an unavailable response into a guessed timetable", async () => {
-    vi.resetModules(); vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: false, data: null })));
+    vi.resetModules(); const fetchMock = vi.fn().mockResolvedValue(Response.json({ error: "12306 暂未返回可用时刻表" }, { status: 502 })); vi.stubGlobal("fetch", fetchMock);
     const { loadJourney } = await import("../lib/rail-position-data");
     await expect(loadJourney("G6003", "2026-09-29")).rejects.toThrow(/暂未返回/);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
   it("does not send malformed dates or train codes upstream", async () => {
     vi.resetModules(); const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);

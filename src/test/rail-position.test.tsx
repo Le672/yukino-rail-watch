@@ -6,7 +6,7 @@ import { k123, k123Map } from "./fixtures/conventional-position";
 import { distanceKm } from "../lib/train-position";
 import { wgs84togcj02 } from "coordtransform";
 
-const loaders = vi.hoisted(() => ({ loadJourney: vi.fn(), loadDelays: vi.fn(), loadRailway: vi.fn() }));
+const loaders = vi.hoisted(() => ({ loadJourney: vi.fn(), loadDelays: vi.fn(), loadRailway: vi.fn(), loadJourneyEquipment: vi.fn() }));
 vi.mock("../lib/rail-position-data", () => loaders);
 vi.mock("../components/RailMap", () => ({ RailMap: () => <div>完整交互地图</div> }));
 const payload = { success: true, data: { numberFull: ["G6003"], rundays: ["20260929"], car: "CR400AF-A", timetable: [
@@ -20,6 +20,7 @@ beforeEach(() => {
   loaders.loadJourney.mockResolvedValue(parseJourney(payload, "G6003", "2026-09-29"));
   loaders.loadRailway.mockRejectedValue(new Error("Route unavailable"));
   loaders.loadDelays.mockRejectedValue(new Error("Delay unavailable"));
+  loaders.loadJourneyEquipment.mockImplementation(async journey => ({ model: journey.model, owner: journey.owner }));
 });
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 

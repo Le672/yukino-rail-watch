@@ -1,5 +1,8 @@
 type Station = { name: string; code: string; pinyin: string };
 type Seat = { label: string; value: string; available: boolean };
+import { officialDelayReport, officialDelayTargets, parseOfficialDelay, parseOfficialJourney } from "../../src/lib/rail-official";
+import type { OfficialTimetable } from "../../src/lib/rail-official";
+import type { TrainJourney } from "../../src/lib/train-position";
 
 const ORIGIN = "https://kyfw.12306.cn";
 const STATIONS_URL = `${ORIGIN}/otn/resources/js/framework/station_name.js`;
@@ -14,6 +17,10 @@ let sessionCache: { at: number; cookie: string } | undefined;
 type TrainRoute = { from: string; to: string; trainNo: string };
 const trainRouteCache = new Map<string, { at: number; route: TrainRoute }>();
 const TRAIN_CODE = /^(?:[GDCZTKYS]\d{1,4}[A-Z]?|\d{4})$/;
+const timetableCache = new Map<string, { at: number; payload: OfficialTimetable; journey: TrainJourney }>();
+const timetablePending = new Map<string, Promise<{ at: number; payload: OfficialTimetable; journey: TrainJourney }>>();
+const delayCache = new Map<string, { at: number; report: ReturnType<typeof officialDelayReport> }>();
+const delayPending = new Map<string, Promise<ReturnType<typeof officialDelayReport>>>();
 
 class QueryError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
@@ -66,6 +73,8 @@ function json(data: unknown, status = 200, cacheSeconds = 0) {
       "Content-Type": "application/json; charset=utf-8",
       "Cache-Control": cacheSeconds ? `public, max-age=${cacheSeconds}` : "no-store",
       "X-Content-Type-Options": "nosniff",
+      // Public, unauthenticated rail queries are also used by the locally bundled native clients.
+      "Access-Control-Allow-Origin": "*",
     },
   });
 }
@@ -136,6 +145,58 @@ async function getTrainRoute(date: string, trainCode: string): Promise<TrainRout
   return route;
 }
 
+async function getTimetable(date: string, train: string, stations: Station[]) {
+  const key = `${date}/${train}`, cached = timetableCache.get(key);
+  if (cached && Date.now() - cached.at < 15 * 60000) return cached;
+  if (timetablePending.has(key)) return timetablePending.get(key)!;
+  const request = (async () => {
+    const route = await getTrainRoute(date, train);
+    const url = new URL(`${ORIGIN}/otn/queryTrainInfo/query`);
+    url.searchParams.set("leftTicketDTO.train_no", route.trainNo);
+    url.searchParams.set("leftTicketDTO.train_date", date);
+    url.searchParams.set("rand_code", "");
+    const response = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(15000) });
+    if (!response.ok) throw new Error(`12306 停站表接口返回 ${response.status}`);
+    const payload = await response.json() as OfficialTimetable;
+    const names = new Map(stations.map(station => [station.name, station.code]));
+    if (Array.isArray(payload.data?.data)) payload.data!.data = payload.data!.data!.map(row => ({ ...row, station_telecode: names.get(row.station_name || "") || "" }));
+    const at = Date.now(), journey = parseOfficialJourney(payload, train, date, at);
+    if (journey.stops[0].station !== route.from || journey.stops.at(-1)?.station !== route.to) throw new Error("12306 搜索与停站表的始发终到不一致，请稍后重试");
+    const value = { at, payload: { ...payload, source: "12306", train, date, checkedAt: at }, journey };
+    if (timetableCache.size >= 200) timetableCache.delete(timetableCache.keys().next().value!);
+    timetableCache.set(key, value);
+    return value;
+  })();
+  timetablePending.set(key, request);
+  try { return await request; } finally { timetablePending.delete(key); }
+}
+
+async function getDelays(date: string, train: string, stations: Station[]) {
+  const key = `${date}/${train}`, cached = delayCache.get(key);
+  if (cached && Date.now() - cached.at < 55000) return cached.report;
+  if (delayPending.has(key)) return delayPending.get(key)!;
+  const request = (async () => {
+    const { journey } = await getTimetable(date, train, stations), now = Date.now();
+    const targets = officialDelayTargets(journey, now);
+    const responses = await Promise.allSettled(targets.map(async ({ stop, departure }) => {
+      const url = new URL("https://hzfw.12306.cn/zgzfw/trainTime/query");
+      url.searchParams.set("train_code", stop.trainCode);
+      url.searchParams.set("station_name", stop.station);
+      url.searchParams.set("from_to", departure ? "1" : "0");
+      const response = await fetch(url, { headers: { ...REQUEST_HEADERS, Referer: "https://hzfw.12306.cn/zgzfw/resources/web/zwdcx.html" }, signal: AbortSignal.timeout(12000) });
+      if (!response.ok) throw new Error(`12306 正晚点接口返回 ${response.status}`);
+      return parseOfficialDelay(await response.json(), stop, now, departure);
+    }));
+    const rows = responses.flatMap(response => response.status === "fulfilled" && response.value ? [response.value] : []);
+    const report = officialDelayReport(rows, Date.now());
+    if (delayCache.size >= 200) delayCache.delete(delayCache.keys().next().value!);
+    delayCache.set(key, { at: report.checkedAt, report });
+    return report;
+  })();
+  delayPending.set(key, request);
+  try { return await request; } finally { delayPending.delete(key); }
+}
+
 async function fetchTicketPayload(url: URL, cookie: string) {
   const response = await fetch(url, {
     headers: { ...REQUEST_HEADERS, Cookie: cookie },
@@ -163,7 +224,7 @@ function isValidDate(value: string) {
 export async function onRequestGet(context: { request: Request }) {
   const url = new URL(context.request.url);
   const mode = url.searchParams.get("mode") || "query";
-  if (mode !== "stations" && mode !== "query") return json({ error: "未知查询类型" }, 400);
+  if (!["stations", "query", "journey", "delays"].includes(mode)) return json({ error: "未知查询类型" }, 400);
 
   try {
     const stations = await getStations();
@@ -173,6 +234,11 @@ export async function onRequestGet(context: { request: Request }) {
     let from = (url.searchParams.get("from") || "").trim();
     let to = (url.searchParams.get("to") || "").trim();
     const trainCode = (url.searchParams.get("train") || "").trim().toUpperCase();
+    if (mode === "journey" || mode === "delays") {
+      if (!isValidDate(date) || !TRAIN_CODE.test(trainCode)) return json({ error: "请填写有效车次和始发日期" }, 400);
+      if (mode === "journey") return json((await getTimetable(date, trainCode, stations)).payload, 200, 60);
+      return json(await getDelays(date, trainCode, stations), 200, 30);
+    }
     const search = url.searchParams.get("search") || (from || to ? "route" : trainCode ? "train" : "route");
     if (!isValidDate(date) || !["train", "route"].includes(search) || (trainCode && !TRAIN_CODE.test(trainCode))) {
       return json({ error: "请填写有效的日期、查询方式和车次" }, 400);

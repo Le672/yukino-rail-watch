@@ -28,20 +28,30 @@ describe("RailGo train model reference", () => {
     expect(matchRailGoModel(result(), [row, { ...row, carOwner: "其他动车段" }], "now").trains[0]).toMatchObject({ trainsetModel: "CR400AF-BZ", trainsetOwner: null });
   });
 
-  it("requests RailGo directly and caches a route instead of querying each train on every poll", async () => {
+  it("requests only single-train equipment, ignores other third-party fields and reuses it across routes", async () => {
     vi.resetModules();
     const { enrichWithRailGo } = await import("../lib/railgo");
-    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify([row])));
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ ...row, timetable: "must not be used", seats: [{ value: "有" }] }));
     vi.stubGlobal("fetch", fetchMock);
     const first = await enrichWithRailGo(result());
-    const second = await enrichWithRailGo(result());
+    const second = await enrichWithRailGo({ ...result(), fromCode: "BJP", toCode: "SHH" });
     const url = new URL(String(fetchMock.mock.calls[0][0]));
     expect(url.hostname).toBe("data.railgo.zenglingkun.cn");
-    expect(url.searchParams.get("date")).toBe("20260928");
-    expect(url.searchParams.get("from")).toBe("VNP");
+    expect(url.pathname).toBe("/api/train/query");
+    expect([...url.searchParams.keys()]).toEqual(["train"]);
+    expect(url.searchParams.get("train")).toBe("G547");
     expect(first.trains[0].trainsetModel).toBe("CR400AF-BZ");
     expect(second.modelCheckedAt).toBe(first.modelCheckedAt);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not request supplemental equipment when an official model is already present, or apply an unconfirmed date", async () => {
+    vi.resetModules();
+    const { enrichWithRailGo } = await import("../lib/railgo");
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ ...row, rundays: ["20260927"] })); vi.stubGlobal("fetch", fetchMock);
+    const official = { ...result(), trains: [{ ...result().trains[0], trainsetModel: "CR400AF" }] };
+    expect(await enrichWithRailGo(official)).toBe(official); expect(fetchMock).not.toHaveBeenCalled();
+    expect((await enrichWithRailGo(result())).trains[0].trainsetModel).toBeNull();
   });
 
   it("preserves 12306 results and backs off when the model service fails", async () => {
@@ -53,5 +63,23 @@ describe("RailGo train model reference", () => {
     expect(await enrichWithRailGo(tickets)).toBe(tickets);
     expect(await enrichWithRailGo(tickets)).toBe(tickets);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("shares a pending equipment request and limits lookup concurrency to three", async () => {
+    vi.resetModules();
+    const { getRailGoEquipment } = await import("../lib/railgo");
+    let active = 0, peak = 0;
+    const fetchMock = vi.fn(async (input: URL) => {
+      active++; peak = Math.max(peak, active);
+      await Promise.resolve();
+      active--;
+      return Response.json({ ...row, numberFull: [input.searchParams.get("train")] });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const [a, b] = await Promise.all([getRailGoEquipment("G547", "2026-09-28"), getRailGoEquipment("G547", "2026-09-28")]);
+    expect(a).toBe(b); expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(a).not.toHaveProperty("timetable"); expect(a).not.toHaveProperty("diagram");
+    await Promise.all(Array.from({ length: 8 }, (_, index) => getRailGoEquipment(`G${index + 1000}`, "2026-09-28")));
+    expect(peak).toBeLessThanOrEqual(3);
   });
 });
