@@ -54,12 +54,13 @@ describe("physical stations and time-feasible connections", () => {
     const hz = station("惠州", "HCQ", "惠州"), small = station("小金口", "NKQ", "惠州"), source = station("樟木头", "ZOQ", "东莞"), dest = station("广州东", "GGQ"), listed = station("河源", "VIQ", "河源");
     const hubs = candidateHubs(source, dest, [source, dest, hz, small, b, c, listed], [listed], true);
     expect(hubs.findIndex(s => s.code === "VIQ")).toBeLessThan(hubs.findIndex(s => s.code === "HCQ"));
-    expect(hubs.slice(0, 2).map(s => s.code)).toEqual(["IZQ", "PYA"]);
+    expect(hubs[0].code).toBe("VIQ");
+    expect(new Set(hubs.slice(1, 3).map(s => s.code))).toEqual(new Set(["IZQ", "PYA"]));
   });
   it("keeps the two telecodes and applies directional walk buffers; never calls arbitrary city stations same-station", () => {
     expect(transferLink(b, c, 10)).toMatchObject({ kind: "walk", minimum: 25, from: { code: "IZQ" }, to: { code: "PYA" } });
     expect(transferLink(c, b, 10)?.minimum).toBe(35);
-    expect(transferLink(b, station("广州东", "GGQ"), 20, true)).toBeNull();
+    expect(transferLink(b, station("广州东", "GGQ"), 20, true)).toMatchObject({ kind: "city", minimum: 90 });
     const south = station("长沙南", "CWQ", "长沙"), central = station("长沙", "CSQ", "长沙");
     expect(transferLink(south, central, 20)).toBeNull();
     expect(transferLink(south, central, 20, true, 90)).toMatchObject({ kind: "city", minimum: 90 });

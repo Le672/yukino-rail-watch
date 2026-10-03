@@ -8,6 +8,7 @@ import type { TransferSettings, TransferResult, TransferProgress } from "../lib/
 import { DEFAULT_TRAIN_FILTERS, durationLabel, money, trainIdentity } from "../lib/rail-tickets";
 import type { Station, TrainFilters } from "../lib/rail-tickets";
 import { RailResultControls, TrainFare } from "./RailResultControls";
+import { officialCityKey } from "../lib/rail-national-network";
 import { TrainIllustration } from "./TrainIllustration";
 import "./rail-transfer.css";
 const STORAGE = "yukino-rail-transfer-v1";
@@ -28,17 +29,17 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
     controller.current?.abort(); generation.current++;
     setSettings(current => ({ ...current, ...patch })); setResult(null); setChecking(false); setProgress(null); setDetails(null); setError(null); setPage(1);
   };
-  const run = async () => {
+  const run = async (query = settings) => {
     controller.current?.abort(); const current = ++generation.current, abort = new AbortController(); controller.current = abort;
     setChecking(true); setError(null); setResult(null); setDetails(null); setPage(1);
     try {
-      const next = await searchTransfers(settings, stations, abort.signal, value => { if (current === generation.current) setProgress(value); });
+      const next = await searchTransfers(query, stations, abort.signal, value => { if (current === generation.current) setProgress(value); });
       if (current !== generation.current) return;
       setResult(next); setChecking(false); setProgress(null);
       const unique = [...new Map(next.trips.flatMap(trip => trip.legs).map(l => [trainIdentity(l), l])).values()];
       if (!unique.length) return;
       setDetails({ done: 0, total: unique.length });
-      await enrichTrainList(unique, settings.date, (updates, done) => {
+      await enrichTrainList(unique, query.date, (updates, done) => {
         const byId = new Map(updates.map(t => [trainIdentity(t), t]));
         if (current !== generation.current) return;
         setResult(previous => previous ? { ...previous, trips: previous.trips.map(trip => ({ ...trip, legs: trip.legs.map(l => mergeTrainDetails(l, byId.get(trainIdentity(l)))) })) } : previous);
@@ -52,8 +53,9 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
   const pages = Math.max(1, Math.ceil(sorted.length / 20)), currentPage = Math.min(page, pages), shown = sorted.slice((currentPage - 1) * 20, currentPage * 20);
   const trains = useMemo(() => result?.trips.flatMap(t => t.legs) || [], [result]);
   const filter = (value: TrainFilters) => { setFilters(value); setPage(1); };
+  const cityCount = new Set(stations.flatMap(s => officialCityKey(s) ? [officialCityKey(s)!] : [])).size;
   return <section className="rail-transfer" aria-label="中转行程查询">
-    <div className="rail-transfer-intro"><span className="rail-overline">TRANSFER / 12306</span><h2>中转行程</h2><p>同站、相邻站群与站外衔接一起规划。每程保持真实站名，按换乘所需时间筛选。</p></div>
+    <div className="rail-transfer-intro"><span className="rail-overline">NATIONWIDE TRANSFER / 12306</span><h2>中转行程</h2><p>全国铁路、高铁、普速与 12306 城际／市域列车一起规划。同站、相邻站群及同城异站分别计算换乘预留。</p></div>
     <form className="rail-transfer-form" onSubmit={event => { event.preventDefault(); void run(); }}>
       <div className="rail-transfer-fields">
         <label>首程乘车日期<input type="date" required value={settings.date} onChange={e => update({ date: e.target.value })}/></label>
@@ -61,6 +63,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
         <label>到达站<input list="rail-transfer-stations" required placeholder="例如 西平西 / 树木岭" value={settings.to} onChange={e => update({ to: e.target.value })}/></label>
         <label>最早出发<input type="time" required value={settings.earliest} onChange={e => update({ earliest: e.target.value })}/></label>
         <label>最多中转<select value={settings.maxChanges} onChange={e => update({ maxChanges: Number(e.target.value) as 1 | 2, via2: e.target.value === "1" ? "" : settings.via2 })}><option value={1}>1 次 · 最多 2 程</option><option value={2}>2 次 · 最多 3 程</option></select></label>
+        <label>搜索范围<select value={settings.hubLimit ?? 64} onChange={e => update({ hubLimit: Number(e.target.value) })}><option value={64}>标准 · 64 个候选站</option><option value={128}>扩展 · 128 个候选站</option><option value={256}>深度 · 256 个候选站</option><option value={512}>广域 · 512 个候选站（耗时较长）</option></select></label>
         <label>中转站 1（可选）<input list="rail-transfer-stations" placeholder="自动发现中转节点" value={settings.via} onChange={e => update({ via: e.target.value })}/></label>
         {settings.maxChanges === 2 && <label>中转站 2（可选）<input list="rail-transfer-stations" placeholder="指定两站可查询完整路径" value={settings.via2} onChange={e => update({ via2: e.target.value })}/></label>}
         <label>同站最短预留（分钟）<input type="number" min={10} max={180} required value={settings.minimum} onChange={e => update({ minimum: Number(e.target.value) })}/></label>
@@ -68,19 +71,21 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
         <label>站外预留（分钟）<input type="number" min={45} max={360} required value={settings.cityMinutes} onChange={e => update({ cityMinutes: Number(e.target.value) })}/></label>
       </div>
       <datalist id="rail-transfer-stations">{stations.map(s => <option key={s.code} value={s.name}>{s.city || s.pinyin}</option>)}</datalist>
-      <div className="rail-transfer-options"><label><input type="checkbox" checked={settings.stationGroupEndpoints} onChange={e => update({ stationGroupEndpoints: e.target.checked })}/>起终点也纳入相邻站群</label><label><input type="checkbox" checked={settings.allowCity} onChange={e => update({ allowCity: e.target.checked })}/>允许长株潭高铁与城际站外衔接</label></div>
-      <p className="rail-transfer-help">已纳入广州南／番禺、广州北／花都、广州新塘／新塘南、虎门／虎门北、肇庆东／鼎湖东、惠州／小金口、东莞东／常平东。相邻站群按方向至少预留 20–40 分钟；站外交通费用不计入铁路总票价。</p>
+      <div className="rail-transfer-options"><label><input type="checkbox" checked={settings.stationGroupEndpoints} onChange={e => update({ stationGroupEndpoints: e.target.checked })}/>起终点也纳入相邻站群</label><label><input type="checkbox" checked={settings.allowCity} onChange={e => update({ allowCity: e.target.checked })}/>允许全国同城异站换乘（需站外交通）</label></div>
+      <p className="rail-transfer-help">已载入 {stations.length} 个官方车站、{cityCount} 个城市标识，全国车站均可作为中转候选。北京、上海、成渝、长三角、东北、西北、西南及各地城际／市域车次以当日 12306 返回为准；选择中转站后也会检查同城异站，可关闭站外换乘。</p>
+      <p className="rail-transfer-help">广州南／番禺等七组已核对的相邻站群按方向至少预留 20–40 分钟；其他同城异站按站外交通预留，不能视为同站通道。含未核实城区范围的站点至少预留 180 分钟，地面路线需自行确认；站外交通费用不计入铁路总票价。</p>
       <div className="rail-transfer-actions"><button className="rail-transfer-primary" disabled={checking || !stations.length} type="submit"><ArrowRightLeft size={16}/>{checking ? "正在规划" : result ? "重新查询 / 刷新余票" : "查询中转"}</button>{checking && <button type="button" onClick={() => { controller.current?.abort(); generation.current++; setChecking(false); setProgress(null); }}><X size={15}/>取消查询</button>}<span>{!stations.length ? "正在加载官方车站表…" : progress ? `${progress.queryCount} 个区间 · ${progress.text}` : "车次、时刻、余票及票价来自 12306"}</span></div>
     </form>
     {error && <div className="rail-error" role="alert">{error}</div>}
     {result && <div className="rail-transfer-results">
       <div className="rail-transfer-results-heading"><h3>{result.from} → {result.to}</h3><span>{result.date} · {result.trips.length} 个方案</span></div>
+      {!settings.via && result.hubs.length < result.candidateCount && result.hubLimit < 512 && <div className="rail-transfer-actions"><button type="button" onClick={() => { const next = { ...settings, hubLimit: Math.min(512, result.hubLimit * 2) }; setSettings(next); void run(next); }}>扩大范围重新查询</button><span>本次选取 {result.hubs.length} / {result.candidateCount} 个全国候选站；扩大范围需更多查询时间。</span></div>}
       <div className="rail-transfer-seat-filter"><label>票价与余票席别<select value={seat} onChange={e => { setSeat(e.target.value); setPage(1); }}>{SEAT_OPTIONS.map(s => <option key={s}>{s}</option>)}</select></label><label className="rail-control-checkbox"><input type="checkbox" checked={everyModel} onChange={e => { setEveryModel(e.target.checked); setPage(1); }}/>车型筛选要求每程均匹配</label></div>
       <RailResultControls filters={currentFilters} onChange={filter} trains={trains} count={sorted.length} multi/>
       <p className="rail-transfer-help">总耗时包含乘车、等待与站群步行；总票价按所选席别逐程相加，“任意席别”取各程最低适用票价。余票按最少的一程排序，“有”表示未提供精确数量。未知价格排在已知总价之后。</p>
       {details && details.done < details.total && <p className="rail-transfer-loading" role="status"><RefreshCw size={13} className="rail-spin"/> 正在补充车型及缺失票价：{details.done} / {details.total}；筛选结果会随资料更新。</p>}
       {result.warnings.length > 0 && <details className="rail-transfer-warnings" open={!result.trips.length}><summary>查询范围与未完成区间（{result.warnings.length}）</summary><ul>{result.warnings.map(w => <li key={w}>{w}</li>)}</ul></details>}
-      {!shown.length ? <div className="rail-transfer-empty">{result.trips.length ? "没有符合当前车型或余票筛选的方案。" : "当前查询范围内暂无符合预留时间的方案，可调整时间或指定中转站。"}</div> : shown.map(trip => <article className="rail-trip" key={trip.id}>
+      {!shown.length ? <div className="rail-transfer-empty">{result.trips.length ? "没有符合当前车型或余票筛选的方案。" : result.serviceUnavailable ? "12306 暂时无法完成查询，请稍后重试；不能据此判断没有可行中转。" : "当前查询范围内暂无符合预留时间的方案，可调整时间或指定中转站。"}</div> : shown.map(trip => <article className="rail-trip" key={trip.id}>
         <header className="rail-trip-header"><div><strong>{chinaDateTime(trip.departureAt).replace("T", " ")} → {chinaDateTime(trip.arrivalAt).replace("T", " ")}</strong><span>{durationLabel(trip.duration)} · {trip.legs.length === 1 ? "直达" : `${trip.legs.length - 1} 次中转`}{trip.connections.some(c => c.kind === "city") ? " · 含站外换乘" : ""}</span></div><div className="rail-trip-total"><strong>{money(tripFare(trip, seat))}</strong><span>{tripSeats(trip, seat) > 0 ? "全程有关注席别余票" : "部分车次暂无关注席别余票"}</span></div></header>
         {trip.access && <div className="rail-trip-connection"><b>出发站群：{trip.access.from.name} → {trip.access.to.name}</b><span>预留 {trip.access.minimum} 分钟步行／进站</span><small>{trip.access.note}</small></div>}
         {trip.legs.map((leg, index) => <div className="rail-trip-leg-block" key={trainIdentity(leg)}>
@@ -92,7 +97,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
         {trip.egress && <div className="rail-trip-connection"><b>到达站群：{trip.egress.from.name} → {trip.egress.to.name}</b><span>预留 {trip.egress.minimum} 分钟步行／进站</span><small>{trip.egress.note}</small></div>}
       </article>)}
       {pages > 1 && <nav className="rail-trip-pagination" aria-label="中转结果分页"><button disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>上一页</button><span>{currentPage} / {pages} · 每页 20 个</span><button disabled={currentPage === pages} onClick={() => setPage(currentPage + 1)}>下一页</button></nav>}
-      <p className="rail-transfer-help">已查询 {result.queryCount} 个区间、{result.hubs.length} 个中转节点 · {new Date(result.checkedAt).toLocaleString("zh-CN", { hour12: false })}。自动查询覆盖已发现节点，指定中转站可补查其他路径；余票与检票截止以 12306 和车站现场为准。</p>
+      <p className="rail-transfer-help">已请求 {result.queryCount} 个区间，本次选取 {result.hubs.length} / {result.candidateCount} 个全国候选站 · {new Date(result.checkedAt).toLocaleString("zh-CN", { hour12: false })}。未完成区间见上方提示；本次结果不保证穷尽所有组合，可扩大范围或指定任意官方中转站补查，余票与检票截止以 12306 和车站现场为准。</p>
     </div>}
   </section>;
 }

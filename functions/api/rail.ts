@@ -14,6 +14,8 @@ const REQUEST_HEADERS = {
 
 let stationCache: { at: number; stations: Station[] } | undefined;
 let sessionCache: { at: number; cookie: string } | undefined;
+let sessionPending: Promise<string> | undefined;
+let nextTicketRequestAt = 0;
 type TrainRoute = { from: string; to: string; trainNo: string };
 const trainRouteCache = new Map<string, { at: number; route: TrainRoute }>();
 const TRAIN_CODE = /^(?:[GDCZTKYS]\d{1,4}[A-Z]?|\d{4})$/;
@@ -108,23 +110,28 @@ async function getStations(): Promise<Station[]> {
 
 async function getSessionCookie(): Promise<string> {
   if (sessionCache && Date.now() - sessionCache.at < 20 * 60 * 1000) return sessionCache.cookie;
-  const response = await fetch(`${ORIGIN}/otn/leftTicket/init`, {
-    headers: REQUEST_HEADERS,
-    signal: AbortSignal.timeout(15000),
-  });
-  if (!response.ok) throw new Error(`12306 初始化会话失败：${response.status}`);
-  const headers = response.headers as Headers & { getSetCookie?: () => string[] };
-  const setCookies = headers.getSetCookie?.() || [response.headers.get("set-cookie") || ""];
-  const cookies = new Map<string, string>();
-  for (const raw of setCookies) {
-    for (const match of raw.matchAll(/(?:^|,\s*)([A-Za-z0-9_-]+)=([^;,\s]*)/g)) {
-      cookies.set(match[1], match[2]);
+  if (sessionPending) return sessionPending;
+  const request = (async () => {
+    const response = await fetch(`${ORIGIN}/otn/leftTicket/init`, {
+      headers: REQUEST_HEADERS,
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!response.ok) throw new Error(`12306 初始化会话失败：${response.status}`);
+    const headers = response.headers as Headers & { getSetCookie?: () => string[] };
+    const setCookies = headers.getSetCookie?.() || [response.headers.get("set-cookie") || ""];
+    const cookies = new Map<string, string>();
+    for (const raw of setCookies) {
+      for (const match of raw.matchAll(/(?:^|,\s*)([A-Za-z0-9_-]+)=([^;,\s]*)/g)) {
+        cookies.set(match[1], match[2]);
+      }
     }
-  }
-  if (cookies.size === 0) throw new Error("12306 未返回查询会话");
-  const cookie = [...cookies].map(([name, value]) => `${name}=${value}`).join("; ");
-  sessionCache = { at: Date.now(), cookie };
-  return cookie;
+    if (cookies.size === 0) throw new Error("12306 未返回查询会话");
+    const cookie = [...cookies].map(([name, value]) => `${name}=${value}`).join("; ");
+    sessionCache = { at: Date.now(), cookie };
+    return cookie;
+  })();
+  sessionPending = request;
+  try { return await request; } finally { sessionPending = undefined; }
 }
 
 async function getTrainRoute(date: string, trainCode: string): Promise<TrainRoute> {
@@ -212,6 +219,11 @@ async function getDelays(date: string, train: string, stations: Station[]) {
 }
 
 async function fetchTicketPayload(url: URL, cookie: string) {
+  // Space outbound queries in this service instance; identical routes already share ticketPending.
+  const now = Date.now(), startAt = Math.max(now, nextTicketRequestAt);
+  if (startAt - now > 10000) throw new QueryError("余票查询繁忙，请稍后重试", 503);
+  nextTicketRequestAt = startAt + 250;
+  if (startAt > now) await new Promise<void>(resolve => setTimeout(resolve, startAt - now));
   const response = await fetch(url, {
     headers: { ...REQUEST_HEADERS, Cookie: cookie },
     signal: AbortSignal.timeout(15000),

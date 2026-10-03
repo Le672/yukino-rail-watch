@@ -6,10 +6,10 @@ import { compareNullable, minutes, seatScore, trainIdentity, trainPrice } from "
 import type { Station, Train, TrainFilters } from "./rail-tickets";
 export type Leg = Train & { date: string; departureAt: number; arrivalAt: number; fromCode: string; toCode: string };
 export type Trip = { id: string; legs: Leg[]; connections: TransferLink[]; access?: TransferLink; egress?: TransferLink; departureAt: number; arrivalAt: number; duration: number };
-export type TransferSettings = { date: string; from: string; to: string; via: string; via2: string; maxChanges: 1 | 2; minimum: number; maximumWait: number; cityMinutes: number; allowCity: boolean; stationGroupEndpoints: boolean; earliest: string };
-export type TransferResult = { date: string; from: string; to: string; checkedAt: string; trips: Trip[]; hubs: Station[]; warnings: string[]; queryCount: number };
+export type TransferSettings = { date: string; from: string; to: string; via: string; via2: string; maxChanges: 1 | 2; minimum: number; maximumWait: number; cityMinutes: number; allowCity: boolean; stationGroupEndpoints: boolean; earliest: string; hubLimit?: number };
+export type TransferResult = { date: string; from: string; to: string; checkedAt: string; trips: Trip[]; hubs: Station[]; warnings: string[]; queryCount: number; candidateCount: number; hubLimit: number; serviceUnavailable?: boolean };
 export type TransferProgress = { queryCount: number; text: string };
-export const DEFAULT_TRANSFER: TransferSettings = { date: chinaDateTime().slice(0, 10), from: "", to: "", via: "", via2: "", maxChanges: 1, minimum: 20, maximumWait: 240, cityMinutes: 90, allowCity: true, stationGroupEndpoints: true, earliest: "00:00" };
+export const DEFAULT_TRANSFER: TransferSettings = { date: chinaDateTime().slice(0, 10), from: "", to: "", via: "", via2: "", maxChanges: 1, minimum: 20, maximumWait: 240, cityMinutes: 90, allowCity: true, stationGroupEndpoints: true, earliest: "00:00", hubLimit: 64 };
 const routeCache = new Map<string, { at: number; trains: Train[]; checkedAt: string }>();
 const DAY = 86400000;
 export function tripFare(trip: Trip, seat: string) {
@@ -62,14 +62,15 @@ async function json<T>(params: URLSearchParams, signal?: AbortSignal) {
 }
 export async function searchTransfers(settings: TransferSettings, stations: Station[], signal: AbortSignal, onProgress: (progress: TransferProgress) => void): Promise<TransferResult> {
   const from = findStation(stations, settings.from), to = findStation(stations, settings.to);
+  const hubLimit = settings.hubLimit ?? 64, queryLimit = hubLimit * 8;
   if (!from || !to || from.code === to.code || !isJourneyDate(settings.date) || minutes(settings.earliest) == null || minutes(settings.earliest)! >= 1440 ||
       ![1, 2].includes(settings.maxChanges) || !Number.isInteger(settings.minimum) || settings.minimum < 10 || settings.minimum > 180 ||
-      !Number.isInteger(settings.maximumWait) || settings.maximumWait < settings.minimum || settings.maximumWait > 1440 || !Number.isInteger(settings.cityMinutes) || settings.cityMinutes < 45 || settings.cityMinutes > 360) throw new Error("请选择两个不同车站、有效日期和时间；同站预留 10–180 分钟，最长等待不超过 1440 分钟，站外预留 45–360 分钟。");
+      !Number.isInteger(settings.maximumWait) || settings.maximumWait < settings.minimum || settings.maximumWait > 1440 || !Number.isInteger(settings.cityMinutes) || settings.cityMinutes < 45 || settings.cityMinutes > 360 || !Number.isInteger(hubLimit) || hubLimit < 32 || hubLimit > 512) throw new Error("请选择两个不同车站、有效日期和时间；同站预留 10–180 分钟，最长等待不超过 1440 分钟，站外预留 45–360 分钟。");
   const manual = [settings.via, settings.via2].filter(Boolean).map(value => findStation(stations, value));
   if (manual.some(s => !s) || (settings.via2 && !settings.via) || (settings.via2 && settings.maxChanges !== 2)) throw new Error("请使用官方站名填写中转站；第二中转站需要允许两次中转。");
   if (manual.some(s => s!.code === from.code || s!.code === to.code) || manual.length === 2 && manual[0]!.code === manual[1]!.code) throw new Error("中转站不能与起终点或另一中转站相同。");
   const warnings = new Set<string>(), local = new Map<string, Promise<Leg[]>>(), trips = new Map<string, Trip>();
-  let queryCount = 0, active = 0;
+  let queryCount = 0, active = 0, consecutiveFailures = 0, serviceUnavailable = false;
   const queue: (() => void)[] = [];
   const limited = async <T,>(operation: () => Promise<T>): Promise<T> => {
     signal.throwIfAborted();
@@ -81,19 +82,26 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
     const key = `${date}/${a.code}/${b.code}`;
     if (local.has(key)) return local.get(key)!;
     const operation = limited(async () => {
+      if (serviceUnavailable) return [];
       const cached = routeCache.get(key);
       if (cached && Date.now() - cached.at < 30000) return cached.trains.flatMap(t => { const l = timedLeg(t, date); return l ? [l] : []; });
-      if (++queryCount > 140) { warnings.add("已达到本次自动查询范围，请指定中转站缩小范围后继续查询。"); return []; }
+      if (queryCount >= queryLimit) { warnings.add("已达到本次区间查询范围，可扩大搜索范围或指定中转站继续查询。"); return []; }
+      queryCount++;
       onProgress({ queryCount, text: `${date} · ${a.name} → ${b.name}` });
       try {
         const data = await json<{ trains: Train[]; checkedAt: string }>(new URLSearchParams({ date, search: "route", from: a.code, to: b.code }), signal);
         if (!Array.isArray(data.trains)) throw new Error("12306 区间响应格式异常");
+        consecutiveFailures = 0;
         if (routeCache.size >= 300) routeCache.delete(routeCache.keys().next().value!);
         routeCache.set(key, { at: Date.now(), trains: data.trains, checkedAt: data.checkedAt });
         return data.trains.flatMap(t => { const leg = timedLeg(t, date); return leg && leg.fromCode === a.code && leg.toCode === b.code ? [leg] : []; });
       } catch (cause) {
         signal.throwIfAborted();
         warnings.add(`${a.name} → ${b.name}（${date}）查询失败：${cause instanceof Error ? cause.message : String(cause)}`);
+        if (++consecutiveFailures >= 8) {
+          serviceUnavailable = true;
+          warnings.add("12306 连续多个区间查询失败，本次已停止继续请求；已有方案保留，未查询区间不代表没有车次，请稍后重试。");
+        }
         return [];
       }
     });
@@ -102,12 +110,20 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   };
   let official: Station[] = [];
   if (!manual.length) {
-    onProgress({ queryCount, text: "读取官方中转节点与城际站群" });
-    try { official = (await json<{ hubs: Station[] }>(new URLSearchParams({ mode: "hubs", date: settings.date, from: from.code, to: to.code }), signal)).hubs; }
-    catch (cause) { signal.throwIfAborted(); warnings.add(`官方推荐节点暂不可用，继续查询城际站群；可指定中转站：${cause instanceof Error ? cause.message : String(cause)}`); }
+    onProgress({ queryCount, text: "读取当日官方推荐与全国车站节点" });
+    const pairs = stationVariants(from, stations).flatMap(a => stationVariants(to, stations).map(b => [a, b] as const));
+    await Promise.all(pairs.map(([a, b]) => limited(async () => {
+      try {
+        const data = await json<{ hubs: Station[] }>(new URLSearchParams({ mode: "hubs", date: settings.date, from: a.code, to: b.code }), signal);
+        if (!Array.isArray(data.hubs)) throw new Error("12306 推荐节点响应格式异常");
+        official.push(...data.hubs);
+      } catch (cause) { signal.throwIfAborted(); warnings.add(`官方推荐节点暂不可用，继续查询全国车站候选；可指定中转站：${cause instanceof Error ? cause.message : String(cause)}`); }
+    })));
+    official = [...new Map(official.map(s => [s.code, s])).values()];
   }
   let hubs = manual.length ? [...new Map(manual.flatMap(s => interchangeVariants(s!, stations, settings.allowCity)).map(s => [s.code, s])).values()] : candidateHubs(from, to, stations, official, settings.allowCity);
-  if (hubs.length > 28) { hubs = hubs.slice(0, 28); warnings.add("自动查询优先覆盖 28 个节点，可指定中转站进一步查询。"); }
+  const candidateCount = hubs.length;
+  if (!manual.length && hubs.length > hubLimit) { hubs = hubs.slice(0, hubLimit); warnings.add(`本次优先查询 ${hubLimit} / ${candidateCount} 个全国候选站，可扩大搜索范围或指定中转站补查。`); }
   const origins = settings.stationGroupEndpoints ? stationVariants(from, stations) : [from], destinations = settings.stationGroupEndpoints ? stationVariants(to, stations) : [to];
   const station = (code: string) => stations.find(s => s.code === code)!;
   const firstLegs = new Map<string, Leg[]>();
@@ -147,8 +163,9 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
     let connectors = 0;
     for (const l1 of links1) for (const l2 of links2) {
       signal.throwIfAborted();
-      if (l1.from.code === l2.from.code || l1.to.code === l2.to.code || transferLink(l1.to, l2.from, 0, true)) continue;
-      if (!manual.length && connectors >= 36) { warnings.add("两次中转优先查询 36 条节点连接，指定两个中转站可完整查询所选路径。"); continue; }
+      if (serviceUnavailable) break;
+      if (l1.from.code === l2.from.code || l1.to.code === l2.to.code || transferLink(l1.to, l2.from, 0, false)) continue;
+      if (!manual.length && connectors >= hubLimit * 2) { warnings.add(`两次中转优先查询 ${hubLimit * 2} 条节点连接，指定两个中转站可补查所选路径。`); continue; }
       connectors++;
       const first = firstLegs.get(l1.from.code)!;
       const middle = (await Promise.all(datesAfter(first, l1).map(date => route(l1.to, l2.from, date)))).flat();
@@ -164,5 +181,5 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   }
   signal.throwIfAborted();
   if (!trips.size && warnings.size) warnings.add("部分区间查询失败，暂无方案不代表没有可行中转。");
-  return { date: settings.date, from: from.name, to: to.name, checkedAt: new Date().toISOString(), trips: [...trips.values()], hubs, warnings: [...warnings], queryCount: Math.min(queryCount, 140) };
+  return { date: settings.date, from: from.name, to: to.name, checkedAt: new Date().toISOString(), trips: [...trips.values()], hubs, warnings: [...warnings], queryCount, candidateCount, hubLimit, serviceUnavailable };
 }

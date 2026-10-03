@@ -33,3 +33,19 @@ it("shows each leg and physical walk transfer, sorts the summed price and filter
   fireEvent.click(screen.getByLabelText("车型筛选要求每程均匹配"));
   expect(screen.getByText("没有符合当前车型或余票筛选的方案。")).toBeVisible();
 });
+
+it("exposes nationwide city transfers and expands the automatic station search when requested", async () => {
+  const endpoints: Station[] = [{ name: "南京", code: "NJH", city: "南京", cityCode: "0711", pinyin: "" }, { name: "银川", code: "YIJ", city: "银川", cityCode: "2301", pinyin: "" }];
+  const extra: Station[] = Array.from({ length: 70 }, (_, i) => ({ name: `测试城${i}`, code: `N${String.fromCharCode(65 + Math.floor(i / 26))}${String.fromCharCode(65 + i % 26)}`, city: `测试城${i}`, cityCode: `测试${i}`, pinyin: "" }));
+  vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => new URL(String(input), "https://cr.yukino.bond").searchParams.get("mode") === "hubs" ? Response.json({ source: "12306", hubs: [] }) : Response.json({ source: "12306", trains: [], checkedAt: new Date().toISOString() })));
+  render(<RailTransfer stations={[...endpoints, ...extra]} onPosition={vi.fn()}/>);
+  expect(screen.getByLabelText("允许全国同城异站换乘（需站外交通）")).toBeChecked();
+  for (const [label, value] of [["首程乘车日期", "2026-10-09"], ["出发站", "南京"], ["到达站", "银川"]]) fireEvent.change(screen.getByLabelText(label), { target: { value } });
+  fireEvent.click(screen.getByRole("button", { name: "查询中转" }));
+  await screen.findByRole("button", { name: "扩大范围重新查询" });
+  expect(screen.getByText(/^本次选取 64 \/ 70 个全国候选站/)).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "扩大范围重新查询" }));
+  await waitFor(() => expect(screen.getByText(/已请求 .*70 \/ 70 个全国候选站/)).toBeVisible());
+  expect(screen.getByLabelText("搜索范围")).toHaveValue("128");
+  expect(screen.queryByRole("button", { name: "扩大范围重新查询" })).toBeNull();
+});

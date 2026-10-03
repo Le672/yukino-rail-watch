@@ -12,15 +12,15 @@
 
 手机版采用独立底部导航、车次卡片和原生通知 / 定位，不加载整张网页。Android 提供测试 APK；iOS 提供原生工程与模拟器构建，真机和商店发行需要自己的 Apple 开发者账号签名。
 
-[手机安装与发行教程](docs/mobile-distribution.md) · [手机预览版本](https://github.com/Le672/yukino-rail-watch/releases/tag/mobile-v1.1.1) · [隐私政策](https://cr.yukino.bond/rail-privacy.html)
+[手机安装与发行教程](docs/mobile-distribution.md) · [手机预览版本](https://github.com/Le672/yukino-rail-watch/releases/tag/mobile-v1.1.2) · [隐私政策](https://cr.yukino.bond/rail-privacy.html)
 
 前台按所设 1–60 分钟间隔检查；Android 后台最短约 15 分钟，iOS 后台由系统安排，无法保证固定频率。GPS 仅在前台位置页主动开启后读取。
 
 ## 功能
 
-- Windows 1.9.1 与手机 1.1.1 新增站群中转、多程票价与余票、车型和排序筛选；[中转使用说明](docs/rail-transfer.md)。支持广州南／番禺等相邻站群、长株潭站外衔接、跨日与最多三程，保留每程真实车站，地面交通费用另计。
+- Windows 1.9.2 与手机 1.1.2 新增站群中转、多程票价与余票、车型和排序筛选；[中转使用说明](docs/rail-transfer.md)。支持全国官方车站、同城异站、城际／市域、广州南／番禺等相邻站群、跨日与最多三程，可扩大搜索范围；保留每程真实车站，地面交通费用另计。
 
-- Windows 1.9.1 与手机 1.1.1 优先使用 12306 官方车次、停站表及正晚点，RailGo 仅补充车型、配属与铁路坐标；[数据来源与请求规则](docs/rail-data-sources.md)。
+- Windows 1.9.2 与手机 1.1.2 优先使用 12306 官方车次、停站表及正晚点，RailGo 仅补充车型、配属与铁路坐标；[数据来源与请求规则](docs/rail-data-sources.md)。
 
 - Windows 1.8.3 应用图标更新为余票页同款浅绿底列车图案，同步 exe、窗口、托盘及通知图标。
 

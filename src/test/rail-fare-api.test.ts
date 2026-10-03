@@ -22,6 +22,14 @@ function mock(encoded = "", additionalRows: string[] = []) {
 }
 afterEach(() => vi.unstubAllGlobals());
 describe("official ticket price and transfer node gateway", () => {
+  it("shares initialization across concurrent distinct ticket routes", async () => {
+    vi.resetModules(); const fetchMock = mock();
+    const { onRequestGet } = await import("../../functions/api/rail");
+    const responses = await Promise.all([date, "2026-10-05"].map(day => onRequestGet({ request: new Request(`https://cr.yukino.bond/api/rail?date=${day}&from=IZQ&to=CWQ&search=route`) })));
+    expect(responses.map(response => response.status)).toEqual([200, 200]);
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith("leftTicket/init"))).toHaveLength(1);
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).includes("leftTicket/queryA"))).toHaveLength(2);
+  });
   it("rejects same-city alternative station rows instead of treating different telecodes as the requested route", async () => {
     vi.resetModules();
     const wrong = row("O032050001M051000002").split("|");
