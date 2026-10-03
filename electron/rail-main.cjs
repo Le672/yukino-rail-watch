@@ -182,7 +182,7 @@ if (!app.requestSingleInstanceLock()) {
     const localLocationRequest = event => window && !window.isDestroyed() && event.sender === window.webContents && event.sender.getURL().startsWith("file://");
     ipcMain.handle("rail:location-start", event => { if (!localLocationRequest(event) || !window.isVisible()) throw new Error("位置请求来源无效"); locationWatcher.start(); });
     ipcMain.handle("rail:location-stop", event => { if (localLocationRequest(event)) locationWatcher.stop(); });
-    ipcMain.handle("rail:stations", () => apiRequest(`${API}?mode=stations`));
+    ipcMain.handle("rail:stations", () => apiRequest(`${API}?mode=stations&schema=city-v1`));
     ipcMain.handle("rail:configure", (_event, value) => {
       settings = validate(value);
       revision++;

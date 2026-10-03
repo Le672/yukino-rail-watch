@@ -1,6 +1,6 @@
 # Android / iOS 客户端：安装与发行
 
-手机版本独立于 Windows 版本，版本号由 [`mobile-version.json`](../mobile-version.json) 管理。当前版本为 **1.1.2 / build 5**，包名与 Bundle ID 均为 `bond.yukino.rail`。最低 Android 7.0（API 24）、iOS 15。Windows 便携版为 1.9.2。中转与排序的使用方法见[中转说明](rail-transfer.md)。
+手机版本独立于 Windows 版本，版本号由 [`mobile-version.json`](../mobile-version.json) 管理。当前版本为 **1.1.2 / build 5**，包名与 Bundle ID 均为 `bond.yukino.rail`。最低 Android 7.0（API 24）、iOS 15。Windows 便携版为 1.9.3。中转与排序的使用方法见[中转说明](rail-transfer.md)。
 
 ## 先理解三个文件
 
