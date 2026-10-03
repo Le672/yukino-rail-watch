@@ -3,7 +3,7 @@ import { intercityFares, parseEncodedFares, parsePriceResponse } from "../lib/ra
 import { DEFAULT_TRAIN_FILTERS, seatScore, sortTrains, trainPrice } from "../lib/rail-tickets";
 import type { Train, Station } from "../lib/rail-tickets";
 import { DEFAULT_TRANSFER, makeTrip, searchTransfers, sortTrips, timedLeg, tripFare, tripSeats } from "../lib/rail-transfer";
-import { transferLink } from "../lib/rail-station-groups";
+import { candidateHubs, stationVariants, transferLink } from "../lib/rail-station-groups";
 const date = "2026-10-04";
 const station = (name: string, code: string, city = "广州"): Station => ({ name, code, city, pinyin: "", cityCode: "1502" });
 const a = station("深圳北", "IOQ", "深圳"), b = station("广州南", "IZQ"), c = station("番禺", "PYA"), d = station("西平西", "XPH", "东莞"), e = station("东莞西", "WGQ", "东莞");
@@ -39,6 +39,23 @@ describe("official fares and journey ordering", () => {
   });
 });
 describe("physical stations and time-feasible connections", () => {
+  it.each([
+    ["广州北", "GBQ", "花都", "HAA", 20, 30],
+    ["肇庆东", "FCQ", "鼎湖东", "UWQ", 20, 30],
+    ["惠州", "HCQ", "小金口", "NKQ", 20, 30],
+    ["东莞东", "DMQ", "常平东", "FQQ", 30, 40],
+  ] as const)("recognizes %s and %s as separate walking-connected telecodes", (name, code, pairedName, pairedCode, forward, reverse) => {
+    const from = station(name, code), to = station(pairedName, pairedCode);
+    expect(stationVariants(from, [from, to]).map(s => s.code)).toEqual([code, pairedCode]);
+    expect(transferLink(from, to, 10)).toMatchObject({ kind: "walk", minimum: forward });
+    expect(transferLink(to, from, 10)).toMatchObject({ kind: "walk", minimum: reverse });
+  });
+  it("prioritizes destination-region and official hubs before unrelated nodes when automatic coverage is bounded", () => {
+    const hz = station("惠州", "HCQ", "惠州"), small = station("小金口", "NKQ", "惠州"), source = station("樟木头", "ZOQ", "东莞"), dest = station("广州东", "GGQ"), listed = station("河源", "VIQ", "河源");
+    const hubs = candidateHubs(source, dest, [source, dest, hz, small, b, c, listed], [listed], true);
+    expect(hubs.findIndex(s => s.code === "VIQ")).toBeLessThan(hubs.findIndex(s => s.code === "HCQ"));
+    expect(hubs.slice(0, 2).map(s => s.code)).toEqual(["IZQ", "PYA"]);
+  });
   it("keeps the two telecodes and applies directional walk buffers; never calls arbitrary city stations same-station", () => {
     expect(transferLink(b, c, 10)).toMatchObject({ kind: "walk", minimum: 25, from: { code: "IZQ" }, to: { code: "PYA" } });
     expect(transferLink(c, b, 10)?.minimum).toBe(35);

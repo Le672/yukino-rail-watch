@@ -1,6 +1,6 @@
 # Android / iOS 客户端：安装与发行
 
-手机版本独立于 Windows 版本，版本号由 [`mobile-version.json`](../mobile-version.json) 管理。当前版本为 **1.1.0 / build 3**，包名与 Bundle ID 均为 `bond.yukino.rail`。最低 Android 7.0（API 24）、iOS 15。Windows 便携版为 1.9.0。中转与排序的使用方法见[中转说明](rail-transfer.md)。
+手机版本独立于 Windows 版本，版本号由 [`mobile-version.json`](../mobile-version.json) 管理。当前版本为 **1.1.1 / build 4**，包名与 Bundle ID 均为 `bond.yukino.rail`。最低 Android 7.0（API 24）、iOS 15。Windows 便携版为 1.9.1。中转与排序的使用方法见[中转说明](rail-transfer.md)。
 
 ## 先理解三个文件
 
@@ -24,7 +24,7 @@
 
 ## 2. Android：先安装预览 APK
 
-1. 在 Android 手机上进入 [Releases](https://github.com/Le672/yukino-rail-watch/releases)，选择 `Android / iOS 1.1.0 Preview`，展开 Assets，下载 `Yukino-Rail-Watch-Android-1.1.0-debug.apk`。
+1. 在 Android 手机上进入 [Releases](https://github.com/Le672/yukino-rail-watch/releases)，选择 `Android / iOS 1.1.1 Preview`，展开 Assets，下载 `Yukino-Rail-Watch-Android-1.1.1-debug.apk`。
 2. 打开文件，按系统提示允许当前浏览器或文件管理器安装应用，然后安装。这个版本是测试包，调试标记会保留。
 3. 输入日期和车次，点「立即查询」。再点「开启监控」，允许系统通知；前台应立即检查。位置页点开启 GPS 后才申请定位。
 4. 测试锁屏、前后台切换、撤销权限及无网络情况。部分品牌手机还需在系统设置允许应用后台活动；Android 强行停止应用后，要重新打开才能恢复任务。

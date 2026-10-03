@@ -69,7 +69,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
       </div>
       <datalist id="rail-transfer-stations">{stations.map(s => <option key={s.code} value={s.name}>{s.city || s.pinyin}</option>)}</datalist>
       <div className="rail-transfer-options"><label><input type="checkbox" checked={settings.stationGroupEndpoints} onChange={e => update({ stationGroupEndpoints: e.target.checked })}/>起终点也纳入相邻站群</label><label><input type="checkbox" checked={settings.allowCity} onChange={e => update({ allowCity: e.target.checked })}/>允许长株潭高铁与城际站外衔接</label></div>
-      <p className="rail-transfer-help">广州南／番禺、广州新塘／新塘南、虎门／虎门北按相邻站群衔接。相邻站群按方向至少预留 20–35 分钟；站外需另行安排地面交通，费用不计入铁路总票价。</p>
+      <p className="rail-transfer-help">已纳入广州南／番禺、广州北／花都、广州新塘／新塘南、虎门／虎门北、肇庆东／鼎湖东、惠州／小金口、东莞东／常平东。相邻站群按方向至少预留 20–40 分钟；站外交通费用不计入铁路总票价。</p>
       <div className="rail-transfer-actions"><button className="rail-transfer-primary" disabled={checking || !stations.length} type="submit"><ArrowRightLeft size={16}/>{checking ? "正在规划" : result ? "重新查询 / 刷新余票" : "查询中转"}</button>{checking && <button type="button" onClick={() => { controller.current?.abort(); generation.current++; setChecking(false); setProgress(null); }}><X size={15}/>取消查询</button>}<span>{!stations.length ? "正在加载官方车站表…" : progress ? `${progress.queryCount} 个区间 · ${progress.text}` : "车次、时刻、余票及票价来自 12306"}</span></div>
     </form>
     {error && <div className="rail-error" role="alert">{error}</div>}

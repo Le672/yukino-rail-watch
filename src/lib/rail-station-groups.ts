@@ -5,11 +5,15 @@ export const WALK_GROUPS = [
   { names: ["广州南", "番禺"], minutes: [25, 35], note: "广州南地下城际番禺站，按指引出闸换乘；进入高铁需预留安检、检票时间。" },
   { names: ["广州新塘", "新塘南"], minutes: [20, 30], note: "国铁新塘枢纽与城际新塘南衔接，按现场指引换乘并重新检票。" },
   { names: ["虎门", "虎门北"], minutes: [25, 35], note: "高铁虎门与穗深城际虎门北处于同一综合枢纽，仍需出闸及进站。" },
+  { names: ["广州北", "花都"], minutes: [20, 30], note: "广州北与城际花都站通过枢纽换乘通道衔接，按现场指引出闸、步行并重新检票。" },
+  { names: ["肇庆东", "鼎湖东"], minutes: [20, 30], note: "高铁肇庆东与城际鼎湖东经综合体连廊衔接，需出闸、步行并重新进站。" },
+  { names: ["惠州", "小金口"], minutes: [20, 30], note: "普铁惠州与城际小金口为相邻站群，需出站沿现场指引步行，返回国铁预留安检检票时间。" },
+  { names: ["东莞东", "常平东"], minutes: [30, 40], note: "两站需站外沿道路步行并过路口，不能按同站通道换乘；预留步行、安检和检票时间。" },
 ] as const;
 const CITY_GROUPS = [["长沙南", "长沙"], ["株洲西", "株洲"], ["湘潭北", "湘潭"]] as const;
 const GD_CITIES = new Set(["广州", "佛山", "肇庆", "东莞", "惠州", "深圳", "清远", "中山", "珠海", "江门"]);
 const HN_CITIES = new Set(["长沙", "株洲", "湘潭"]);
-const GD_HUBS = ["广州南", "番禺", "佛山西", "东莞西", "广州新塘", "新塘南", "虎门", "虎门北", "广州北", "广州白云", "广州东", "肇庆", "肇庆东", "鼎湖东", "深圳北", "常平"];
+const GD_HUBS = ["广州南", "番禺", "佛山西", "东莞西", "广州新塘", "新塘南", "虎门", "虎门北", "广州北", "广州白云", "广州东", "肇庆", "肇庆东", "鼎湖东", "深圳北", "常平", "惠州", "小金口", "东莞东", "常平东"];
 const HN_HUBS = ["长沙南", "长沙", "暮云", "株洲", "株洲西", "湘潭", "湘潭北", "株洲南", "长沙西", "大丰"];
 const NATIONAL_HUBS = ["北京南", "北京西", "天津南", "石家庄", "济南西", "徐州东", "郑州东", "南京南", "合肥南", "杭州东", "上海虹桥", "武汉", "长沙南", "南昌西", "广州南", "深圳北", "西安北", "成都东", "重庆北", "昆明南", "贵阳北", "南宁东"];
 export function findStation(stations: Station[], input: string) {
@@ -51,5 +55,8 @@ export function candidateHubs(from: Station, to: Station, stations: Station[], o
       for (const name of group) for (const station of stations.filter(s => s.name === name)) result.set(station.code, station);
     }
   }
-  return [...result.values()].filter(s => s.code !== from.code && s.code !== to.code);
+  const recommended = new Set(official.flatMap(hub => interchangeVariants(hub, stations, allowCity)).map(s => s.code));
+  const priority = (s: Station) => (s.city && cities.includes(s.city) ? 200 : 0) + (recommended.has(s.code) ? 100 : 0) + (WALK_GROUPS.some(group => group.names.some(name => name === s.name)) ? 40 : 0);
+  // Keep endpoint-region and official candidates ahead of unrelated regional nodes if the query budget is reached.
+  return [...result.values()].filter(s => s.code !== from.code && s.code !== to.code).sort((a, b) => priority(b) - priority(a));
 }
