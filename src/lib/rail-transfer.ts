@@ -4,23 +4,33 @@ import type { TransferLink } from "./rail-station-groups";
 import { chinaDateTime, isJourneyDate } from "./train-position";
 import { compareNullable, minutes, seatScore, trainIdentity, trainPrice } from "./rail-tickets";
 import type { Station, Train, TrainFilters } from "./rail-tickets";
+import { isUrbanStation, loadUrbanRail } from "./urban-rail";
+import type { UrbanRailPlanner, UrbanRoute } from "./urban-rail";
 export type Leg = Train & { date: string; departureAt: number; arrivalAt: number; fromCode: string; toCode: string };
-export type Trip = { id: string; legs: Leg[]; connections: TransferLink[]; access?: TransferLink; egress?: TransferLink; departureAt: number; arrivalAt: number; duration: number };
-export type TransferSettings = { date: string; from: string; to: string; via: string; via2: string; maxChanges: 1 | 2; minimum: number; maximumWait: number; cityMinutes: number; allowCity: boolean; stationGroupEndpoints: boolean; earliest: string; hubLimit?: number };
-export type TransferResult = { date: string; from: string; to: string; checkedAt: string; trips: Trip[]; hubs: Station[]; warnings: string[]; queryCount: number; candidateCount: number; hubLimit: number; serviceUnavailable?: boolean };
+export type Trip = { id: string; legs: Leg[]; connections: TransferLink[]; access?: TransferLink; egress?: TransferLink; urbanOnly?: UrbanRoute; departureAt: number; arrivalAt: number; duration: number };
+export type TransferSettings = { date: string; from: string; to: string; via: string; via2: string; maxChanges: 1 | 2; minimum: number; maximumWait: number; cityMinutes: number; allowCity: boolean; stationGroupEndpoints: boolean; earliest: string; hubLimit?: number; allowUrban?: boolean };
+export type TransferResult = { date: string; from: string; to: string; checkedAt: string; trips: Trip[]; hubs: Station[]; warnings: string[]; queryCount: number; candidateCount: number; hubLimit: number; serviceUnavailable?: boolean; urban?: { lines: number; stops: number; sourceDate: string } };
 export type TransferProgress = { queryCount: number; text: string };
-export const DEFAULT_TRANSFER: TransferSettings = { date: chinaDateTime().slice(0, 10), from: "", to: "", via: "", via2: "", maxChanges: 1, minimum: 20, maximumWait: 240, cityMinutes: 90, allowCity: true, stationGroupEndpoints: true, earliest: "00:00", hubLimit: 64 };
+export const DEFAULT_TRANSFER: TransferSettings = { date: chinaDateTime().slice(0, 10), from: "", to: "", via: "", via2: "", maxChanges: 1, minimum: 20, maximumWait: 240, cityMinutes: 90, allowCity: true, stationGroupEndpoints: true, earliest: "00:00", hubLimit: 64, allowUrban: false };
 const routeCache = new Map<string, { at: number; trains: Train[]; checkedAt: string }>();
 const DAY = 86400000;
-export function tripFare(trip: Trip, seat: string) {
+export function tripRailFare(trip: Trip, seat: string) {
+  if (!trip.legs.length) return null;
   const prices = trip.legs.map(t => trainPrice(t, seat));
   return prices.some(p => p == null) ? null : Math.round(prices.reduce<number>((sum, p) => sum + p!, 0) * 100) / 100;
 }
-export function tripSeats(trip: Trip, seat: string) { return Math.min(...trip.legs.map(t => seatScore(t, seat))); }
-export function sortTrips(trips: Trip[], filters: TrainFilters, requireEveryModel = false) {
+export function hasUrban(trip: Trip) { return !!trip.urbanOnly || [trip.access, ...trip.connections, trip.egress].some(link => link?.kind === "urban"); }
+export function tripFare(trip: Trip, seat: string) {
+  if (trip.urbanOnly) return trip.urbanOnly.fare;
+  const railway = tripRailFare(trip, seat), urban = [trip.access, ...trip.connections, trip.egress].flatMap(link => link?.urban ? [link.urban.fare] : []);
+  return railway == null || urban.some(fare => fare == null) ? null : Math.round((railway + urban.reduce<number>((sum, fare) => sum + fare!, 0)) * 100) / 100;
+}
+export function tripSeats(trip: Trip, seat: string) { return trip.legs.length ? Math.min(...trip.legs.map(t => seatScore(t, seat))) : 0; }
+export function sortTrips(trips: Trip[], filters: TrainFilters, requireEveryModel = false, railFirst = true) {
   return trips.filter(trip => (!filters.availableOnly || tripSeats(trip, filters.seat) > 0) && (!filters.model ||
-    (requireEveryModel ? trip.legs.every(t => t.trainsetModel === filters.model) : trip.legs.some(t => t.trainsetModel === filters.model))))
+    (requireEveryModel ? trip.legs.length > 0 && trip.legs.every(t => t.trainsetModel === filters.model) : trip.legs.some(t => t.trainsetModel === filters.model))))
     .sort((a, b) => {
+      if (railFirst && hasUrban(a) !== hasUrban(b)) return hasUrban(a) ? 1 : -1;
       let order = 0;
       if (filters.sort === "price") order = compareNullable(tripFare(a, filters.seat), tripFare(b, filters.seat));
       else if (filters.sort === "seats") order = tripSeats(b, filters.seat) - tripSeats(a, filters.seat);
@@ -52,7 +62,8 @@ export function makeTrip(legs: Leg[], connections: TransferLink[], settings: Tra
     if (visits.has(leg.toCode)) return null;
     visits.add(leg.fromCode); visits.add(leg.toCode);
   }
-  return { id: legs.map(l => trainIdentity(l)).join("|"), legs, connections, access, egress, departureAt, arrivalAt, duration: Math.round((arrivalAt - departureAt) / 60000) };
+  const urbanIds = [access, ...connections, egress].flatMap(link => link?.urban ? [link.urban.id] : []);
+  return { id: legs.map(l => trainIdentity(l)).join("|") + (urbanIds.length ? `|urban:${urbanIds.join("|")}` : ""), legs, connections, access, egress, departureAt, arrivalAt, duration: Math.round((arrivalAt - departureAt) / 60000) };
 }
 async function json<T>(params: URLSearchParams, signal?: AbortSignal) {
   const response = await fetch(railApiUrl(params), { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000) });
@@ -61,7 +72,9 @@ async function json<T>(params: URLSearchParams, signal?: AbortSignal) {
   return data as T;
 }
 export async function searchTransfers(settings: TransferSettings, stations: Station[], signal: AbortSignal, onProgress: (progress: TransferProgress) => void): Promise<TransferResult> {
-  const from = findStation(stations, settings.from), to = findStation(stations, settings.to);
+  let urban: UrbanRailPlanner | undefined;
+  if (settings.allowUrban) { onProgress({ queryCount: 0, text: "载入全国城市轨道网络" }); urban = await loadUrbanRail(); signal.throwIfAborted(); }
+  const from = findStation(stations, settings.from) || urban?.findStation(settings.from), to = findStation(stations, settings.to) || urban?.findStation(settings.to);
   const hubLimit = settings.hubLimit ?? 64, queryLimit = hubLimit * 8;
   if (!from || !to || from.code === to.code || !isJourneyDate(settings.date) || minutes(settings.earliest) == null || minutes(settings.earliest)! >= 1440 ||
       ![1, 2].includes(settings.maxChanges) || !Number.isInteger(settings.minimum) || settings.minimum < 10 || settings.minimum > 180 ||
@@ -70,6 +83,34 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   if (manual.some(s => !s) || (settings.via2 && !settings.via) || (settings.via2 && settings.maxChanges !== 2)) throw new Error("请使用官方站名填写中转站；第二中转站需要允许两次中转。");
   if (manual.some(s => s!.code === from.code || s!.code === to.code) || manual.length === 2 && manual[0]!.code === manual[1]!.code) throw new Error("中转站不能与起终点或另一中转站相同。");
   const warnings = new Set<string>(), local = new Map<string, Promise<Leg[]>>(), trips = new Map<string, Trip>();
+  const urbanLink = (a: Station, b: Station, enteringRail = true): TransferLink | null => {
+    if (!urban || a.code === b.code) return null;
+    const route = urban.route(a, b, signal);
+    return route ? { from: a, to: b, kind: "urban", minimum: route.minutes + (enteringRail ? settings.minimum : 0), note: route.note, urban: route } : null;
+  };
+  const accessLinks = new Map<string, TransferLink>(), egressLinks = new Map<string, TransferLink>();
+  const originRail = isUrbanStation(from) ? [] : settings.stationGroupEndpoints ? stationVariants(from, stations) : [from];
+  const destinationRail = isUrbanStation(to) ? [] : settings.stationGroupEndpoints ? stationVariants(to, stations) : [to];
+  const directUrban = urban && !manual.length ? urban.route(from, to, signal) : null;
+  if (directUrban && isUrbanStation(from) && isUrbanStation(to)) {
+    const departureAt = Date.parse(`${settings.date}T${settings.earliest}:00+08:00`);
+    // A local urban-rail journey does not require hundreds of unrelated 12306 queries.
+    return { date: settings.date, from: from.name, to: to.name, checkedAt: new Date().toISOString(), trips: [{ id: directUrban.id, legs: [], connections: [], urbanOnly: directUrban, departureAt, arrivalAt: departureAt + directUrban.minutes * 60000, duration: directUrban.minutes }],
+      hubs: [], warnings: [directUrban.note], queryCount: 0, candidateCount: 0, hubLimit,
+      urban: { lines: urban!.network.lines.length, stops: urban!.stations().length, sourceDate: urban!.network.sourceDate } };
+  }
+  if (urban) {
+    // Search all mapped railway anchors, not a city whitelist. A small gateway budget keeps official requests bounded.
+    for (const gateway of urban.gateways(from, stations, isUrbanStation(from) ? 6 : 2)) { const link = urbanLink(from, gateway.station); if (link && !originRail.some(s => s.code === gateway.station.code)) { originRail.push(gateway.station); accessLinks.set(gateway.station.code, link); } }
+    for (const gateway of urban.gateways(to, stations, isUrbanStation(to) ? 6 : 2)) { const link = urbanLink(gateway.station, to, false); if (link && !destinationRail.some(s => s.code === gateway.station.code)) { destinationRail.push(gateway.station); egressLinks.set(gateway.station.code, link); } }
+    const route = directUrban;
+    if (route) {
+      const departureAt = Date.parse(`${settings.date}T${settings.earliest}:00+08:00`);
+      trips.set(route.id, { id: route.id, legs: [], connections: [], urbanOnly: route, departureAt, arrivalAt: departureAt + route.minutes * 60000, duration: route.minutes });
+    }
+    warnings.add("城市轨道为可选的估算方案；没有对应日期的班次、首末班或停运资料时，不保证可赶上衔接列车，轨道票价未知时不会把铁路小计当作总价。");
+    if (!originRail.length || !destinationRail.length) warnings.add("所选轨道站暂无已核实坐标与可达线路的铁路接驳节点；仍展示可找到的纯轨道方案，未收录线路不代表没有轨道服务。");
+  }
   let queryCount = 0, active = 0, consecutiveFailures = 0, serviceUnavailable = false;
   const queue: (() => void)[] = [];
   const limited = async <T,>(operation: () => Promise<T>): Promise<T> => {
@@ -111,7 +152,7 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   let official: Station[] = [];
   if (!manual.length) {
     onProgress({ queryCount, text: "读取当日官方推荐与全国车站节点" });
-    const pairs = stationVariants(from, stations).flatMap(a => stationVariants(to, stations).map(b => [a, b] as const));
+    const pairs = originRail.slice(0, 2).flatMap(a => destinationRail.slice(0, 2).map(b => [a, b] as const));
     await Promise.all(pairs.map(([a, b]) => limited(async () => {
       try {
         const data = await json<{ hubs: Station[] }>(new URLSearchParams({ mode: "hubs", date: settings.date, from: a.code, to: b.code }), signal);
@@ -121,15 +162,16 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
     })));
     official = [...new Map(official.map(s => [s.code, s])).values()];
   }
-  let hubs = manual.length ? [...new Map(manual.flatMap(s => interchangeVariants(s!, stations, settings.allowCity)).map(s => [s.code, s])).values()] : candidateHubs(from, to, stations, official, settings.allowCity);
+  let hubs = manual.length ? [...new Map(manual.flatMap(s => interchangeVariants(s!, stations, settings.allowCity || !!settings.allowUrban)).map(s => [s.code, s])).values()] : candidateHubs(from, to, stations, official, settings.allowCity || !!settings.allowUrban);
   const candidateCount = hubs.length;
   if (!manual.length && hubs.length > hubLimit) { hubs = hubs.slice(0, hubLimit); warnings.add(`本次优先查询 ${hubLimit} / ${candidateCount} 个全国候选站，可扩大搜索范围或指定中转站补查。`); }
-  const origins = settings.stationGroupEndpoints ? stationVariants(from, stations) : [from], destinations = settings.stationGroupEndpoints ? stationVariants(to, stations) : [to];
+  const origins = [...new Map(originRail.map(s => [s.code, s])).values()], destinations = [...new Map(destinationRail.map(s => [s.code, s])).values()];
   const station = (code: string) => stations.find(s => s.code === code)!;
   const firstLegs = new Map<string, Leg[]>();
   const add = (legs: Leg[], links: TransferLink[]) => {
-    const access = legs[0].fromCode !== from.code ? transferLink(from, station(legs[0].fromCode), 0) || undefined : undefined;
-    const last = legs.at(-1)!, egress = last.toCode !== to.code ? transferLink(station(last.toCode), to, 0) || undefined : undefined;
+    const access = legs[0].fromCode !== from.code ? accessLinks.get(legs[0].fromCode) || transferLink(from, station(legs[0].fromCode), 0) || undefined : undefined;
+    const last = legs.at(-1)!, egress = last.toCode !== to.code ? egressLinks.get(last.toCode) || transferLink(station(last.toCode), to, 0) || undefined : undefined;
+    if (legs[0].fromCode !== from.code && !access || last.toCode !== to.code && !egress) return;
     const trip = makeTrip(legs, links, settings, access, egress);
     if (trip && trips.size < 50000) trips.set(trip.id, trip);
     else if (trip) warnings.add("方案组合超过 50000 个，请指定节点或缩短等待范围。");
@@ -148,10 +190,12 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
     return dates;
   }))].sort();
   const linksFor = (arrivals: Station[], departures: Station[]) => arrivals.flatMap(a => departures.flatMap(b => {
+    if (origins.some(s => s.code === a.code || s.code === b.code) || destinations.some(s => s.code === a.code || s.code === b.code)) return [];
     const link = transferLink(a, b, settings.minimum, settings.allowCity, settings.cityMinutes);
-    return link && !origins.some(s => s.code === a.code || s.code === b.code) && !destinations.some(s => s.code === a.code || s.code === b.code) ? [link] : [];
+    const optional = a.code !== b.code && firstLegs.get(a.code)?.length && link?.kind !== "walk" ? urbanLink(a, b) : null;
+    return [link, optional].filter((value): value is TransferLink => !!value);
   }));
-  const manual1 = manual[0] ? interchangeVariants(manual[0]!, stations, settings.allowCity) : hubs, manual2 = manual[1] ? interchangeVariants(manual[1]!, stations, settings.allowCity) : hubs;
+  const manual1 = manual[0] ? interchangeVariants(manual[0]!, stations, settings.allowCity || !!settings.allowUrban) : hubs, manual2 = manual[1] ? interchangeVariants(manual[1]!, stations, settings.allowCity || !!settings.allowUrban) : hubs;
   if (manual.length < 2) await Promise.all(linksFor(manual1, manual1).map(async link => {
     const first = firstLegs.get(link.from.code) || [];
     if (!first.length) return;
@@ -181,5 +225,6 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   }
   signal.throwIfAborted();
   if (!trips.size && warnings.size) warnings.add("部分区间查询失败，暂无方案不代表没有可行中转。");
-  return { date: settings.date, from: from.name, to: to.name, checkedAt: new Date().toISOString(), trips: [...trips.values()], hubs, warnings: [...warnings], queryCount, candidateCount, hubLimit, serviceUnavailable };
+  return { date: settings.date, from: from.name, to: to.name, checkedAt: new Date().toISOString(), trips: [...trips.values()], hubs, warnings: [...warnings], queryCount, candidateCount, hubLimit, serviceUnavailable,
+    urban: urban ? { lines: urban.network.lines.length, stops: urban.stations().length, sourceDate: urban.network.sourceDate } : undefined };
 }

@@ -1,6 +1,7 @@
 import type { Station } from "./rail-tickets";
 import { cityStations, cityTransferReserve, nationalHubRanking, sameOfficialCity } from "./rail-national-network";
-export type TransferLink = { from: Station; to: Station; kind: "same" | "walk" | "city"; minimum: number; note: string };
+import type { UrbanRoute } from "./urban-rail-types";
+export type TransferLink = { from: Station; to: Station; kind: "same" | "walk" | "city" | "urban"; minimum: number; note: string; urban?: UrbanRoute };
 // Infrastructure relationships, not timetable aliases. Keep both official telecodes in every query.
 export const WALK_GROUPS = [
   { names: ["广州南", "番禺"], minutes: [25, 35], note: "广州南地下城际番禺站，按指引出闸换乘；进入高铁需预留安检、检票时间。" },
