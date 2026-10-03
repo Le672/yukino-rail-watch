@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { enrichWithRailGo } from "../lib/railgo";
+import { enrichTrainList, mergeTrainDetails } from "../lib/rail-enrichment";
+import { trainIdentity } from "../lib/rail-tickets";
+import type { Train, Station, Seat } from "../lib/rail-tickets";
+export type { Train, Station, Seat } from "../lib/rail-tickets";
+export { matchingSeats } from "../lib/rail-tickets";
+import { matchingSeats } from "../lib/rail-tickets";
+import { railApiUrl } from "../lib/rail-api";
 
-export type Station = { name: string; code: string; pinyin: string };
-export type Seat = { label: string; value: string; available: boolean };
-export type Train = {
-  code: string; from: string; to: string; departure: string; arrival: string;
-  duration: string; saleStatus: string; seats: Seat[]; trainsetModel: string | null; trainsetOwner?: string | null;
-};
 type QueryMode = "train" | "route";
 export type Result = { checkedAt: string; date: string; from: string; to: string; fromCode?: string; toCode?: string; queryMode?: QueryMode; trains: Train[]; modelCheckedAt?: string | null };
 export type Settings = {
@@ -30,7 +30,7 @@ const DEFAULT_SETTINGS: Settings = {
   queryMode: "train", date: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10),
   from: "", to: "", train: "", seat: "任意席别", intervalMinutes: 5, enabled: false,
 };
-export const SEAT_OPTIONS = ["任意席别", "商务座", "特等座", "一等座", "二等座", "高级软卧", "软卧", "动卧", "硬卧", "软座", "硬座", "无座"];
+export const SEAT_OPTIONS = ["任意席别", "商务座", "特等座", "优选一等座", "一等座", "二等座", "高级软卧", "软卧", "动卧", "硬卧", "软座", "硬座", "无座"];
 
 function loadSettings(): Settings {
   try {
@@ -52,10 +52,6 @@ function validSettings(settings: Settings) {
     Number.isInteger(settings.intervalMinutes) && settings.intervalMinutes >= 1 && settings.intervalMinutes <= 60;
 }
 
-export function matchingSeats(train: Train, seat: string) {
-  return train.seats.filter((item) => item.available && (seat === "任意席别" || item.label === seat));
-}
-
 export function formatCheckedAt(value: string) {
   return new Date(value).toLocaleString("zh-CN", { hour12: false });
 }
@@ -71,7 +67,7 @@ async function query(settings: Settings): Promise<Result> {
   const params = new URLSearchParams({ date: settings.date, search: settings.queryMode });
   if (settings.queryMode === "train") params.set("train", settings.train.trim().toUpperCase());
   else { params.set("from", settings.from.trim()); params.set("to", settings.to.trim()); }
-  return fetchJson<Result>(`/api/rail?${params}`);
+  return fetchJson<Result>(railApiUrl(params));
 }
 
 function notifyAvailable(settings: Settings, train: Train, seats: Seat[]) {
@@ -90,14 +86,14 @@ export function useRailMonitor(desktop = window.railDesktop) {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
-  const [feature, setFeature] = useState<"tickets" | "position">("tickets");
+  const [feature, setFeature] = useState<"tickets" | "position" | "transfer">("tickets");
   const [positionSelection, setPositionSelection] = useState<{ train: string; date?: string }>({ train: "" });
   const [permission, setPermission] = useState(() => typeof Notification === "undefined" ? "unsupported" : Notification.permission);
   const availability = useRef<Record<string, boolean>>({});
   const requestGeneration = useRef(0);
 
   useEffect(() => {
-    const load = desktop ? desktop.stations() : fetchJson<{ stations: Station[] }>("/api/rail?mode=stations");
+    const load = desktop ? desktop.stations() : fetchJson<{ stations: Station[] }>(railApiUrl(new URLSearchParams({ mode: "stations" })));
     load.then((data) => setStations(data.stations)).catch((cause) => setError(`车站列表加载失败：${String(cause)}`));
   }, [desktop]);
 
@@ -123,11 +119,15 @@ export function useRailMonitor(desktop = window.railDesktop) {
   }, [desktop, settings]);
 
   useEffect(() => {
-    if (!desktop || !result || result.modelCheckedAt) return;
-    let active = true;
-    void enrichWithRailGo(result).then((next) => { if (active) setResult(next); });
-    return () => { active = false; };
-  }, [desktop, result]);
+    if (!result) return;
+    const controller = new AbortController(), identity = `${result.checkedAt}/${result.date}/${result.from}/${result.to}`;
+    void enrichTrainList(result.trains, result.date, updates => {
+      const byId = new Map(updates.map(t => [trainIdentity(t, result.date), t]));
+      setResult(current => current && `${current.checkedAt}/${current.date}/${current.from}/${current.to}` === identity
+        ? { ...current, trains: current.trains.map(t => mergeTrainDetails(t, byId.get(trainIdentity(t, current.date)))) } : current);
+    }, controller.signal);
+    return () => controller.abort();
+  }, [result?.checkedAt, result?.date, result?.from, result?.to]);
 
   const runCheck = useCallback(async (notify = false) => {
     if (!validSettings(settings)) { setError("请填写有效日期和 1–60 分钟的间隔；按车次填车次，按区间填两个不同的车站"); return; }
@@ -138,9 +138,6 @@ export function useRailMonitor(desktop = window.railDesktop) {
       const next = desktop ? await desktop.checkNow(settings) : await query(settings);
       if (generation !== requestGeneration.current) return;
       setResult(next);
-      if (!desktop) void enrichWithRailGo(next).then(enriched => {
-        if (generation === requestGeneration.current) setResult(enriched);
-      });
       if (!desktop && notify) {
         const current: Record<string, boolean> = {};
         for (const train of next.trains) {

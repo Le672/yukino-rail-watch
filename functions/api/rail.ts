@@ -1,5 +1,5 @@
-type Station = { name: string; code: string; pinyin: string };
-type Seat = { label: string; value: string; available: boolean };
+import type { Station, Seat } from "../../src/lib/rail-tickets";
+import { applyFares, intercityFares, parseEncodedFares, parsePriceResponse } from "../../src/lib/rail-fares";
 import { officialDelayReport, officialDelayTargets, parseOfficialDelay, parseOfficialJourney } from "../../src/lib/rail-official";
 import type { OfficialTimetable } from "../../src/lib/rail-official";
 import type { TrainJourney } from "../../src/lib/train-position";
@@ -21,6 +21,12 @@ const timetableCache = new Map<string, { at: number; payload: OfficialTimetable;
 const timetablePending = new Map<string, Promise<{ at: number; payload: OfficialTimetable; journey: TrainJourney }>>();
 const delayCache = new Map<string, { at: number; report: ReturnType<typeof officialDelayReport> }>();
 const delayPending = new Map<string, Promise<ReturnType<typeof officialDelayReport>>>();
+type TicketData = { result: string[]; map: Record<string, string> };
+const ticketCache = new Map<string, { at: number; data: TicketData }>();
+const ticketPending = new Map<string, Promise<TicketData>>();
+const fareCache = new Map<string, { at: number; prices: ReturnType<typeof parseEncodedFares> }>();
+const farePending = new Map<string, Promise<ReturnType<typeof parseEncodedFares>>>();
+const hubCache = new Map<string, { at: number; hubs: Station[] }>();
 
 class QueryError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
@@ -28,8 +34,11 @@ class QueryError extends Error {
 
 export function parseStations(text: string): Station[] {
   const stations = new Map<string, Station>();
-  for (const match of text.matchAll(/@[^|@]*\|([^|@]+)\|([A-Z]{3})\|([^|@]*)\|/g)) {
-    stations.set(match[2], { name: match[1], code: match[2], pinyin: match[3] });
+  for (const row of text.split("@")) {
+    const fields = row.split("|");
+    if (!fields[1] || !/^[A-Z]{3}$/.test(fields[2] || "") || fields.length < 5) continue;
+    stations.set(fields[2], { name: fields[1], code: fields[2], pinyin: fields[3],
+      ...(fields[7] ? { city: fields[7], cityCode: fields[6] } : {}) });
   }
   return [...stations.values()];
 }
@@ -40,13 +49,15 @@ export function seatsFromFields(fields: string[]): Seat[] {
     ["高级软卧", 21], ["软卧", 23], ["动卧", 33], ["硬卧", 28],
     ["软座", 24], ["硬座", 29], ["无座", 26],
   ];
-  return definitions.map(([label, index]) => {
+  const seats = definitions.map(([label, index]) => {
     const value = fields[index] || "--";
-    return { label, value, available: value === "有" || /^[1-9]\d*$/.test(value) };
+    return { label: label === "一等座" && fields[35]?.includes("D") && !fields[35]?.includes("M") ? "优选一等座" : label,
+      value, available: value === "有" || /^[1-9]\d*$/.test(value) };
   });
+  return applyFares(seats, intercityFares(seats, parseEncodedFares(fields[39]), fields[3] || "", fields[35] || ""));
 }
 
-export function parseTrains(result: string[], names: Record<string, string>, trainCode?: string, trainNo?: string) {
+export function parseTrains(result: string[], names: Record<string, string>, trainCode?: string, trainNo?: string, date?: string) {
   return result.map((row) => {
     const fields = row.split("|");
     const code = fields[3] || "";
@@ -60,6 +71,9 @@ export function parseTrains(result: string[], names: Record<string, string>, tra
       duration: fields[10] || "--",
       saleStatus: fields[11] || "",
       seats: seatsFromFields(fields),
+      fromCode: fields[6], toCode: fields[7], trainNo: fields[2], date,
+      originDate: /^\d{8}$/.test(fields[13] || "") ? `${fields[13].slice(0, 4)}-${fields[13].slice(4, 6)}-${fields[13].slice(6)}` : date,
+      fareStatus: Object.keys(parseEncodedFares(fields[39])).length ? "available" as const : "missing" as const,
       // The left-ticket response does not identify the physical trainset.
       trainsetModel: null,
     };
@@ -221,10 +235,88 @@ function isValidDate(value: string) {
   return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
 }
 
+async function getTicketData(date: string, fromCode: string, toCode: string): Promise<TicketData> {
+  const key = `${date}/${fromCode}/${toCode}`, cached = ticketCache.get(key);
+  if (cached && Date.now() - cached.at < 30000) return cached.data;
+  if (ticketPending.has(key)) return ticketPending.get(key)!;
+  const request = (async () => {
+    const query = new URL(`${ORIGIN}/otn/leftTicket/queryA`);
+    query.searchParams.set("leftTicketDTO.train_date", date);
+    query.searchParams.set("leftTicketDTO.from_station", fromCode);
+    query.searchParams.set("leftTicketDTO.to_station", toCode);
+    query.searchParams.set("purpose_codes", "ADULT");
+    const cookie = await getSessionCookie();
+    let payload = await fetchTicketPayload(query, cookie);
+    if (payload.data?.c_url && !payload.data.result) {
+      if (!/^leftTicket\/query[A-Z]?$/.test(payload.data.c_url)) throw new Error("12306 返回了未知查询地址");
+      query.pathname = `/otn/${payload.data.c_url}`;
+      payload = await fetchTicketPayload(query, cookie);
+    }
+    if (!Array.isArray(payload.data?.result)) throw new Error(payload.messages?.join("；") || "12306 返回了无法识别的余票数据");
+    // queryA may return neighbouring city stations too. Never substitute their departure station.
+    const data = { result: payload.data.result.filter(row => {
+      const fields = row.split("|"); return fields[6] === fromCode && fields[7] === toCode;
+    }), map: payload.data.map || {} };
+    if (ticketCache.size >= 250) ticketCache.delete(ticketCache.keys().next().value!);
+    ticketCache.set(key, { at: Date.now(), data });
+    return data;
+  })();
+  ticketPending.set(key, request);
+  try { return await request; } finally { ticketPending.delete(key); }
+}
+
+async function getFare(date: string, fromCode: string, toCode: string, train: string) {
+  const key = `${date}/${fromCode}/${toCode}/${train}`, cached = fareCache.get(key);
+  if (cached && Date.now() - cached.at < 5 * 60000) return cached.prices;
+  if (farePending.has(key)) return farePending.get(key)!;
+  const request = (async () => {
+    const rows = (await getTicketData(date, fromCode, toCode)).result.map(row => row.split("|"))
+      .filter(fields => fields[3] === train && fields[6] === fromCode && fields[7] === toCode);
+    if (rows.length !== 1) throw new QueryError("12306 未返回该车次在所选区间的唯一票价资料", 404);
+    const fields = rows[0];
+    let prices = parseEncodedFares(fields[39]);
+    if (!Object.keys(prices).length) {
+      if (!/^[A-Za-z0-9]{1,32}$/.test(fields[2]) || !/^\d{1,3}$/.test(fields[16]) || !/^\d{1,3}$/.test(fields[17]) || !/^[A-Za-z0-9]{1,32}$/.test(fields[35])) throw new Error("12306 票价查询参数不完整");
+      const url = new URL(`${ORIGIN}/otn/leftTicket/queryTicketPrice`);
+      for (const [name, value] of Object.entries({ train_no: fields[2], from_station_no: fields[16], to_station_no: fields[17], seat_types: fields[35], train_date: date })) url.searchParams.set(name, value);
+      const response = await fetch(url, { headers: { ...REQUEST_HEADERS, Cookie: await getSessionCookie() }, signal: AbortSignal.timeout(12000) });
+      if (!response.ok) throw new Error(`12306 票价接口返回 ${response.status}`);
+      const payload = await response.json() as { status?: boolean; data?: unknown };
+      if (payload.status !== true) throw new Error("12306 票价查询暂不可用");
+      prices = parsePriceResponse(payload.data);
+    }
+    if (!Object.keys(prices).length) throw new Error("12306 暂未返回可核实票价");
+    prices = intercityFares(seatsFromFields(fields), prices, fields[3], fields[35]);
+    if (fareCache.size >= 400) fareCache.delete(fareCache.keys().next().value!);
+    fareCache.set(key, { at: Date.now(), prices });
+    return prices;
+  })();
+  farePending.set(key, request);
+  try { return await request; } finally { farePending.delete(key); }
+}
+
+async function getHubs(date: string, from: Station, to: Station, stations: Station[]) {
+  const key = `${date}/${from.code}/${to.code}`, cached = hubCache.get(key);
+  if (cached && Date.now() - cached.at < 15 * 60000) return cached.hubs;
+  const url = new URL(`${ORIGIN}/otn/zzzcx/query`);
+  for (const [name, value] of Object.entries({ queryDate: date, from_station: from.code, to_station: to.code,
+    from_station_name: from.name, to_station_name: to.name, randCode: "", changeStationText: "" })) url.searchParams.set(name, value);
+  const response = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(12000) });
+  if (!response.ok) throw new Error(`12306 中转节点查询返回 ${response.status}`);
+  const payload = await response.json() as { status?: boolean; data?: { flag?: boolean; middleStations?: { station_telecode?: string }[]; isThrough?: string; message?: string } };
+  if (payload.status !== true || payload.data?.flag !== true) throw new Error(payload.data?.message || "12306 暂未返回中转节点");
+  if (!Array.isArray(payload.data.middleStations) && !["Y", "S"].includes(payload.data.isThrough || "")) throw new Error("12306 中转节点格式变化");
+  const byCode = new Map(stations.map(s => [s.code, s]));
+  const hubs = [...new Set((payload.data.middleStations || []).map(row => row.station_telecode))].flatMap(code => byCode.has(code || "") ? [byCode.get(code!)!] : []);
+  if (hubCache.size >= 100) hubCache.delete(hubCache.keys().next().value!);
+  hubCache.set(key, { at: Date.now(), hubs });
+  return hubs;
+}
+
 export async function onRequestGet(context: { request: Request }) {
   const url = new URL(context.request.url);
   const mode = url.searchParams.get("mode") || "query";
-  if (!["stations", "query", "journey", "delays"].includes(mode)) return json({ error: "未知查询类型" }, 400);
+  if (!["stations", "query", "journey", "delays", "fare", "hubs"].includes(mode)) return json({ error: "未知查询类型" }, 400);
 
   try {
     const stations = await getStations();
@@ -234,6 +326,12 @@ export async function onRequestGet(context: { request: Request }) {
     let from = (url.searchParams.get("from") || "").trim();
     let to = (url.searchParams.get("to") || "").trim();
     const trainCode = (url.searchParams.get("train") || "").trim().toUpperCase();
+    if (mode === "fare" || mode === "hubs") {
+      const fromStation = stations.find(s => s.name === from || s.code === from), toStation = stations.find(s => s.name === to || s.code === to);
+      if (!isValidDate(date) || !fromStation || !toStation || fromStation.code === toStation.code || (mode === "fare" && !TRAIN_CODE.test(trainCode))) return json({ error: "请填写有效日期、区间和车次" }, 400);
+      if (mode === "hubs") return json({ source: "12306", hubs: await getHubs(date, fromStation, toStation, stations) }, 200, 60);
+      return json({ source: "12306", date, train: trainCode, fromCode: fromStation.code, toCode: toStation.code, checkedAt: new Date().toISOString(), prices: await getFare(date, fromStation.code, toStation.code, trainCode) }, 200, 60);
+    }
     if (mode === "journey" || mode === "delays") {
       if (!isValidDate(date) || !TRAIN_CODE.test(trainCode)) return json({ error: "请填写有效车次和始发日期" }, 400);
       if (mode === "journey") return json((await getTimetable(date, trainCode, stations)).payload, 200, 60);
@@ -258,25 +356,13 @@ export async function onRequestGet(context: { request: Request }) {
     const toCode = byName.get(to) || (stations.some((s) => s.code === to) ? to : "");
     if (!fromCode || !toCode || fromCode === toCode) return json({ error: "请选择两个不同的 12306 车站" }, 400);
 
-    const query = new URL(`${ORIGIN}/otn/leftTicket/queryA`);
-    query.searchParams.set("leftTicketDTO.train_date", date);
-    query.searchParams.set("leftTicketDTO.from_station", fromCode);
-    query.searchParams.set("leftTicketDTO.to_station", toCode);
-    query.searchParams.set("purpose_codes", "ADULT");
-    const cookie = await getSessionCookie();
-    let payload = await fetchTicketPayload(query, cookie);
-    if (payload.data?.c_url && !payload.data.result) {
-      const endpoint = payload.data.c_url;
-      if (!/^leftTicket\/query[A-Z]?$/.test(endpoint)) throw new Error("12306 返回了未知查询地址");
-      query.pathname = `/otn/${endpoint}`;
-      payload = await fetchTicketPayload(query, cookie);
-    }
-    if (!Array.isArray(payload.data?.result)) throw new Error(payload.messages?.join("；") || "12306 返回了无法识别的余票数据");
+    const data = await getTicketData(date, fromCode, toCode);
+    const names = Object.fromEntries(stations.map(s => [s.code, s.name]));
     return json({
       source: "12306",
       checkedAt: new Date().toISOString(),
       date, from, to, fromCode, toCode, trainCode, queryMode: search,
-      trains: parseTrains(payload.data.result, payload.data.map || {}, trainCode, trainNo),
+      trains: parseTrains(data.result, { ...names, ...data.map }, trainCode, trainNo, date),
     }, 200, 30);
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "查询 12306 失败" }, error instanceof QueryError ? error.status : 502);

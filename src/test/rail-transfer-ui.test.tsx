@@ -1,0 +1,35 @@
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
+import { RailTransfer } from "../components/RailTransfer";
+import type { Train, Station } from "../lib/rail-tickets";
+const stations: Station[] = [{ name: "深圳北", code: "IOQ", pinyin: "", city: "深圳" }, { name: "广州南", code: "IZQ", pinyin: "", city: "广州" }, { name: "番禺", code: "PYA", pinyin: "", city: "广州" }, { name: "西平西", code: "EGQ", pinyin: "", city: "东莞" }];
+const make = (code: string, fromCode: string, toCode: string, departure: string, arrival: string, duration: string, price: number, model: string, value = "有"): Train => ({ code, trainNo: `TRAIN${code}`, fromCode, toCode, from: stations.find(s => s.code === fromCode)!.name, to: stations.find(s => s.code === toCode)!.name, departure, arrival, duration, saleStatus: "Y", trainsetModel: model, date: "2026-10-04", originDate: code === "G2" ? "2026-10-03" : "2026-10-04", seats: [{ label: "二等座", value, available: value === "有", price }] });
+afterEach(() => { cleanup(); localStorage.clear(); vi.unstubAllGlobals(); });
+it("shows each leg and physical walk transfer, sorts the summed price and filters whole-trip availability and exact models", async () => {
+  localStorage.clear(); const onPosition = vi.fn();
+  vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+    const url = new URL(String(input), "https://cr.yukino.bond"), key = `${url.searchParams.get("from")}/${url.searchParams.get("to")}`;
+    const trains = url.searchParams.get("date") !== "2026-10-04" ? [] : key === "IOQ/IZQ" ? [make("G1", "IOQ", "IZQ", "09:00", "10:00", "01:00", 80, "CR400AF"), make("G2", "IOQ", "IZQ", "10:00", "11:00", "01:00", 60, "CRH380A")] : key === "PYA/EGQ" ? [make("C10", "PYA", "EGQ", "10:30", "11:00", "00:30", 30, "CRH6A"), make("C20", "PYA", "EGQ", "12:00", "12:30", "00:30", 20, "CRH6A", "无")] : [];
+    return Response.json({ source: "12306", checkedAt: new Date().toISOString(), trains });
+  }));
+  const { container } = render(<RailTransfer stations={stations} onPosition={onPosition}/>);
+  for (const [label, value] of [["首程乘车日期", "2026-10-04"], ["出发站", "深圳北"], ["到达站", "西平西"], ["中转站 1（可选）", "广州南"]]) fireEvent.change(screen.getByLabelText(label), { target: { value } });
+  fireEvent.click(screen.getByRole("button", { name: "查询中转" }));
+  await waitFor(() => expect(container.querySelectorAll(".rail-trip")).toHaveLength(3));
+  let first = container.querySelector(".rail-trip") as HTMLElement;
+  expect(within(first).getByText("G1")).toBeVisible();
+  expect(within(first).getByText("C10")).toBeVisible();
+  expect(within(first).getByText(/相邻站群换乘：广州南 → 番禺/)).toBeVisible();
+  fireEvent.change(screen.getByLabelText("排序"), { target: { value: "price" } });
+  first = container.querySelector(".rail-trip") as HTMLElement;
+  expect(within(first).getByText("G2")).toBeVisible(); expect(first.querySelector(".rail-trip-total strong")?.textContent).toBe("¥80");
+  fireEvent.click(within(first).getAllByRole("button", { name: "位置 / 下一站" })[0]);
+  expect(onPosition).toHaveBeenCalledWith("G2", "2026-10-03");
+  fireEvent.click(screen.getByLabelText("仅看全程有票"));
+  expect(container.querySelectorAll(".rail-trip")).toHaveLength(1);
+  fireEvent.click(screen.getByLabelText("仅看全程有票"));
+  fireEvent.change(screen.getByLabelText("至少一程车型"), { target: { value: "CRH380A" } });
+  expect(container.querySelectorAll(".rail-trip")).toHaveLength(1);
+  fireEvent.click(screen.getByLabelText("车型筛选要求每程均匹配"));
+  expect(screen.getByText("没有符合当前车型或余票筛选的方案。")).toBeVisible();
+});

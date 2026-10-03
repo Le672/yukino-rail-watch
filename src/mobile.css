@@ -5,3 +5,5 @@
 .mobile-app input[type=date],.mobile-app input[type=datetime-local]{appearance:none;-webkit-appearance:none;display:block;min-inline-size:0;max-inline-size:100%;overflow:hidden;line-height:normal}
 .mobile-app input::-webkit-date-and-time-value{min-width:0;min-height:24px;text-align:left;margin:0;padding:0}
 .mobile-app input::-webkit-datetime-edit{display:inline-flex;align-items:center;padding:0;max-width:100%}
+
+.mobile-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}.mobile-tabs button{min-width:0;padding-inline:4px}.mobile-app .rail-train-fare{margin:10px 0}.mobile-app .rail-transfer .rail-transfer-options{align-items:flex-start;flex-direction:column}

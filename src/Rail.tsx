@@ -1,10 +1,14 @@
 import { ArrowLeft, Bell, BellOff, Clock3, ExternalLink, RefreshCw, TrainFront } from "lucide-react";
 import { TrainIllustration } from "./components/TrainIllustration";
 import { RailPosition } from "./components/RailPosition";
+import { RailTransfer } from "./components/RailTransfer";
+import { RailResultControls, TrainFare, useTrainListing } from "./components/RailResultControls";
+import { money } from "./lib/rail-tickets";
 import { useRailMonitor, SEAT_OPTIONS, matchingSeats, formatCheckedAt } from "./hooks/useRailMonitor";
 
 export default function Rail() {
   const { desktop, settings, stations, result, error, checking, feature, setFeature, positionSelection, setPositionSelection, permission, knownStations, matched, update, runCheck, toggleMonitor } = useRailMonitor();
+  const { filters, setFilters, visibleTrains } = useTrainListing(result?.trains, settings.seat);
   return (
     <div className="rail-page">
       <div className="rail-wrap">
@@ -22,6 +26,7 @@ export default function Rail() {
         </header>
         <div className="rail-feature-tabs" role="group" aria-label="功能选择">
           <button type="button" aria-pressed={feature === "tickets"} onClick={() => setFeature("tickets")}>余票查询与监控</button>
+          <button type="button" aria-pressed={feature === "transfer"} onClick={() => setFeature("transfer")}>中转行程</button>
           <button type="button" aria-pressed={feature === "position"} onClick={() => setFeature("position")}>列车位置与下一站</button>
         </div>
         <div hidden={feature !== "tickets"}>
@@ -64,17 +69,19 @@ export default function Rail() {
         <section className="rail-results" aria-labelledby="rail-results-title">
           <div className="rail-section-heading"><div><span className="rail-overline">03 / RESULTS</span><h2 id="rail-results-title">查询结果</h2></div>{result && <span>{result.trains.length} 趟车 · {matched.length} 趟有关注席别余票</span>}</div>
           {result && <p className="rail-result-route">{result.date} · {result.from} → {result.to}{result.queryMode === "train" ? " · 全程余票" : ""}</p>}
+          {result && result.trains.length > 0 && <RailResultControls filters={filters} onChange={setFilters} trains={result.trains} count={visibleTrains.length}/>}
           {!result ? <div className="rail-empty">还没有查询结果。填写车次或乘车区间后点击“立即查询”。</div> : result.trains.length === 0 ? <div className="rail-empty">没有找到符合条件的余票数据。请检查日期，或前往 12306 查看开行情况。</div> :
-            <div className="rail-trains">{result.trains.map((train) => {
+            <div className="rail-trains">{!visibleTrains.length && <div className="rail-empty">没有符合当前车型或余票筛选的车次。</div>}{visibleTrains.map((train) => {
               const available = matchingSeats(train, settings.seat);
               return <article className="rail-train" key={`${train.code}-${train.departure}`}>
                 <div className="rail-train-main"><div className="rail-train-identity"><span className="rail-train-code">{train.code}</span><TrainIllustration model={train.trainsetModel} /></div><div className="rail-journey"><strong>{train.departure}</strong><span>{train.from}</span></div><div className="rail-route"><span>{train.duration}</span><i /></div><div className="rail-journey"><strong>{train.arrival}</strong><span>{train.to}</span></div><span className={available.length ? "rail-badge is-available" : "rail-badge"}>{available.length ? "有余票" : "暂无余票"}</span></div>
-                <div className="rail-seats">{train.seats.filter((seat) => seat.value !== "--").map((seat) => <span className={seat.available ? "rail-seat is-available" : "rail-seat"} key={seat.label}>{seat.label} <strong>{seat.value}</strong></span>)}</div>
-                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}</span><div className="rail-train-links"><button type="button" onClick={() => { setPositionSelection({ train: train.code, date: result.date }); setFeature("position"); }}>位置／下一站</button><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div></div>
+                <div className="rail-seats">{train.seats.filter((seat) => seat.value !== "--").map((seat) => <span className={seat.available ? "rail-seat is-available" : "rail-seat"} key={seat.label}>{seat.label} <strong>{seat.value}</strong>{seat.price != null && <small>{money(seat.price)}</small>}</span>)}</div>
+                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}</span><TrainFare train={train} seat={settings.seat}/><div className="rail-train-links"><button type="button" onClick={() => { setPositionSelection({ train: train.code, date: train.originDate || result.date }); setFeature("position"); }}>位置／下一站</button><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div></div>
               </article>;
             })}</div>}
         </section>
         </div>
+        {feature === "transfer" && <RailTransfer stations={stations} onPosition={(train, date) => { setPositionSelection({ train, date }); setFeature("position"); }}/>}
         {feature === "position" && <RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} />}
         <p className="rail-disclaimer">本工具仅展示公开查询结果，不提供购票或抢票。车票状态会随时变化，最终以 12306 官网为准。</p>
         <a className="rail-attribution" href="https://api.railgo.dev/" target="_blank" rel="noreferrer" aria-label="车型、配属与铁路坐标补充来源：RailGo 数据服务（打开数据服务文档）">
