@@ -3,7 +3,7 @@ import type { DelayReport, TrainJourney, RailwayMapData } from "./train-position
 import { parseOfficialJourney } from "./rail-official";
 import type { OfficialTimetable } from "./rail-official";
 import { railApiUrl } from "./rail-api";
-import { getRailGoEquipment } from "./railgo";
+import { loadTrainEquipment } from "./rail-equipment";
 import { mtrLiveryModel } from "./mtr-vibrant";
 
 const BASE = "https://rg-api.zenglingkun.cn/api/v2/";
@@ -40,10 +40,11 @@ export async function loadDelays(train: string, date: string): Promise<DelayRepo
   return { ...report, checkedAt: fetched.checkedAt };
 }
 export async function loadJourneyEquipment(journey: TrainJourney) {
-  const equipment = await getRailGoEquipment(journey.train, journey.date);
-  const trainsetModel = mtrLiveryModel({ code: journey.train, trainsetModel: equipment?.model ?? journey.model, trainsetOwner: equipment?.owner ?? journey.owner },
+  const equipment = await loadTrainEquipment(journey.train, journey.date);
+  const trainsetModel = mtrLiveryModel({ code: journey.train, trainsetModel: equipment?.model ?? journey.model, trainsetOwner: equipment?.owner ?? journey.owner, trainsetNumber: equipment.number },
     { date: journey.date, fromCode: journey.stops[0].telecode, toCode: journey.stops.at(-1)?.telecode });
-  return { model: trainsetModel, owner: equipment?.owner ?? journey.owner };
+  return { model: trainsetModel, owner: equipment.owner, operator: equipment.operator, modelSource: equipment.model ? equipment.source : null,
+    modelScope: equipment.model ? equipment.scope : "reference" as const, modelDate: equipment.date, modelNumber: equipment.number, modelCheckedAt: equipment.checkedAt };
 }
 export async function loadRailway(journey: TrainJourney): Promise<RailwayMapData> {
   const url = new URL("mapLine", BASE);

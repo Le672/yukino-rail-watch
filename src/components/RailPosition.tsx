@@ -10,6 +10,7 @@ import { RailSpeed } from "./RailSpeed";
 import { readRailSpeed } from "../lib/rail-speed";
 import { estimateRailMotion } from "../lib/rail-motion";
 import { TrainIllustration } from "./TrainIllustration";
+import { equipmentLabel, equipmentTitle } from "../lib/rail-equipment";
 import "./rail-position.css";
 
 function timeLabel(at: number) { return chinaDateTime(at).replace("T", " "); }
@@ -95,6 +96,9 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
           const extra = await Promise.allSettled([loadRailway(updated), loadDelays(updated.train, updated.date)]);
           if (!active || version !== generation.current) return;
           setJourney(updated);
+          void loadJourneyEquipment(updated).then(equipment => {
+            if (version === generation.current) setJourney(current => current?.checkedAt === updated.checkedAt ? { ...current, ...equipment } : current);
+          }).catch(() => {});
           setMapData(extra[0].status === "fulfilled" ? extra[0].value : null);
           setRouteError(extra[0].status === "fulfilled" ? null : "线路资料暂不可用，仍可查看运行区间和下一站。");
           setDelays(extra[1].status === "fulfilled" ? extra[1].value : null);
@@ -162,6 +166,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
     {journey && position && <div className="rail-position-result">
       <div className="rail-position-summary rail-card">
         <div className="rail-position-identity"><div><span className="rail-overline">{journey.date} 始发</span><h3>{journey.codes.join(" / ")}</h3></div><TrainIllustration model={journey.model} /></div>
+        <p className="rail-small" title={equipmentTitle({ trainsetModel: journey.model, trainsetSource: journey.modelSource, trainsetScope: journey.modelScope, trainsetDate: journey.modelDate, trainsetNumber: journey.modelNumber })}>{equipmentLabel({ trainsetModel: journey.model, trainsetOwner: journey.owner, trainOperator: journey.operator, trainsetScope: journey.modelScope })}</p>
         <span className="rail-position-status"><MapPin size={14} />{status} · {gpsPosition ? "GPS 实时匹配" : position.delayUsed ? "结合正晚点估算" : "按时刻表估算"}</span>
         <p className="rail-position-current">{position.phase === "running" ? `${previous!.station} → ${next!.station}` : `${current!.station}${position.phase === "before" ? " · 等待始发" : position.phase === "arrived" ? " · 行程结束" : " · 停站中"}`}</p>
         <div className="rail-next-stop" aria-label="下一停靠站">
@@ -190,6 +195,6 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
     {!journey && !loading && !error && <div className="rail-empty">输入车次和始发日期，查看运行区间、下一停靠站及铁路线路图。</div>}
     {!position && <div className="rail-card rail-position-route"><RailMap journey={journey} route={wgsRoute} stations={wgsStations} position={null} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} /></div>}
     {(delayError || position?.warning) && journey && <p className="rail-position-warning">{position?.warning || delayError}</p>}
-    <p className="rail-hint rail-position-source">车次、停站时刻表和正晚点来自 12306；车型、配属及铁路坐标由 RailGo 补充。开启 GPS 后显示设备实时位置；有完整线路时匹配下一站，缺少线路或有效定位时按官方时刻表估算。正晚点仅覆盖未来 3 小时，实际到发及临时停站请以列车广播、站内显示和 12306 为准。</p>
+    <p className="rail-hint rail-position-source">车次、停站时刻表和正晚点来自 12306，车型优先查询 12306；官方缺少车型时才使用第三方参考资料，铁路坐标由 RailGo 补充。开启 GPS 后显示设备实时位置；有完整线路时匹配下一站，缺少线路或有效定位时按官方时刻表估算。正晚点仅覆盖未来 3 小时，实际到发及临时停站请以列车广播、站内显示和 12306 为准。</p>
   </section>;
 }

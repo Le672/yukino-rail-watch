@@ -1,7 +1,9 @@
 import type { Station, Seat } from "../../src/lib/rail-tickets";
 import { applyFares, intercityFares, parseEncodedFares, parsePriceResponse } from "../../src/lib/rail-fares";
-import { officialDelayReport, officialDelayTargets, parseOfficialDelay, parseOfficialJourney } from "../../src/lib/rail-official";
-import type { OfficialTimetable } from "../../src/lib/rail-official";
+import { officialDelayReport, officialDelayTargets, parseOfficialDelay, parseOfficialJourney, parseOfficialTrainNames } from "../../src/lib/rail-official";
+import type { OfficialTimetable, OfficialTrainRoute } from "../../src/lib/rail-official";
+import { parseOfficialEquipment } from "../../src/lib/rail-equipment";
+import type { TrainEquipment } from "../../src/lib/rail-equipment";
 import type { TrainJourney } from "../../src/lib/train-position";
 
 const ORIGIN = "https://kyfw.12306.cn";
@@ -16,8 +18,14 @@ let stationCache: { at: number; stations: Station[] } | undefined;
 let sessionCache: { at: number; cookie: string } | undefined;
 let sessionPending: Promise<string> | undefined;
 let nextTicketRequestAt = 0;
-type TrainRoute = { from: string; to: string; trainNo: string };
+let nextEquipmentRequestAt = 0;
+type TrainRoute = OfficialTrainRoute;
 const trainRouteCache = new Map<string, { at: number; route: TrainRoute }>();
+const trainNamesCache = new Map<string, { at: number; routes: Map<string, TrainRoute[]> }>();
+const trainNamesPending = new Map<string, Promise<Map<string, TrainRoute[]>>>();
+const trainRoutePending = new Map<string, Promise<TrainRoute>>();
+const equipmentCache = new Map<string, { at: number; value: TrainEquipment }>();
+const equipmentPending = new Map<string, Promise<TrainEquipment>>();
 const TRAIN_CODE = /^(?:[GDCZTKYS]\d{1,4}[A-Z]?|\d{4})$/;
 const timetableCache = new Map<string, { at: number; payload: OfficialTimetable; journey: TrainJourney }>();
 const timetablePending = new Map<string, Promise<{ at: number; payload: OfficialTimetable; journey: TrainJourney }>>();
@@ -134,36 +142,103 @@ async function getSessionCookie(): Promise<string> {
   try { return await request; } finally { sessionPending = undefined; }
 }
 
-async function getTrainRoute(date: string, trainCode: string): Promise<TrainRoute> {
+async function getTrainNames(date: string) {
+  const cached = trainNamesCache.get(date);
+  if (cached && Date.now() - cached.at < 15 * 60000) return cached.routes;
+  if (trainNamesPending.has(date)) return trainNamesPending.get(date)!;
+  const request = (async () => {
+    const url = new URL(`${ORIGIN}/otn/queryTrainInfo/getTrainName`);
+    url.searchParams.set("date", date);
+    const response = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(12000) });
+    if (!response.ok) throw new Error(`12306 按日期车次表返回 ${response.status}`);
+    const routes = parseOfficialTrainNames(await response.json());
+    if (trainNamesCache.size >= 3) trainNamesCache.delete(trainNamesCache.keys().next().value!);
+    trainNamesCache.set(date, { at: Date.now(), routes });
+    return routes;
+  })();
+  trainNamesPending.set(date, request);
+  try { return await request; } finally { trainNamesPending.delete(date); }
+}
+async function searchTrainRoute(date: string, trainCode: string): Promise<TrainRoute> {
   const key = `${date}/${trainCode}`;
   const cached = trainRouteCache.get(key);
   if (cached && Date.now() - cached.at < 15 * 60 * 1000) return cached.route;
   const search = new URL("https://search.12306.cn/search/v1/train/search");
   search.searchParams.set("keyword", trainCode);
   search.searchParams.set("date", date.replace(/-/g, ""));
-  const response = await fetch(search, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(12000) });
-  if (!response.ok) throw new Error(`12306 车次搜索返回 ${response.status}`);
-  const payload = await response.json() as {
-    status?: boolean; errorMsg?: string;
-    data?: { date?: string; station_train_code?: string; from_station?: string; to_station?: string; train_no?: string }[];
-  };
-  if (payload.status !== true || !Array.isArray(payload.data)) throw new Error(payload.errorMsg || "12306 暂未返回可识别的车次资料");
-  const matches = payload.data.filter((row) => row?.station_train_code === trainCode && row.date === date.replace(/-/g, ""));
-  if (!matches.length) throw new QueryError(`12306 未找到 ${date} 的 ${trainCode}，请检查日期和车次`, 404);
   const routes = new Map<string, TrainRoute>();
-  for (const row of matches) {
-    if (typeof row.from_station !== "string" || typeof row.to_station !== "string" || typeof row.train_no !== "string" ||
-        !row.from_station.trim() || !row.to_station.trim() || !/^[A-Za-z0-9]{1,32}$/.test(row.train_no)) {
-      throw new Error("12306 车次线路资料不完整，请稍后重试");
+  try {
+    const response = await fetch(search, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(12000) });
+    if (response.status === 429) throw new QueryError("12306 车次搜索繁忙，请稍后重试", 503);
+    if (!response.ok) throw new Error(`12306 车次搜索返回 ${response.status}`);
+    const payload = await response.json() as {
+      status?: boolean; errorMsg?: string;
+      data?: { date?: string; station_train_code?: string; from_station?: string; to_station?: string; train_no?: string }[];
+    };
+    if (payload.status !== true || !Array.isArray(payload.data)) throw new Error(payload.errorMsg || "12306 暂未返回可识别的车次资料");
+    const matches = payload.data.filter((row) => row?.station_train_code === trainCode && row.date === date.replace(/-/g, ""));
+    for (const row of matches) {
+      if (typeof row.from_station !== "string" || typeof row.to_station !== "string" || typeof row.train_no !== "string" ||
+          !row.from_station.trim() || !row.to_station.trim() || !/^[A-Za-z0-9]{1,32}$/.test(row.train_no)) {
+        throw new Error("12306 车次线路资料不完整，请稍后重试");
+      }
+      const route = { from: row.from_station.trim(), to: row.to_station.trim(), trainNo: row.train_no };
+      routes.set(`${route.trainNo}/${route.from}/${route.to}`, route);
     }
-    const route = { from: row.from_station.trim(), to: row.to_station.trim(), trainNo: row.train_no };
-    routes.set(`${route.trainNo}/${route.from}/${route.to}`, route);
+  } catch (error) {
+    if (error instanceof QueryError) throw error;
+    routes.clear();
+    // An unavailable keyword index does not imply that the official date-scoped list is empty.
   }
+  if (!routes.size) {
+    for (const route of (await getTrainNames(date)).get(trainCode) || []) routes.set(`${route.trainNo}/${route.from}/${route.to}`, route);
+  }
+  if (!routes.size) throw new QueryError(`12306 未找到 ${date} 的 ${trainCode}，请检查日期和车次`, 404);
   if (routes.size !== 1) throw new QueryError("该车次对应多条线路，请改用区间查询", 400);
   const route = [...routes.values()][0];
   if (trainRouteCache.size >= 200) trainRouteCache.delete(trainRouteCache.keys().next().value!);
   trainRouteCache.set(key, { at: Date.now(), route });
   return route;
+}
+async function getTrainRoute(date: string, trainCode: string) {
+  const key = `${date}/${trainCode}`;
+  if (trainRoutePending.has(key)) return trainRoutePending.get(key)!;
+  const request = searchTrainRoute(date, trainCode);
+  trainRoutePending.set(key, request);
+  try { return await request; } finally { trainRoutePending.delete(key); }
+}
+
+async function getEquipment(date: string, train: string) {
+  const key = `${date}/${train}`, cached = equipmentCache.get(key);
+  if (cached && Date.now() - cached.at < (cached.value.model ? 10 * 60000 : 60000)) return cached.value;
+  if (equipmentPending.has(key)) return equipmentPending.get(key)!;
+  const request = (async () => {
+    await getTrainRoute(date, train); // Confirm that the service belongs to this origin date.
+    const root = `${ORIGIN}/wxxcx/openplatform-inner/miniprogram/wifiapps/appFrontEnd/v2/lounge/open-smooth-common`;
+    const car = new URL(`${root}/trainStyleBatch/getCarDetail`);
+    for (const [name, value] of Object.entries({ carCode: "", trainCode: train, runningDay: date.replace(/-/g, ""), reqType: "form" })) car.searchParams.set(name, value);
+    const duty = new URL(`${root}/qrCode/getDeptByTrainCode`);
+    duty.searchParams.set("trainCode", train); duty.searchParams.set("reqType", "form");
+    const read = async (url: URL, method: "GET" | "POST") => {
+      const now = Date.now(), startAt = Math.max(now, nextEquipmentRequestAt);
+      if (startAt - now > 10000) throw new Error("12306 车型查询繁忙，请稍后重试");
+      nextEquipmentRequestAt = startAt + 250;
+      if (startAt > now) await new Promise<void>(resolve => setTimeout(resolve, startAt - now));
+      const response = await fetch(url, { method, headers: { ...REQUEST_HEADERS,
+        ...(method === "POST" ? { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" } : {}) },
+        ...(method === "POST" ? { body: "" } : {}), signal: AbortSignal.timeout(10000) });
+      if (!response.ok) throw new Error(`12306 车型接口返回 ${response.status}`);
+      return response.json();
+    };
+    const [carResult, dutyResult] = await Promise.allSettled([read(car, "GET"), read(duty, "POST")]);
+    const value = parseOfficialEquipment(carResult.status === "fulfilled" ? carResult.value : null,
+      dutyResult.status === "fulfilled" ? dutyResult.value : null, date, Date.now());
+    if (equipmentCache.size >= 500) equipmentCache.delete(equipmentCache.keys().next().value!);
+    equipmentCache.set(key, { at: Date.now(), value });
+    return value;
+  })();
+  equipmentPending.set(key, request);
+  try { return await request; } finally { equipmentPending.delete(key); }
 }
 
 async function getTimetable(date: string, train: string, stations: Station[]) {
@@ -328,9 +403,15 @@ async function getHubs(date: string, from: Station, to: Station, stations: Stati
 export async function onRequestGet(context: { request: Request }) {
   const url = new URL(context.request.url);
   const mode = url.searchParams.get("mode") || "query";
-  if (!["stations", "query", "journey", "delays", "fare", "hubs"].includes(mode)) return json({ error: "未知查询类型" }, 400);
+  if (!["stations", "query", "journey", "delays", "fare", "hubs", "equipment"].includes(mode)) return json({ error: "未知查询类型" }, 400);
 
   try {
+    if (mode === "equipment") {
+      const date = url.searchParams.get("date") || "", train = (url.searchParams.get("train") || "").trim().toUpperCase();
+      if (!isValidDate(date) || !TRAIN_CODE.test(train)) return json({ error: "请填写有效车次和始发日期" }, 400);
+      const equipment = await getEquipment(date, train);
+      return json({ ...equipment, train }, 200, equipment.model ? 60 : 0);
+    }
     const stations = await getStations();
     if (mode === "stations") return json({ stations }, 200, 86400);
 

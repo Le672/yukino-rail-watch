@@ -12,6 +12,7 @@ import { officialCityKey } from "../lib/rail-national-network";
 import { TrainIllustration } from "./TrainIllustration";
 import { loadUrbanRail } from "../lib/urban-rail";
 import { UrbanRailRoute } from "./UrbanRailRoute";
+import { equipmentLabel, equipmentTitle } from "../lib/rail-equipment";
 import "./rail-transfer.css";
 const STORAGE = "yukino-rail-transfer-v1";
 function initialSettings(): TransferSettings {
@@ -114,7 +115,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
         {trip.access && <div className="rail-trip-connection"><b>{trip.access.urban ? "出发轨道接驳" : "出发站群"}：{trip.access.from.name} → {trip.access.to.name}</b><span>至少预留 {trip.access.minimum} 分钟（含进站）</span>{trip.access.urban ? <UrbanRailRoute route={trip.access.urban}/> : <small>{trip.access.note}</small>}</div>}
         {trip.legs.map((leg, index) => <div className="rail-trip-leg-block" key={trainIdentity(leg)}>
           {index > 0 && <div className={`rail-trip-connection is-${trip.connections[index - 1].kind}`}><b>{trip.connections[index - 1].kind === "same" ? "同站换乘" : trip.connections[index - 1].kind === "walk" ? "相邻站群换乘" : trip.connections[index - 1].kind === "urban" ? "城市轨道接驳（备选）" : "站外换乘"}：{trip.connections[index - 1].from.name}{trip.connections[index - 1].from.code !== trip.connections[index - 1].to.code ? ` → ${trip.connections[index - 1].to.name}` : ""}</b><span>间隔 {(leg.departureAt - trip.legs[index - 1].arrivalAt) / 60000} 分钟 · 至少预留 {trip.connections[index - 1].minimum} 分钟</span>{trip.connections[index - 1].urban ? <UrbanRailRoute route={trip.connections[index - 1].urban!}/> : <small>{trip.connections[index - 1].note}</small>}</div>}
-          <div className="rail-trip-leg"><div className="rail-trip-leg-title"><span>第 {index + 1} 程 · {leg.date}</span><div><strong>{leg.code}</strong><TrainIllustration model={leg.trainsetModel}/></div><p>车型：{leg.trainsetModel || "暂无可核实资料"}{leg.trainsetOwner ? ` · ${leg.trainsetOwner}` : ""}</p></div>
+          <div className="rail-trip-leg"><div className="rail-trip-leg-title"><span>第 {index + 1} 程 · {leg.date}</span><div><strong>{leg.code}</strong><TrainIllustration model={leg.trainsetModel}/></div><p title={equipmentTitle(leg)}>{equipmentLabel(leg)}</p></div>
           <div className="rail-trip-leg-times"><div><strong>{leg.departure}</strong><span>{leg.from}</span></div><div className="rail-trip-leg-duration">{durationLabel(Math.round((leg.arrivalAt - leg.departureAt) / 60000))}<span>→</span></div><div><strong>{leg.arrival}</strong><span>{leg.to}</span>{chinaDateTime(leg.arrivalAt).slice(0, 10) !== leg.date && <small>{chinaDateTime(leg.arrivalAt).slice(0, 10)} 到达</small>}</div></div>
           <TrainFare train={leg} seat={seat}/><div className="rail-trip-seats">{leg.seats.filter(s => s.value !== "--").map(s => <span key={s.label} className={s.available ? "is-available" : ""}>{s.label} <b>{s.value}</b><small>{money(s.price)}{s.priceMax && s.price && s.priceMax > s.price ? `–${money(s.priceMax)}` : ""}</small></span>)}</div><div className="rail-trip-leg-links"><button type="button" onClick={() => onPosition(leg.code, leg.originDate || leg.date)}>位置 / 下一站</button><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={12}/></a></div></div>
         </div>)}

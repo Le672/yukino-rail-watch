@@ -4,6 +4,7 @@ import { TrainIllustration } from "./components/TrainIllustration";
 import { RailTransfer } from "./components/RailTransfer";
 import { RailResultControls, TrainFare, useTrainListing } from "./components/RailResultControls";
 import { money } from "./lib/rail-tickets";
+import { equipmentLabel, equipmentTitle } from "./lib/rail-equipment";
 import { useRailMonitor, SEAT_OPTIONS, matchingSeats, formatCheckedAt } from "./hooks/useRailMonitor";
 
 export default function DesktopRail() {
@@ -35,19 +36,19 @@ export default function DesktopRail() {
               {result && <p className="desktop-route">{result.date}　{result.from} → {result.to}{result.queryMode === "train" ? " · 全程余票" : ""}</p>}
               {result && result.trains.length > 0 && <RailResultControls filters={filters} onChange={setFilters} trains={result.trains} count={visibleTrains.length}/>}
               {!result || !visibleTrains.length ? <div className="desktop-empty"><TrainFront size={32} strokeWidth={1.3} /><strong>{result ? "没有找到符合条件的车次" : "输入查询条件开始"}</strong><span>{result ? "请检查日期、站名与筛选条件。" : "按车次或区间查询，结果将在此表格显示。"}</span></div> : <div className="desktop-table-scroll"><table className="desktop-trains"><thead><tr><th scope="col">车次 / 车型</th><th scope="col">出发 / 到达</th><th scope="col">历时 / 票价</th><th scope="col">席别余票</th><th scope="col">操作</th></tr></thead><tbody>{visibleTrains.map((train) => <tr key={`${train.code}-${train.departure}`}>
-                <td><div className="desktop-train-identity"><strong>{train.code}</strong><TrainIllustration model={train.trainsetModel} /></div><span className="desktop-model">{train.trainsetModel || "车型暂无资料"}{train.trainsetOwner && ` · ${train.trainsetOwner}`}</span></td>
+                <td><div className="desktop-train-identity"><strong>{train.code}</strong><TrainIllustration model={train.trainsetModel} /></div><span className="desktop-model" title={equipmentTitle(train)}>{equipmentLabel(train)}</span></td>
                 <td className="desktop-timing"><div><strong>{train.departure}</strong><span>{train.from}</span></div><div><strong>{train.arrival}</strong><span>{train.to}</span></div></td><td className="desktop-duration">{train.duration}<TrainFare train={train} seat={settings.seat}/></td>
                 <td><div className="desktop-seat-list">{train.seats.filter((seat) => seat.value !== "--").map((seat) => <span key={seat.label} className={seat.available ? "is-available" : ""}>{seat.label} <b>{seat.value}</b>{seat.price != null && <small>{money(seat.price)}</small>}</span>)}</div><span className="desktop-availability">{matchingSeats(train, settings.seat).length ? "有关注席别余票" : "暂无关注席别余票"}</span></td>
                 <td><div className="desktop-row-actions"><button onClick={() => { setPositionSelection({ train: train.code, date: train.originDate || result.date }); setFeature("position"); }}>位置 / 下一站</button><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">12306 <ExternalLink size={11} /></a></div></td>
               </tr>)}</tbody></table></div>}
             </section>
-            <aside className="desktop-monitor" aria-label="监控状态"><div className="desktop-panel-heading"><h2>监控状态</h2><Bell size={16} /></div><div className={`desktop-monitor-state ${settings.enabled ? "is-active" : ""}`}><i /><strong>{settings.enabled ? "监控运行中" : "监控未开启"}</strong></div><dl><div><dt>检查频率</dt><dd>每 {settings.intervalMinutes} 分钟</dd></div><div><dt>关注席别</dt><dd>{settings.seat}</dd></div><div><dt>通知方式</dt><dd>Windows 系统通知</dd></div><div><dt>最近检查</dt><dd>{result ? formatCheckedAt(result.checkedAt) : "尚未查询"}</dd></div></dl><p>开启后由桌面后台定时查询。关闭窗口仍继续监控，有余票时通过系统通知提醒。</p><a className="desktop-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer"><TrainFront size={17} /><span><strong>RailGo Data Service</strong><small>车型、配属与铁路坐标补充服务</small></span><ExternalLink size={12} /></a></aside>
+            <aside className="desktop-monitor" aria-label="监控状态"><div className="desktop-panel-heading"><h2>监控状态</h2><Bell size={16} /></div><div className={`desktop-monitor-state ${settings.enabled ? "is-active" : ""}`}><i /><strong>{settings.enabled ? "监控运行中" : "监控未开启"}</strong></div><dl><div><dt>检查频率</dt><dd>每 {settings.intervalMinutes} 分钟</dd></div><div><dt>关注席别</dt><dd>{settings.seat}</dd></div><div><dt>通知方式</dt><dd>Windows 系统通知</dd></div><div><dt>最近检查</dt><dd>{result ? formatCheckedAt(result.checkedAt) : "尚未查询"}</dd></div></dl><p>开启后由桌面后台定时查询。关闭窗口仍继续监控，有余票时通过系统通知提醒。</p><a className="desktop-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer"><TrainFront size={17} /><span><strong>RailGo Data Service</strong><small>仅补充缺失车型与铁路坐标</small></span><ExternalLink size={12} /></a></aside>
           </div>
         </div>
         {feature === "transfer" && <RailTransfer stations={stations} onPosition={(train, date) => { setPositionSelection({ train, date }); setFeature("position"); }}/>}
-        {feature === "position" && <div className="desktop-position"><RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} /><a className="desktop-position-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer">车型、配属与铁路坐标由 RailGo Data Service 补充 ↗</a></div>}
+        {feature === "position" && <div className="desktop-position"><RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} /><a className="desktop-position-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer">车型优先来自 12306；缺失资料与铁路坐标由 RailGo 补充 ↗</a></div>}
       </main>
     </div>
-    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票、票价与停站表来自 12306 · 车型与铁路坐标为补充资料</span><span>v1.9.4</span></footer>
+    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票、票价与停站表来自 12306 · 车型与铁路坐标为补充资料</span><span>v1.9.5</span></footer>
   </div>;
 }

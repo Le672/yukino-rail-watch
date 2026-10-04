@@ -94,6 +94,7 @@ function officialFixture(searchRows: unknown[], ticketRows = [ticketRow("G101"),
     const url = new URL(String(input));
     if (url.pathname.endsWith("station_name.js")) return new Response(`var station_names='${stationFixture}';`);
     if (url.hostname === "search.12306.cn") return Response.json({ status: true, data: searchRows });
+    if (url.pathname.endsWith("/getTrainName")) return Response.json({ status: true, data: [] });
     if (url.pathname.endsWith("/init")) return new Response("<html></html>", { headers: { "set-cookie": "JSESSIONID=abc; Path=/" } });
     if (url.pathname.endsWith("/queryA")) return Response.json({ data: { result: ticketRows, map: { AAA: "车站0", AAB: "车站1" } } });
     throw new Error(`Unexpected official request: ${url}`);
@@ -153,6 +154,8 @@ describe("independent train and route searches", () => {
     vi.stubGlobal("fetch", fetchMock);
     const response = await onRequestGet({ request: new Request("https://cr.yukino.bond/api/rail?date=2026-09-29&train=G101") });
     expect(response.status).toBe(404);
+    const fallback = fetchMock.mock.calls.map(([input]) => new URL(String(input))).find((url) => url.pathname.endsWith("/getTrainName"));
+    expect(fallback?.searchParams.get("date")).toBe("2026-09-29");
     expect(fetchMock.mock.calls.some(([input]) => String(input).includes("leftTicket/query"))).toBe(false);
   });
 

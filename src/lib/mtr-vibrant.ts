@@ -5,9 +5,14 @@ const normalize = (value: string) => value.normalize("NFKC").toUpperCase().repla
 const isMtrOwner = (owner: string) => /^(?:港[铁鐵](?:公司|有限公司)?|香港[铁鐵]路(?:有限公司|公司)?|MTR(?:CORPORATION(?:LIMITED)?)?|石[岗崗](?:动车所|車廠|车厂|列[车車]停放[处處]))$/.test(normalize(owner));
 const conventional380A = (model: string) => /^CRH380A(?:\((?:统型|統型)\))?(?:重联)?$/.test(normalize(model));
 
-export function mtrLiveryModel(train: { code: string; trainsetModel: string | null; trainsetOwner?: string | null },
+export function mtrLiveryModel(train: { code: string; trainsetModel: string | null; trainsetOwner?: string | null; trainsetNumber?: string | null },
   context: { date: string; fromCode?: string; toCode?: string }): string | null {
   const model = train.trainsetModel;
+  // A physical train number from the dated official query is stronger evidence than a timetable edition.
+  if (model && conventional380A(model) && train.trainsetNumber) {
+    const units = normalize(train.trainsetNumber).split(/[+,/]/).map(value => value.match(/^CRH380A-(\d{4})$/)?.[1]);
+    if (units.length && units.every(Boolean)) return units.every(unit => /^025[1-9]$/.test(unit!)) ? MTR_MODEL + (units.length > 1 ? " 重联" : "") : model;
+  }
   // Live operator evidence takes precedence over the published schedule snapshot.
   if (train.trainsetOwner && isMtrOwner(train.trainsetOwner) && model && conventional380A(model)) {
     return MTR_MODEL + (/重联$/.test(normalize(model)) ? " 重联" : "");

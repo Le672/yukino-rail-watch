@@ -1,7 +1,8 @@
 import { railApiUrl } from "./rail-api";
 import { applyFares } from "./rail-fares";
 import type { Fare } from "./rail-fares";
-import { enrichWithRailGo } from "./railgo";
+import { equipmentFields, loadTrainEquipment } from "./rail-equipment";
+import { mtrLiveryModel } from "./mtr-vibrant";
 import { trainIdentity } from "./rail-tickets";
 import type { Train } from "./rail-tickets";
 const fares = new Map<string, { at: number; value: Record<string, Fare> | null }>();
@@ -28,7 +29,11 @@ async function ticketFares(train: Train, date: string) {
 }
 export async function enrichTrainDetails(train: Train, date: string): Promise<Train> {
   const [equipment, prices] = await Promise.all([
-    train.trainsetModel ? Promise.resolve(train) : enrichWithRailGo({ date: train.originDate || train.date || date, fromCode: train.fromCode, toCode: train.toCode, trains: [train] }).then(r => r.trains[0]),
+    train.trainsetModel && train.trainsetSource !== "RailGo" ? Promise.resolve(train) : loadTrainEquipment(train.code, train.originDate || train.date || date).then(item => {
+      const next = { ...train, ...equipmentFields(item) };
+      return { ...next, trainsetSource: item.model ? item.source : null, trainsetScope: item.model ? item.scope : "reference" as const,
+        trainsetModel: mtrLiveryModel(next, { date: item.date, fromCode: train.fromCode, toCode: train.toCode }) };
+    }),
     train.seats.some(s => s.value !== "--" && s.price == null) ? ticketFares(train, date) : Promise.resolve(null),
   ]);
   return { ...equipment, seats: prices ? applyFares(train.seats, prices) : train.seats,
@@ -44,5 +49,7 @@ export async function enrichTrainList(trains: Train[], date: string, onBatch: (u
   }
 }
 export function mergeTrainDetails<T extends Train>(train: T, updated: Train | undefined): T {
-  return updated ? { ...train, trainsetModel: updated.trainsetModel, trainsetOwner: updated.trainsetOwner, seats: updated.seats, fareStatus: updated.fareStatus } : train;
+  return updated ? { ...train, trainsetModel: updated.trainsetModel, trainsetOwner: updated.trainsetOwner, trainOperator: updated.trainOperator,
+    trainsetSource: updated.trainsetSource, trainsetScope: updated.trainsetScope, trainsetDate: updated.trainsetDate,
+    trainsetNumber: updated.trainsetNumber, trainsetCheckedAt: updated.trainsetCheckedAt, seats: updated.seats, fareStatus: updated.fareStatus } : train;
 }

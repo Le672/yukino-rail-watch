@@ -1,6 +1,23 @@
 import { isJourneyDate, parseJourney, TRAIN_CODE } from "./train-position";
 import type { DelayReport, TimetableStop, TrainDelay, TrainJourney } from "./train-position";
 
+export type OfficialTrainRoute = { from: string; to: string; trainNo: string };
+/** The date-scoped official list contains duplicates and aliases; never decode train numbers to invent a service. */
+export function parseOfficialTrainNames(payload: unknown): Map<string, OfficialTrainRoute[]> {
+  const root = payload as { status?: unknown; data?: unknown } | null;
+  if (root?.status !== true || !Array.isArray(root.data)) throw new Error("12306 按日期车次表暂不可用");
+  const routes = new Map<string, Map<string, OfficialTrainRoute>>();
+  for (const row of root.data) {
+    if (!row || typeof row !== "object" || typeof row.station_train_code !== "string" || typeof row.train_no !== "string" || !/^[A-Za-z0-9]{1,32}$/.test(row.train_no)) continue;
+    const match = row.station_train_code.match(/^([^()]+)\(([^()]+)-([^()]+)\)$/);
+    if (!match || !TRAIN_CODE.test(match[1]) || !match[2].trim() || !match[3].trim() || match[2] === match[3]) continue;
+    const route = { from: match[2].trim(), to: match[3].trim(), trainNo: row.train_no };
+    if (!routes.has(match[1])) routes.set(match[1], new Map());
+    routes.get(match[1])!.set(`${route.trainNo}/${route.from}/${route.to}`, route);
+  }
+  return new Map([...routes].map(([code, items]) => [code, [...items.values()]]));
+}
+
 type OfficialStop = {
   station_no?: string; station_name?: string; station_train_code?: string; station_telecode?: string;
   arrive_day_diff?: string; arrive_time?: string; start_time?: string;

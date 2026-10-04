@@ -1,6 +1,7 @@
+import type { EquipmentFields } from "./rail-equipment";
 export type Station = { name: string; code: string; pinyin: string; city?: string; cityCode?: string };
 export type Seat = { label: string; value: string; available: boolean; price?: number; priceMax?: number };
-export type Train = {
+export type Train = EquipmentFields & {
   code: string; from: string; to: string; departure: string; arrival: string; duration: string;
   saleStatus: string; seats: Seat[]; trainsetModel: string | null; trainsetOwner?: string | null;
   fromCode?: string; toCode?: string; date?: string; originDate?: string; trainNo?: string;

@@ -4,6 +4,7 @@ import { RailPosition } from "./components/RailPosition";
 import { RailTransfer } from "./components/RailTransfer";
 import { RailResultControls, TrainFare, useTrainListing } from "./components/RailResultControls";
 import { money } from "./lib/rail-tickets";
+import { equipmentLabel, equipmentTitle } from "./lib/rail-equipment";
 import { useRailMonitor, SEAT_OPTIONS, matchingSeats, formatCheckedAt } from "./hooks/useRailMonitor";
 
 export default function Rail() {
@@ -76,7 +77,7 @@ export default function Rail() {
               return <article className="rail-train" key={`${train.code}-${train.departure}`}>
                 <div className="rail-train-main"><div className="rail-train-identity"><span className="rail-train-code">{train.code}</span><TrainIllustration model={train.trainsetModel} /></div><div className="rail-journey"><strong>{train.departure}</strong><span>{train.from}</span></div><div className="rail-route"><span>{train.duration}</span><i /></div><div className="rail-journey"><strong>{train.arrival}</strong><span>{train.to}</span></div><span className={available.length ? "rail-badge is-available" : "rail-badge"}>{available.length ? "有余票" : "暂无余票"}</span></div>
                 <div className="rail-seats">{train.seats.filter((seat) => seat.value !== "--").map((seat) => <span className={seat.available ? "rail-seat is-available" : "rail-seat"} key={seat.label}>{seat.label} <strong>{seat.value}</strong>{seat.price != null && <small>{money(seat.price)}</small>}</span>)}</div>
-                <div className="rail-train-foot"><span>车型：{train.trainsetModel || "暂无可核实资料"}{train.trainsetOwner ? ` · 配属 ${train.trainsetOwner}` : ""}</span><TrainFare train={train} seat={settings.seat}/><div className="rail-train-links"><button type="button" onClick={() => { setPositionSelection({ train: train.code, date: train.originDate || result.date }); setFeature("position"); }}>位置／下一站</button><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div></div>
+                <div className="rail-train-foot"><span title={equipmentTitle(train)}>{equipmentLabel(train)}</span><TrainFare train={train} seat={settings.seat}/><div className="rail-train-links"><button type="button" onClick={() => { setPositionSelection({ train: train.code, date: train.originDate || result.date }); setFeature("position"); }}>位置／下一站</button><a href="https://www.12306.cn/" target="_blank" rel="noreferrer">前往 12306 <ExternalLink size={13} /></a></div></div>
               </article>;
             })}</div>}
         </section>
@@ -90,7 +91,7 @@ export default function Rail() {
             <span className="rail-attribution-copy"><strong>RailGo Data Service</strong><span>api.railgo.dev</span></span>
             <ExternalLink className="rail-attribution-external" size={17} aria-hidden="true" />
           </span>
-          <span className="rail-attribution-caption">车型、配属与铁路坐标由 RailGo 数据服务补充</span>
+          <span className="rail-attribution-caption">车型优先来自 12306；RailGo 仅补充缺失资料与铁路坐标</span>
         </a>
         <footer className="rail-site-footer" role="contentinfo" aria-label="Yukino 页脚">
           <div className="rail-site-footer-main">
