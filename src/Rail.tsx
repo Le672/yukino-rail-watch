@@ -1,6 +1,7 @@
 import { ArrowLeft, Bell, BellOff, Clock3, ExternalLink, RefreshCw, TrainFront } from "lucide-react";
 import { TrainIllustration } from "./components/TrainIllustration";
 import { RailPosition } from "./components/RailPosition";
+import { StationBoard } from "./components/StationBoard";
 import { RailTransfer } from "./components/RailTransfer";
 import { RailResultControls, TrainFare, useTrainListing } from "./components/RailResultControls";
 import { money } from "./lib/rail-tickets";
@@ -21,7 +22,7 @@ export default function Rail() {
           <div>
             <p className="eyebrow"><span className="status-dot" /> RAIL WATCH / 12306</p>
             <h1>余票提醒<span>.</span></h1>
-            <p>查询余票、查看列车运行区间与下一停靠站。余票变化时，及时收到提醒。</p>
+            <p>查询余票、查看列车位置与下一站，或打开车站到发大屏。余票变化时，及时收到提醒。</p>
           </div>
           <div className="rail-hero-icon" aria-hidden="true"><TrainFront size={54} strokeWidth={1.25} /></div>
         </header>
@@ -29,6 +30,7 @@ export default function Rail() {
           <button type="button" aria-pressed={feature === "tickets"} onClick={() => setFeature("tickets")}>余票查询与监控</button>
           <button type="button" aria-pressed={feature === "transfer"} onClick={() => setFeature("transfer")}>中转行程</button>
           <button type="button" aria-pressed={feature === "position"} onClick={() => setFeature("position")}>列车位置与下一站</button>
+          <button type="button" aria-pressed={feature === "board"} onClick={() => setFeature("board")}>车站大屏</button>
         </div>
         <div hidden={feature !== "tickets"}>
         <div className="rail-layout">
@@ -82,6 +84,7 @@ export default function Rail() {
             })}</div>}
         </section>
         </div>
+        {feature === "board" && <StationBoard stations={stations}/>}
         {feature === "transfer" && <RailTransfer stations={stations} onPosition={(train, date) => { setPositionSelection({ train, date }); setFeature("position"); }}/>}
         {feature === "position" && <RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} />}
         <p className="rail-disclaimer">本工具仅展示公开查询结果，不提供购票或抢票。车票状态会随时变化，最终以 12306 官网为准。</p>

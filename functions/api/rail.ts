@@ -5,6 +5,7 @@ import type { OfficialTimetable, OfficialTrainRoute } from "../../src/lib/rail-o
 import { parseOfficialEquipment } from "../../src/lib/rail-equipment";
 import type { TrainEquipment } from "../../src/lib/rail-equipment";
 import type { TrainJourney } from "../../src/lib/train-position";
+import { getStationBoard, getStationBoardRow } from "../../src/lib/rail-board-service";
 
 const ORIGIN = "https://kyfw.12306.cn";
 const STATIONS_URL = `${ORIGIN}/otn/resources/js/framework/station_name.js`;
@@ -403,7 +404,7 @@ async function getHubs(date: string, from: Station, to: Station, stations: Stati
 export async function onRequestGet(context: { request: Request }) {
   const url = new URL(context.request.url);
   const mode = url.searchParams.get("mode") || "query";
-  if (!["stations", "query", "journey", "delays", "fare", "hubs", "equipment"].includes(mode)) return json({ error: "未知查询类型" }, 400);
+  if (!["stations", "query", "journey", "delays", "fare", "hubs", "equipment", "board", "board-row"].includes(mode)) return json({ error: "未知查询类型" }, 400);
 
   try {
     if (mode === "equipment") {
@@ -419,6 +420,19 @@ export async function onRequestGet(context: { request: Request }) {
     let from = (url.searchParams.get("from") || "").trim();
     let to = (url.searchParams.get("to") || "").trim();
     const trainCode = (url.searchParams.get("train") || "").trim().toUpperCase();
+    if (mode === "board" || mode === "board-row") {
+      const stationValue = (url.searchParams.get("station") || "").trim();
+      const station = stations.find(item => item.code === stationValue || item.name === stationValue);
+      const today = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
+      const distance = (Date.parse(`${date}T00:00:00+08:00`) - Date.parse(`${today}T00:00:00+08:00`)) / 86400000;
+      if (!isValidDate(date) || !station || distance < -13 || distance > 14) return json({ error: "请选择有效 12306 车站及前 13 天至后 14 天内的日期" }, 400);
+      const direction = url.searchParams.get("direction") || "D", id = url.searchParams.get("id") || "";
+      if (mode === "board-row" && (!["D", "A"].includes(direction) || !/^[A-Za-z0-9]{1,32}\/\d{4}-\d{2}-\d{2}\/(?:[GDCZTKYS]\d{1,4}[A-Z]?|\d{4})$/.test(id))) return json({ error: "请提供有效的大屏车次及到发方向" }, 400);
+      const board = await getStationBoard(station, date);
+      if (mode === "board") return json(board, 200, 15);
+      if (!board.rows.some(row => row.id === id && (direction === "D" ? row.departureAt : row.arrivalAt) !== null)) return json({ error: "该车次不在所选车站的到发列表中" }, 404);
+      return json(await getStationBoardRow(board, id, direction as "D" | "A"), 200, 15);
+    }
     if (mode === "fare" || mode === "hubs") {
       const fromStation = stations.find(s => s.name === from || s.code === from), toStation = stations.find(s => s.name === to || s.code === to);
       if (!isValidDate(date) || !fromStation || !toStation || fromStation.code === toStation.code || (mode === "fare" && !TRAIN_CODE.test(trainCode))) return json({ error: "请填写有效日期、区间和车次" }, 400);

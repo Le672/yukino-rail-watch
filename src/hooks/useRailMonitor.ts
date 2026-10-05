@@ -86,7 +86,7 @@ export function useRailMonitor(desktop = window.railDesktop) {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
-  const [feature, setFeature] = useState<"tickets" | "position" | "transfer">("tickets");
+  const [feature, setFeature] = useState<"tickets" | "position" | "transfer" | "board">(() => new URLSearchParams(window.location.search).get("view") === "board" ? "board" : "tickets");
   const [positionSelection, setPositionSelection] = useState<{ train: string; date?: string }>({ train: "" });
   const [permission, setPermission] = useState(() => typeof Notification === "undefined" ? "unsupported" : Notification.permission);
   const availability = useRef<Record<string, boolean>>({});

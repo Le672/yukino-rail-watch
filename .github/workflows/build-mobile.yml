@@ -1,20 +1,6 @@
 name: Build Android and iOS apps
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'android/**'
-      - 'ios/**'
-      - 'src/**'
-      - 'public/**'
-      - 'scripts/**'
-      - 'mobile*'
-      - 'capacitor.config.ts'
-      - 'vite.mobile.config.ts'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/build-mobile.yml'
   workflow_dispatch:
     inputs:
       publish:

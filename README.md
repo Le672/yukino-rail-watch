@@ -1,6 +1,6 @@
 # Yukino Rail Watch · 余票提醒
 
-独立的 12306 余票查询、网页通知、Windows 托盘提醒与 Android / iOS 手机客户端项目。网页入口为 [cr.yukino.bond](https://cr.yukino.bond)，也可通过主站 [余票提醒](https://www.yukino.bond/cr) 使用。子域已完成 Pages 绑定和 DNS 配置，并验证 HTTPS 页面可以访问。
+独立的 12306 余票查询、车站大屏、网页通知与 Windows 托盘提醒项目。网页入口为 [cr.yukino.bond](https://cr.yukino.bond)，也可通过主站 [余票提醒](https://www.yukino.bond/cr) 使用。子域已完成 Pages 绑定和 DNS 配置，并验证 HTTPS 页面可以访问。
 
 ## 下载
 
@@ -8,15 +8,13 @@
 
 在版本页的 Assets 中下载 `.exe`，双击运行即可。每个正式版本同时提供 `SHA256SUMS.txt`。
 
-## Android / iOS 手机版
+## 移动客户端（已暂停）
 
-手机版采用独立底部导航、车次卡片和原生通知 / 定位，不加载整张网页。Android 提供测试 APK；iOS 提供原生工程与模拟器构建，真机和商店发行需要自己的 Apple 开发者账号签名。
-
-[手机安装与发行教程](docs/mobile-distribution.md) · [手机预览版本](https://github.com/Le672/yukino-rail-watch/releases/tag/mobile-v1.1.5) · [隐私政策](https://cr.yukino.bond/rail-privacy.html)
-
-前台按所设 1–60 分钟间隔检查；Android 后台最短约 15 分钟，iOS 后台由系统安排，无法保证固定频率。GPS 仅在前台位置页主动开启后读取。
+Android / iOS 停止服务，后续更新仅提供网页与 Windows 桌面端。旧工程与历史安装包保留，本次不构建或发行移动版；移动工作流已移除推送自动触发，仅保留手动入口供以后明确恢复时使用。
 
 ## 功能
+
+- Windows 1.10.0 与网页新增深色车站大屏：全国 12306 车站、到达／出发、车次与到发站筛选、计划停靠时长、站台／检票口、官方列车和检票状态、每分钟刷新、分页、自动翻页与全屏。缺失实时数据明确标注未提供。[大屏使用与数据说明](docs/rail-station-board.md)。
 
 - Windows 1.9.6 与手机 1.1.5 的 2D 地图默认改用高德国内底图，保留 OpenStreetMap 备用；卫星图切换同步转换坐标并保留视野，加载失败可重试，窄屏也可选择来源。
 

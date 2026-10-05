@@ -1,4 +1,5 @@
-import { Bell, BellOff, MapPin, RefreshCw, Ticket, TrainFront, ExternalLink, ArrowRightLeft } from "lucide-react";
+import { Bell, BellOff, MapPin, RefreshCw, Ticket, TrainFront, ExternalLink, ArrowRightLeft, Monitor } from "lucide-react";
+import { StationBoard } from "./components/StationBoard";
 import { RailPosition } from "./components/RailPosition";
 import { TrainIllustration } from "./components/TrainIllustration";
 import { RailTransfer } from "./components/RailTransfer";
@@ -13,9 +14,9 @@ export default function DesktopRail() {
   return <div className="desktop-app">
     <header className="desktop-header"><div className="desktop-brand"><img src="./rail-icon.png" width={34} height={34} alt="" aria-hidden="true" /><div><strong>Yukino Rail Watch</strong><span>Windows 余票与行程工具</span></div></div><span className="desktop-connection"><i />{desktop ? "已连接桌面服务" : "桌面界面预览"}</span></header>
     <div className="desktop-workspace">
-      <nav className="desktop-nav" aria-label="桌面功能"><button aria-pressed={feature === "tickets"} onClick={() => setFeature("tickets")}><Ticket size={19} />余票监控</button><button aria-pressed={feature === "transfer"} onClick={() => setFeature("transfer")}><ArrowRightLeft size={19}/>中转行程</button><button aria-pressed={feature === "position"} onClick={() => setFeature("position")}><MapPin size={19} />列车位置</button><span>关闭窗口可留在托盘<br />退出请使用托盘菜单</span></nav>
+      <nav className="desktop-nav" aria-label="桌面功能"><button aria-pressed={feature === "tickets"} onClick={() => setFeature("tickets")}><Ticket size={19} />余票监控</button><button aria-pressed={feature === "transfer"} onClick={() => setFeature("transfer")}><ArrowRightLeft size={19}/>中转行程</button><button aria-pressed={feature === "position"} onClick={() => setFeature("position")}><MapPin size={19} />列车位置</button><button aria-pressed={feature === "board"} onClick={() => setFeature("board")}><Monitor size={19}/>车站大屏</button><span>关闭窗口可留在托盘<br />退出请使用托盘菜单</span></nav>
       <main className="desktop-main">
-        <div className="desktop-title"><h1>{feature === "tickets" ? "余票监控" : feature === "transfer" ? "中转行程" : "列车位置"}</h1><span>{feature === "tickets" ? "12306 查询 · Windows 通知" : feature === "transfer" ? "站群换乘 · 多程车次 · 官方票价" : "设备定位 · 下一站 · 实时 / 预估速度"}</span></div>
+        <div className="desktop-title"><h1>{feature === "tickets" ? "余票监控" : feature === "transfer" ? "中转行程" : feature === "board" ? "车站大屏" : "列车位置"}</h1><span>{feature === "tickets" ? "12306 查询 · Windows 通知" : feature === "transfer" ? "站群换乘 · 多程车次 · 官方票价" : feature === "board" ? "全国车站 · 到发信息 · 全屏展示" : "设备定位 · 下一站 · 实时 / 预估速度"}</span></div>
         <div hidden={feature !== "tickets"} className="desktop-ticket-workspace">
           <section className="desktop-query" aria-label="查询条件">
             <div className="desktop-query-modes" role="group" aria-label="查询方式"><button aria-pressed={settings.queryMode === "train"} onClick={() => update({ queryMode: "train" })}>按车次</button><button aria-pressed={settings.queryMode === "route"} onClick={() => update({ queryMode: "route" })}>按区间</button><span>{settings.queryMode === "train" ? "输入车次即可查询全程余票" : "输入两站即可查询区间全部车次"}</span></div>
@@ -45,10 +46,11 @@ export default function DesktopRail() {
             <aside className="desktop-monitor" aria-label="监控状态"><div className="desktop-panel-heading"><h2>监控状态</h2><Bell size={16} /></div><div className={`desktop-monitor-state ${settings.enabled ? "is-active" : ""}`}><i /><strong>{settings.enabled ? "监控运行中" : "监控未开启"}</strong></div><dl><div><dt>检查频率</dt><dd>每 {settings.intervalMinutes} 分钟</dd></div><div><dt>关注席别</dt><dd>{settings.seat}</dd></div><div><dt>通知方式</dt><dd>Windows 系统通知</dd></div><div><dt>最近检查</dt><dd>{result ? formatCheckedAt(result.checkedAt) : "尚未查询"}</dd></div></dl><p>开启后由桌面后台定时查询。关闭窗口仍继续监控，有余票时通过系统通知提醒。</p><a className="desktop-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer"><TrainFront size={17} /><span><strong>RailGo Data Service</strong><small>仅补充缺失车型与铁路坐标</small></span><ExternalLink size={12} /></a></aside>
           </div>
         </div>
+        {feature === "board" && <StationBoard stations={stations}/>}
         {feature === "transfer" && <RailTransfer stations={stations} onPosition={(train, date) => { setPositionSelection({ train, date }); setFeature("position"); }}/>}
         {feature === "position" && <div className="desktop-position"><RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} /><a className="desktop-position-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer">车型优先来自 12306；缺失资料与铁路坐标由 RailGo 补充 ↗</a></div>}
       </main>
     </div>
-    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票、票价与停站表来自 12306 · 车型与铁路坐标为补充资料</span><span>v1.9.6</span></footer>
+    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票、票价与到发信息来自 12306 · 车型与铁路坐标为补充资料</span><span>v1.10.0</span></footer>
   </div>;
 }
