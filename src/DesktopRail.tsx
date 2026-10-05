@@ -49,6 +49,6 @@ export default function DesktopRail() {
         {feature === "position" && <div className="desktop-position"><RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} /><a className="desktop-position-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer">车型优先来自 12306；缺失资料与铁路坐标由 RailGo 补充 ↗</a></div>}
       </main>
     </div>
-    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票、票价与停站表来自 12306 · 车型与铁路坐标为补充资料</span><span>v1.9.5</span></footer>
+    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票、票价与停站表来自 12306 · 车型与铁路坐标为补充资料</span><span>v1.9.6</span></footer>
   </div>;
 }

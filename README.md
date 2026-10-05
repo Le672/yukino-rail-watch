@@ -12,11 +12,13 @@
 
 手机版采用独立底部导航、车次卡片和原生通知 / 定位，不加载整张网页。Android 提供测试 APK；iOS 提供原生工程与模拟器构建，真机和商店发行需要自己的 Apple 开发者账号签名。
 
-[手机安装与发行教程](docs/mobile-distribution.md) · [手机预览版本](https://github.com/Le672/yukino-rail-watch/releases/tag/mobile-v1.1.4) · [隐私政策](https://cr.yukino.bond/rail-privacy.html)
+[手机安装与发行教程](docs/mobile-distribution.md) · [手机预览版本](https://github.com/Le672/yukino-rail-watch/releases/tag/mobile-v1.1.5) · [隐私政策](https://cr.yukino.bond/rail-privacy.html)
 
 前台按所设 1–60 分钟间隔检查；Android 后台最短约 15 分钟，iOS 后台由系统安排，无法保证固定频率。GPS 仅在前台位置页主动开启后读取。
 
 ## 功能
+
+- Windows 1.9.6 与手机 1.1.5 的 2D 地图默认改用高德国内底图，保留 OpenStreetMap 备用；卫星图切换同步转换坐标并保留视野，加载失败可重试，窄屏也可选择来源。
 
 - Windows 1.9.5 与手机 1.1.4 优先从 12306 查询计划车型与客运担当，关键词检索漏项时补查官方按日期车次表；跨日车次按始发日查车型，未知日期绑定的资料明确标为参考。
 

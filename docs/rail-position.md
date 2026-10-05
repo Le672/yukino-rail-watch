@@ -42,13 +42,17 @@ GPS 未开启、权限被拒绝、定位过期或无法得到有效速度时，�
 
 仅在**正在乘坐所选车次**时开启此功能。GPS 能定位设备，不能验证列车身份。设备位置在本地匹配本车次的铁路线路，依据沿线累计距离确定实际停靠站的前后关系；位置优先于时刻表的时间比例，因此晚点列车仍在广州南之前时，不会因为计划时间已过而把下一站改为深圳北。站场范围内结合时刻表与移动速度作保守判断，无法证明开出时不跳过即将到达的停靠站。
 
-- RailGo 的 GCJ-02 线路和站点经过坐标逆转换为 WGS84，再绘制到 Web Mercator 地图，并与 GPS 匹配；不同坐标系不能直接混用。
+- RailGo 的 GCJ-02 线路和站点先逆转换为 WGS84，与原始 GPS 在同一坐标系内匹配；绘制高德底图时仅将显示坐标转为 GCJ-02。OpenStreetMap 和卫星图使用 WGS84；切换底图同时转换线路、站点、GPS 及当前地图中心，保留缩放，不修改用于测速和下一站判断的数据。
 - 定位超过 30 秒、报告误差超过 500 米、偏离线路、异常跳跃、线路重叠无法唯一匹配，或始发日期不属于当前行程时，停止 GPS 下一站判断，界面明确显示原因并退回时刻表估算。
 - 蓝点表示未经吸附的设备位置，蓝色范围表示定位精度，绿点表示匹配的铁路位置或明确标注的时刻表估算，金点表示下一停靠站。GPS 模式显示至下一站的沿线距离，不用计划倒计时冒充 GPS 到站预测。
 - 页面不保存或向本站上传定位历史。地图提供方仍会收到当前视野的瓦片请求。停止定位、切换页面、隐藏网页／Windows 窗口时停止定位读取；恢复可见时仅在本次定位开关仍开启的情况下恢复。
 - 可拖动、缩放完整地图，切换「2D 地图／卫星图」，查看「全程／当前位置」，并放大地图区域。默认不拦截页面滚轮，使用地图的 +／− 控件或触摸手势缩放。
 
-2D 底图为 [OpenStreetMap](https://www.openstreetmap.org/copyright)，遵循[瓦片使用政策](https://operations.osmfoundation.org/policies/tiles/)：保留署名、浏览器来源和缓存，不批量下载、不提供离线预取。Windows 请求使用可识别的应用 User-Agent。
+2026-10-05 起，2D 默认使用[高德地图](https://www.amap.com/)国内瓦片服务（中文地名），地图内保留提供方署名，并可通过「底图」选择器改用 OpenStreetMap。接入地址依据[高德官方瓦片图层示例](https://developer.amap.com/api/maps-javascript-api/reference/layer/tilelayer)和[Leaflet 中国地图服务原始配置](https://github.com/htoooth/Leaflet.ChineseTmsProviders/blob/master/src/leaflet.ChineseTmsProviders.js)；坐标范围依据[高德坐标转换说明](https://developer.amap.com/api/maps-javascript-api/guide/transform/coord_trans)。这里没有更换网络代理、读取 IP 城市或向地图服务提交 GPS 经纬度接口；提供方仍收到当前视野的瓦片请求。
+
+底图连续加载失败或 15 秒未取得瓦片时显示提示，可「重试底图」、切换备用 2D 来源或从卫星图返回 2D。外部地图服务和具体线路网络仍可能变化；加载失败不会阻断已取得的停站表、设备定位与下一站判断。
+
+备用 2D 底图为 [OpenStreetMap](https://www.openstreetmap.org/copyright)，遵循[瓦片使用政策](https://operations.osmfoundation.org/policies/tiles/)：保留署名、浏览器来源和缓存，不批量下载、不提供离线预取。Windows 请求使用可识别的应用 User-Agent。
 
 卫星底图为 [EOX Sentinel-2 cloudless 2025](https://maps.eox.at/)，约 10 米分辨率，最大原生瓦片层级 14；放大后只放大已有像素。它是年度合成影像，**不是实时卫星直播，也不是列车遥测**。服务依据 [CC BY-NC-SA 4.0 非商业许可](https://cloudless.eox.at/documentation/license)使用，地图内保留完整署名和链接。此免费个人站按非商业用途集成；未来商业化需替换或获得商业许可。相关软件许可随 Windows 包内的 `public/rail-third-party-notices.txt` 一并分发。
 

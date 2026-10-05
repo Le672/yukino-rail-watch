@@ -64,6 +64,8 @@
 .rail-map-view-actions button { border-color: #dce5d6; background: #fffefb; }
 .rail-map-view-actions button[aria-pressed="true"] { color: #286486; border-color: #afd1e4; background: #edf6fc; }
 .rail-map-toolbar button:disabled { opacity: .45; cursor: default; }
+.rail-map-provider { display: flex; align-items: center; gap: 7px; min-width: 0; color: #6c8062; font-size: 11px; }
+.rail-map-provider select { box-sizing: border-box; min-width: 0; max-width: 100%; min-height: 32px; padding: 5px 7px; border: 1px solid #dce5d6; border-radius: 6px; color: #315c42; background: #fffefb; font: inherit; }
 .rail-map-canvas { position: relative; z-index: 0; height: 440px; width: 100%; background: #e8efe3; font-family: inherit; }
 .rail-map-shell.is-expanded .rail-map-canvas { height: min(78vh, 800px); }
 .rail-map-canvas .leaflet-tooltip { border-color: #c9d8c0; background: #fffefbed; color: #315c42; font-family: inherit; font-size: 11px; line-height: 1.5; box-shadow: 0 1px 6px #315c4215; }
@@ -77,7 +79,8 @@
 .rail-map-legend .is-train { background: #315c42; }
 .rail-map-legend .is-next { background: #d6aa54; }
 .rail-map-note, .rail-map-tile-error { margin: 0; padding: 0 13px 12px; color: #8a977f; font-size: 10px; line-height: 1.6; }
-.rail-map-tile-error { padding-top: 10px; color: #967431; background: #fcf8ed; }
+.rail-map-tile-error { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 10px; color: #967431; background: #fcf8ed; }
+.rail-map-tile-error button { padding: 4px 8px; border: 1px solid #d9caab; border-radius: 5px; color: #806127; background: #fffefb; font: inherit; cursor: pointer; }
 .rail-position-explanation { margin: 16px 2px 0; color: #8b9982; font-size: 11px; line-height: 1.8; }
 .rail-position-timetable { grid-column: 1 / -1; }
 .rail-position-timetable h3 { margin: 7px 0 0; color: #315c42; font-size: 20px; font-weight: 500; }
@@ -106,6 +109,8 @@
   .rail-next-stop strong { font-size: 28px; overflow-wrap: anywhere; }
   .rail-speed-updated { overflow-wrap: anywhere; }
   .rail-map-modes, .rail-map-view-actions { width: 100%; }
+  .rail-map-provider { width: 100%; }
+  .rail-map-provider select { flex: 1 1 0; min-height: 36px; }
   .rail-map-modes button { flex: 1 1 0; min-width: 0; justify-content: center; }
   .rail-map-view-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto; }
   .rail-map-toolbar button { justify-content: center; min-width: 0; min-height: 36px; padding: 7px; }

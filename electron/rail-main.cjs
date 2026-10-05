@@ -155,7 +155,7 @@ function createWindow() {
         /^https:\/\/www\.china-emu\.cn\/Trains\/Model\/Detail-\d+-\d+-[A-Z]\.html$/.test(url) ||
         url.startsWith("https://creativecommons.org/licenses/") ||
         url.startsWith("https://creativecommons.org/publicdomain/") ||
-        ["https://www.openstreetmap.org/copyright", "https://s2maps.eu", "https://eox.at", "https://maps.eox.at"].includes(url.replace(/\/$/, ""))) {
+        ["https://www.amap.com", "https://www.openstreetmap.org/copyright", "https://s2maps.eu", "https://eox.at", "https://maps.eox.at"].includes(url.replace(/\/$/, ""))) {
       void shell.openExternal(url);
     }
     return { action: "deny" };

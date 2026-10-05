@@ -56,7 +56,10 @@ SOFTWARE.
 
 
 
-Map data: OpenStreetMap contributors - https://www.openstreetmap.org/copyright
+Default 2D basemap: AMap / 高德地图 - https://www.amap.com/
+GCJ-02 display coordinates. GPS and railway matching use WGS84 locally.
+
+Backup 2D map data: OpenStreetMap contributors - https://www.openstreetmap.org/copyright
 
 Satellite: Sentinel-2 cloudless by EOX IT Services GmbH. Contains modified Copernicus Sentinel data 2025.
 
