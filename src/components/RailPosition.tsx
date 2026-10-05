@@ -189,7 +189,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
       <div className="rail-card rail-position-timetable">
         <div className="rail-card-heading"><div><span className="rail-overline">TIMETABLE</span><h3>本车次停站表</h3></div><span className="rail-small">{journey.stops.length} 站 · 不列通过站</span></div>
         <div className="rail-timetable-scroll" role="region" aria-label="停站表，窄屏可左右滑动" tabIndex={0}><table aria-label="本车次停站表"><thead><tr><th scope="col">停靠站</th><th scope="col">车次</th><th scope="col">始发站</th><th scope="col">终到站</th><th scope="col">到达</th><th scope="col">发车</th><th scope="col">停靠</th><th scope="col">站台</th><th scope="col">检票口</th><th scope="col">列车状态</th><th scope="col">检票状态</th><th scope="col">行程进度</th></tr></thead><tbody>{journey.stops.map((stop, index) => {
-          const detail = visibleStopDetail(stopBoard.rows[index]?.detail, now, live);
+          const detail = visibleStopDetail(stopBoard.rows[index]?.detail, now, live, delays, stop);
           return (
           <tr key={`${stop.station}-${index}`} className={index === position.nextIndex ? "is-next" : index === position.currentIndex ? "is-current" : ""}>
             <th scope="row"><span>{index + 1}</span>{stop.station}</th><td>{stop.trainCode}</td><td>{journey.stops[0].station}</td><td>{journey.stops.at(-1)!.station}</td>

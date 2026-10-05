@@ -1,7 +1,7 @@
 import { railApiUrl } from "./rail-api";
 import { emptyBoardDetail } from "./rail-board";
 import type { BoardRowDetail, JourneyBoardData } from "./rail-board";
-import type { TrainJourney } from "./train-position";
+import type { DelayReport, TimetableStop, TrainJourney } from "./train-position";
 
 export async function loadJourneyBoardStops(journey: TrainJourney, indices: number[], realtime: boolean, signal: AbortSignal): Promise<JourneyBoardData> {
   const response = await fetch(railApiUrl(new URLSearchParams({ mode: "journey-board", train: journey.train, date: journey.date,
@@ -16,10 +16,18 @@ export async function loadJourneyBoardStops(journey: TrainJourney, indices: numb
   return data;
 }
 /** Planned gates/platforms remain visible; old realtime states and custom-time observations stay unknown. */
-export function visibleStopDetail(detail: BoardRowDetail | undefined, now: number, realtime: boolean): BoardRowDetail | undefined {
-  if (!detail) return undefined;
-  const fresh = realtime && now >= detail.checkedAt - 5000 && now - detail.checkedAt <= 120000 &&
+export function visibleStopDetail(detail: BoardRowDetail | undefined, now: number, realtime: boolean, report?: DelayReport | null, stop?: TimetableStop): BoardRowDetail | undefined {
+  const fresh = detail && realtime && now >= detail.checkedAt - 5000 && now - detail.checkedAt <= 120000 &&
     (detail.sourceAt === null || now >= detail.sourceAt - 5000 && now - detail.sourceAt <= 120000);
-  if (fresh) return detail;
-  return { ...emptyBoardDetail(detail.id, detail.direction, detail.checkedAt), platform: detail.platform, wicket: detail.wicket };
+  const visible = !detail || fresh ? detail : { ...emptyBoardDetail(detail.id, detail.direction, detail.checkedAt), platform: detail.platform, wicket: detail.wicket };
+  if (!realtime || visible && visible.status !== "unknown" || !stop || report?.source !== "12306" ||
+    now < report.checkedAt - 5000 || now - report.checkedAt > 120000) return visible;
+  // Position already queried the official arrival service. Reuse it even when a delayed stop's planned time has passed.
+  const matches = report.rows.filter(row => row.station === stop.station && row.telecode === stop.telecode);
+  if (matches.length !== 1 || !/^(?:ON_TIME|DELAY|EARLY)(?:_PREDICTION)?$/.test(matches[0].code) ||
+    !Number.isFinite(matches[0].minutes) || matches[0].minutes < 0 || matches[0].minutes > 1440) return visible;
+  const row = matches[0];
+  return { ...(visible || emptyBoardDetail("", row.kind === "departure" ? "D" : "A", report.checkedAt)), sourceAt: report.checkedAt,
+    status: row.code.startsWith("DELAY") ? "late" : row.code.startsWith("EARLY") ? "early" : "on-time",
+    minutes: row.minutes, predicted: row.code.endsWith("_PREDICTION") };
 }

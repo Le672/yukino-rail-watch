@@ -1,9 +1,20 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { emptyBoardDetail } from "../lib/rail-board";
 import { visibleStopDetail } from "../lib/rail-stop-info";
+import type { DelayReport, TimetableStop } from "../lib/train-position";
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 describe("per-stop board data boundaries", () => {
+  it("reuses a fresh official late report after planned arrival without confusing station, custom time or stale records", () => {
+    const now = Date.parse("2026-10-06T00:12:00+08:00");
+    const stop: TimetableStop = { station: "广州南", telecode: "IZQ", trainCode: "K124", arrival: "23:58", departure: "00:04", arrivalAt: now - 14 * 60000, departureAt: now - 8 * 60000, day: 0 };
+    const report: DelayReport = { source: "12306", checkedAt: now, rows: [{ station: stop.station, telecode: stop.telecode, code: "DELAY_PREDICTION", minutes: 22, kind: "arrival" }] };
+    expect(visibleStopDetail(undefined, now, true, report, stop)).toMatchObject({ status: "late", minutes: 22, predicted: true });
+    expect(visibleStopDetail(undefined, now, false, report, stop)).toBeUndefined();
+    expect(visibleStopDetail(undefined, now + 121000, true, report, stop)).toBeUndefined();
+    expect(visibleStopDetail(undefined, now, true, report, { ...stop, telecode: "IOQ" })).toBeUndefined();
+    expect(visibleStopDetail(undefined, now, true, { ...report, rows: [...report.rows, ...report.rows] }, stop)).toBeUndefined();
+  });
   it("retains planned platforms while hiding stale or custom-time realtime states", () => {
     const now = Date.parse("2026-10-05T23:50:00+08:00");
     const detail = { ...emptyBoardDetail("TRAIN/2026-10-05/K123", "D", now), platform: "6站台", wicket: "A6", status: "late" as const,

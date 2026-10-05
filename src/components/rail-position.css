@@ -93,7 +93,7 @@
 .rail-position-timetable .is-next { background: #f4f0e3; }
 .rail-position-timetable .is-next td:last-child { color: #92702c; }
 .rail-position-timetable .is-current { background: #edf5e7; }
-.rail-position-timetable table { min-width: 1280px; }
+.rail-position-timetable table { min-width: 1040px; }
 .rail-position-timetable .rail-timetable-gate { min-width: 145px; max-width: 180px; white-space: normal; overflow-wrap: anywhere; line-height: 1.6; font-size: 11px; }
 .rail-position-timetable .rail-stop-status.is-late, .rail-position-timetable .rail-stop-status.is-cancelled, .rail-position-timetable .rail-stop-status.is-not-running { color: #a35747; }
 .rail-position-timetable .rail-stop-status.is-on-time, .rail-position-timetable .rail-stop-status.is-early, .rail-position-timetable .rail-stop-checkin.is-checking { color: #315c42; }
