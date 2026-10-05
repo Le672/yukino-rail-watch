@@ -26,7 +26,7 @@ function stopClock(at: number, origin: string) {
   return `${value.slice(0, 10) === origin ? "" : `${value.slice(5, 10)} `}${value.slice(11)}`;
 }
 
-export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().slice(0, 10) }: { initialTrain?: string; initialDate?: string }) {
+export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().slice(0, 10), autoQuery = false }: { initialTrain?: string; initialDate?: string; autoQuery?: boolean }) {
   const [train, setTrain] = useState(initialTrain);
   const [date, setDate] = useState(initialDate);
   const [live, setLive] = useState(true);
@@ -84,6 +84,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
     } catch (cause) { if (version === generation.current) setError(cause instanceof Error ? cause.message : "位置查询失败"); }
     finally { if (version === generation.current) { setLoading(false); setDetailsLoading(false); } }
   };
+  useEffect(() => { if (autoQuery && initialTrain) void queryPosition(); }, [autoQuery, initialTrain, initialDate]);
 
   useEffect(() => {
     if (!journey || !live || detailsLoading) return;
@@ -130,8 +131,8 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   const gpsPosition = gpsMatch?.position;
   const freshFix = gps.enabled && gps.fix && now - gps.fix.timestamp >= -5000 && now - gps.fix.timestamp <= 30000 ? gps.fix : null;
   const speed = useMemo(() => readRailSpeed(gps.samples, now), [gps.samples, now]);
-  const motion = useMemo(() => journey && plannedPosition ? estimateRailMotion(journey, wgsRoute, observation, live ? delays : null) : null,
-    [journey, plannedPosition, wgsRoute, observation, live, delays]);
+  const motion = useMemo(() => journey && plannedPosition ? estimateRailMotion(journey, wgsRoute, observation, live ? delays : null, wgsStations) : null,
+    [journey, plannedPosition, wgsRoute, observation, live, delays, wgsStations]);
   const position = gpsPosition || motion?.position || plannedPosition;
   useEffect(() => {
     if (gpsMatch?.position && gps.fix) gpsHistory.current = { distanceKm: gpsMatch.distanceKm, timestamp: gps.fix.timestamp };
@@ -184,7 +185,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
       </div>
       <div className="rail-position-route rail-card"><RailMap journey={journey} route={wgsRoute} stations={wgsStations} position={position} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} />
         {(!route || detailsLoading) && <p className="rail-position-explanation">{detailsLoading ? "正在读取铁路线路点…" : routeError || mapData?.warning}</p>}
-        <p className="rail-position-explanation">{route ? "蓝点为设备实测位置，绿色为铁路匹配位置或时刻表估算，金色为下一停靠站。" : "蓝点为设备实测位置，绿色为本车次停靠站，金色为按时刻表判断的下一站。"}定位不能证明列车身份，请确认正在乘坐所选车次。</p>
+        <p className="rail-position-explanation">{route ? "蓝点为设备实测位置，绿色为铁路匹配位置或时刻表估算，金色为下一停靠站。" : "蓝点为设备实测位置，绿色为停靠站与站间模拟位置，金色为按时刻表判断的下一站。"}定位不能证明列车身份，请确认正在乘坐所选车次。</p>
       </div>
       <div className="rail-card rail-position-timetable">
         <div className="rail-card-heading"><div><span className="rail-overline">TIMETABLE</span><h3>本车次停站表</h3></div><span className="rail-small">{journey.stops.length} 站 · 不列通过站</span></div>

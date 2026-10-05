@@ -86,3 +86,10 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+Railway station coordinate supplement: OpenStreetMap contributors
+Coordinate snapshot: 2026-07-15; matched to official 12306 stations on 2026-10-05.
+Database license: ODbL 1.0 - https://opendatacommons.org/licenses/odbl/1-0/
+https://www.openstreetmap.org/copyright
+Source database: https://github.com/Le672/yukino-rail-watch/blob/main/src/data/rail-station-coordinates.json
+Only missing coordinates are supplemented. This is not a live train location feed.

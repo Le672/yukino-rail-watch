@@ -93,10 +93,10 @@ describe("distance-conserving instantaneous timetable motion", () => {
     const conflict = { ...report, rows: [{ station: "甲", telecode: "AAA", code: "DELAY", minutes: 90 }] };
     expect(estimateRailMotion(journey, route, now, conflict).position.warning).toContain("冲突");
   });
-  it("requires rail distance while running instead of inventing a straight-line or fixed train speed", () => {
+  it("keeps speed unknown when neither track distance nor station coordinates are available", () => {
     const missing = estimateRailMotion(journey, null, at("10:30"));
     expect(missing.kmh).toBeNull();
-    expect(missing.reason).toContain("铁路区间距离");
+    expect(missing.reason).toContain("线路和车站坐标均未提供");
     expect(missing.position.nextIndex).toBe(1);
     const impossible = estimateRailMotion(journey, { ...route, stopDistances: [0, 500, 800] }, at("10:30"));
     expect(impossible.kmh).toBeNull();

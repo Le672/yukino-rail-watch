@@ -1,5 +1,5 @@
-import { adjustedStops, locateJourney } from "./train-position";
-import type { DelayReport, JourneyPosition, RailwayRoute, TrainJourney } from "./train-position";
+import { adjustedStops, distanceKm, locateJourney } from "./train-position";
+import type { Coordinate, DelayReport, JourneyPosition, RailwayRoute, TrainJourney } from "./train-position";
 
 type AccelerationBand = { untilKmh: number; acceleration: number };
 export type MotionPerformance = {
@@ -12,6 +12,7 @@ export type MotionProfile = {
 export type RailMotionEstimate = {
   kmh: number | null; stage: string; reason: string | null; detail: string;
   position: JourneyPosition; peakKmh: number | null;
+  basis?: "railway" | "stations";
 };
 
 // Operating ceilings are separate from the approximate, NOT measured, ramp parameters.
@@ -104,22 +105,25 @@ export function sampleMotionProfile(profile: MotionProfile, elapsedSeconds: numb
   return { kmh: 0, meters: profile.distanceMeters, stage: "已到站" };
 }
 
-export function estimateRailMotion(journey: TrainJourney, route: RailwayRoute | null, now: number, report?: DelayReport | null): RailMotionEstimate {
+export function estimateRailMotion(journey: TrainJourney, route: RailwayRoute | null, now: number, report?: DelayReport | null,
+  stations?: (Coordinate | null)[]): RailMotionEstimate {
   const position = locateJourney(journey, now, report);
   const unavailable = (reason: string): RailMotionEstimate => ({ position, kmh: null, peakKmh: null, stage: "等待预估资料", detail: "", reason });
   if (!Number.isFinite(now)) return unavailable("请填写有效的观察时间。");
   if (position.phase !== "running") return { position, kmh: 0, peakKmh: 0, reason: null, detail: "依据本车次停站时刻推算。",
     stage: position.phase === "before" ? "尚未发车" : position.phase === "arrived" ? "已到终点" : "停站中" };
   const previous = position.previousIndex!, next = position.nextIndex!;
-  if (!route || route.stopDistances.length !== journey.stops.length) return unavailable("正在等待有效的铁路区间距离，暂不能预估速度。");
-  const kilometers = route.stopDistances[next] - route.stopDistances[previous];
+  const railway = route?.stopDistances.length === journey.stops.length;
+  const a = stations?.[previous], b = stations?.[next];
+  if (!railway && (!a || !b)) return unavailable("当前区间的线路和车站坐标均未提供，暂不能预估地图位置与速度。");
+  const kilometers = railway ? route!.stopDistances[next] - route!.stopDistances[previous] : distanceKm(a!, b!);
   const { stops } = adjustedStops(journey, now, report);
   const seconds = (stops[next].arrivalAt - stops[previous].departureAt) / 1000;
   const performance = motionPerformance(journey.model, journey.train);
   const profile = buildMotionProfile(kilometers * 1000, seconds, performance);
   if (!profile) return unavailable("线路距离与时刻表无法满足车型速度约束，暂不能可靠预估。");
   const sample = sampleMotionProfile(profile, (now - stops[previous].departureAt) / 1000);
-  return { kmh: sample.kmh, stage: sample.stage, reason: null, peakKmh: profile.peakKmh,
+  return { kmh: sample.kmh, stage: sample.stage, reason: null, peakKmh: profile.peakKmh, basis: railway ? "railway" : "stations",
     position: { ...position, progress: Math.max(0, Math.min(1, sample.meters / profile.distanceMeters)) },
-    detail: `${kilometers.toFixed(1)} km 停站区间 · ${performance.label}${position.delayUsed ? " · 已结合正晚点" : ""}` };
+    detail: `${kilometers.toFixed(1)} km ${railway ? "停站区间" : "两站地理距离（未含线路绕行）"} · ${performance.label}${position.delayUsed ? " · 已结合正晚点" : ""}` };
 }

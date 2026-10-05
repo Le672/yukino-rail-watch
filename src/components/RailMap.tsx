@@ -7,6 +7,7 @@ import { positionOnRailway } from "../lib/train-position";
 import type { Coordinate, JourneyPosition, TrainJourney } from "../lib/train-position";
 import { gcjToWgs84 } from "../lib/rail-gps";
 import type { GpsMatch, LocationFix, Wgs84RailwayRoute } from "../lib/rail-gps";
+import { stationSimulationPoint } from "../lib/rail-station-coordinates";
 
 const basemaps = {
   amap: { name: "高德地图", coordinateSystem: "GCJ02", subdomains: "1234",
@@ -48,7 +49,8 @@ export function RailMap({ journey, route, stations, position, fix, match, gpsEna
   const stopPoints = stations ?? route?.stops ?? noStations;
   const availableStops = useMemo(() => stopPoints.filter((point): point is Coordinate => point !== null), [stopPoints]);
   useEffect(() => { if (!gpsEnabled) gpsCentered.current = false; }, [gpsEnabled]);
-  const plannedPoint = useMemo(() => route && position ? positionOnRailway(route, position).coordinate : null, [route, position]);
+  const plannedPoint = useMemo(() => position ? route ? positionOnRailway(route, position).coordinate : stationSimulationPoint(stopPoints, position) : null,
+    [route, stopPoints, position]);
   const liveFix = gpsEnabled && fix && Date.now() - fix.timestamp >= -5000 && Date.now() - fix.timestamp <= 30000 ? fix : null;
   const point: Coordinate | null = liveFix ? [liveFix.longitude, liveFix.latitude] : plannedPoint;
   const pointRef = useRef(point); pointRef.current = point;
@@ -132,7 +134,7 @@ export function RailMap({ journey, route, stations, position, fix, match, gpsEna
       }
     } else if (plannedPoint) {
       L.circleMarker(latLng(plannedPoint), { radius: 7, color: "#fffefb", fillColor: "#315c42", fillOpacity: 1, weight: 3 })
-        .bindTooltip(tooltip("时刻表估算位置")).addTo(group);
+        .bindTooltip(tooltip(route ? "时刻表估算位置" : "站间模拟位置 · 未沿铁路径路")).addTo(group);
     }
     if (liveFix && !gpsCentered.current) {
       gpsCentered.current = true;
@@ -163,8 +165,8 @@ export function RailMap({ journey, route, stations, position, fix, match, gpsEna
       <button type="button" onClick={() => setTileRevision(value => value + 1)}>重试底图</button>
       {mode === "satellite" ? <button type="button" onClick={() => setMode("streets")}>切回 2D 地图</button> : streetProvider === "amap" && <button type="button" onClick={() => setStreetProvider("osm")}>使用备用 2D</button>}
     </div>}
-    <div className="rail-map-legend"><span><i className="is-gps" />设备位置与精度范围</span><span><i className="is-train" />{match?.position ? "GPS 匹配铁路位置" : route ? "时刻表估算位置" : "本车次停靠站"}</span><span><i className="is-next" />下一停靠站{!route && "（时刻表）"}</span></div>
-    {journey && !route && <p className="rail-map-note">已显示 {availableStops.length} / {journey.stops.length} 个停靠站。开启 GPS 可查看设备实时位置；完整铁路线路暂缺时，区间与下一站按时刻表估算。</p>}
+    <div className="rail-map-legend"><span><i className="is-gps" />设备位置与精度范围</span><span><i className="is-train" />{match?.position ? "GPS 匹配铁路位置" : route ? "时刻表估算位置" : plannedPoint ? "站间模拟位置（粗估）" : "本车次停靠站"}</span><span><i className="is-next" />下一停靠站{!route && "（时刻表）"}</span></div>
+    {journey && !route && <p className="rail-map-note">已显示 {availableStops.length} / {journey.stops.length} 个停靠站。完整铁路线路暂缺时，按当前两站坐标和时刻表模拟位置，未沿铁路径路；速度按地理距离粗估，停站与下一站仍以官方时刻表为准。开启 GPS 可查看设备实测位置。补充站点坐标 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>。</p>}
     {mode === "satellite" && <p className="rail-map-note">Sentinel-2 2025 年合成卫星影像，约 10 米分辨率；放大后不增加影像细节。</p>}
   </div>;
 }

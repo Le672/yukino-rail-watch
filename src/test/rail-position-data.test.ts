@@ -8,6 +8,13 @@ const response = { source: "12306", status: true, train: "G6003", date: "2026-09
 ] } };
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 describe("position data dates and caching", () => {
+  it("uses the local nationwide coordinate snapshot after provider failure, without more third-party requests", async () => {
+    vi.resetModules(); const fetchMock = vi.fn().mockRejectedValue(new Error("Coordinate provider unavailable")); vi.stubGlobal("fetch", fetchMock);
+    const { loadRailway } = await import("../lib/rail-position-data");
+    const map = await loadRailway(parseJourney(k123, "K123", "2026-09-29"));
+    expect(map.route).toBeNull(); expect(map.stations[3]).not.toBeNull(); expect(map.warning).toContain("站间模拟位置");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
   it("loads conventional station coordinates without requiring track geometry", async () => {
     vi.resetModules();
     const fetchMock = vi.fn().mockResolvedValue(Response.json(k123Map)); vi.stubGlobal("fetch", fetchMock);

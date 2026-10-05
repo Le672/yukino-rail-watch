@@ -52,3 +52,21 @@ it("retains a failed-refresh snapshot but hides its expired real-time statuses",
   expect(screen.getByText(/旧快照/)).toBeInTheDocument();
   unmount();
 });
+
+it("opens the station-local train number with its actual origin date, including overnight arrivals", async () => {
+  vi.spyOn(Date, "now").mockReturnValue(now);
+  const originDate = "2026-10-04", train = "K123";
+  const overnight = { ...rows[0], train, originDate, id: `NO0/${originDate}/${train}` };
+  vi.stubGlobal("fetch", vi.fn(async (input: string) => {
+    const url = new URL(input, "https://cr.yukino.bond");
+    return Response.json(url.searchParams.get("mode") === "board"
+      ? { source: "12306", station: "广州南", stationCode: "IZQ", date, checkedAt: now, rows: [overnight] }
+      : emptyBoardDetail(overnight.id, url.searchParams.get("direction") as "D" | "A", now));
+  }));
+  const open = vi.fn(); render(<StationBoard stations={stations} onPosition={open}/>);
+  fireEvent.click(await screen.findByRole("button", { name: "查看 K123 的实时位置" }));
+  expect(open).toHaveBeenCalledWith("K123", "2026-10-04");
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: /到达/ })); });
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "查看 K123 的实时位置" })); });
+  expect(open).toHaveBeenCalledTimes(2); vi.restoreAllMocks();
+});

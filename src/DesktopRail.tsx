@@ -46,11 +46,11 @@ export default function DesktopRail() {
             <aside className="desktop-monitor" aria-label="监控状态"><div className="desktop-panel-heading"><h2>监控状态</h2><Bell size={16} /></div><div className={`desktop-monitor-state ${settings.enabled ? "is-active" : ""}`}><i /><strong>{settings.enabled ? "监控运行中" : "监控未开启"}</strong></div><dl><div><dt>检查频率</dt><dd>每 {settings.intervalMinutes} 分钟</dd></div><div><dt>关注席别</dt><dd>{settings.seat}</dd></div><div><dt>通知方式</dt><dd>Windows 系统通知</dd></div><div><dt>最近检查</dt><dd>{result ? formatCheckedAt(result.checkedAt) : "尚未查询"}</dd></div></dl><p>开启后由桌面后台定时查询。关闭窗口仍继续监控，有余票时通过系统通知提醒。</p><a className="desktop-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer"><TrainFront size={17} /><span><strong>RailGo Data Service</strong><small>仅补充缺失车型与铁路坐标</small></span><ExternalLink size={12} /></a></aside>
           </div>
         </div>
-        {feature === "board" && <StationBoard stations={stations}/>}
+        {feature === "board" && <StationBoard stations={stations} onPosition={(train, date) => { setPositionSelection({ train, date, autoQuery: true }); setFeature("position"); }}/>}
         {feature === "transfer" && <RailTransfer stations={stations} onPosition={(train, date) => { setPositionSelection({ train, date }); setFeature("position"); }}/>}
-        {feature === "position" && <div className="desktop-position"><RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} /><a className="desktop-position-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer">车型优先来自 12306；缺失资料与铁路坐标由 RailGo 补充 ↗</a></div>}
+        {feature === "position" && <div className="desktop-position"><RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} autoQuery={positionSelection.autoQuery} /><a className="desktop-position-source" href="https://api.railgo.dev/" target="_blank" rel="noreferrer">车型优先来自 12306；缺失资料与铁路坐标由 RailGo 补充 ↗</a></div>}
       </main>
     </div>
-    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票、票价与到发信息来自 12306 · 车型与铁路坐标为补充资料</span><span>v1.10.2</span></footer>
+    <footer className="desktop-statusbar"><span><i className={settings.enabled ? "is-active" : ""} />{checking ? "查询中…" : settings.enabled ? `后台监控 · ${settings.intervalMinutes} 分钟` : "就绪"}</span><span>余票、票价与到发信息来自 12306 · 车型与铁路坐标为补充资料</span><span>v1.10.3</span></footer>
   </div>;
 }

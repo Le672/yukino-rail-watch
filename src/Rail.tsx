@@ -11,7 +11,7 @@ import { useRailMonitor, SEAT_OPTIONS, matchingSeats, formatCheckedAt } from "./
 
 export default function Rail() {
   const { desktop, settings, stations, result, error, checking, feature, setFeature: setScreen, positionSelection, setPositionSelection, permission, knownStations, matched, update, runCheck, toggleMonitor } = useRailMonitor();
-  const setFeature = useRailPageNavigation(setScreen);
+  const setFeature = useRailPageNavigation(setScreen, undefined, setPositionSelection);
   const { filters, setFilters, visibleTrains } = useTrainListing(result?.trains, settings.seat);
   return (
     <div className="rail-page">
@@ -86,9 +86,9 @@ export default function Rail() {
             })}</div>}
         </section>
         </div>
-        {feature === "board" && <StationBoard stations={stations}/>}
+        {feature === "board" && <StationBoard stations={stations} onPosition={(train, date) => setFeature("position", { train, date, autoQuery: true })}/>}
         {feature === "transfer" && <RailTransfer stations={stations} onPosition={(train, date) => { setPositionSelection({ train, date }); setFeature("position"); }}/>}
-        {feature === "position" && <RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} />}
+        {feature === "position" && <RailPosition key={`${positionSelection.train}/${positionSelection.date}`} initialTrain={positionSelection.train} initialDate={positionSelection.date} autoQuery={positionSelection.autoQuery} />}
         <p className="rail-disclaimer">本工具仅展示公开查询结果，不提供购票或抢票。车票状态会随时变化，最终以 12306 官网为准。</p>
         <a className="rail-attribution" href="https://api.railgo.dev/" target="_blank" rel="noreferrer" aria-label="车型、配属与铁路坐标补充来源：RailGo 数据服务（打开数据服务文档）">
           <span className="rail-attribution-main">

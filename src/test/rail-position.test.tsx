@@ -25,6 +25,14 @@ beforeEach(() => {
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("position query user workflow", () => {
+  it("automatically loads the selected board train without starting device geolocation", async () => {
+    vi.stubGlobal("isSecureContext", true); const watchPosition = vi.fn();
+    vi.stubGlobal("navigator", { geolocation: { watchPosition, clearWatch: vi.fn() } });
+    render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" autoQuery/>);
+    await screen.findByRole("heading", { name: "G6003" });
+    expect(loaders.loadJourney).toHaveBeenCalledWith("G6003", "2026-09-29");
+    expect(watchPosition).not.toHaveBeenCalled();
+  });
   it("shows Guangzhou South at 10:01 even if map and delay data are unavailable", async () => {
     render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" />);
     fireEvent.click(screen.getByLabelText("跟随当前时间"));

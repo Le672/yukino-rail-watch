@@ -59,7 +59,11 @@ describe("full map layer controls", () => {
       view.rerender(<RailMap {...props} fix={{ ...fix, latitude: 32.261, timestamp: now + 1000 }} />);
       expect(setView).not.toHaveBeenCalled();
       view.rerender(<RailMap {...props} fix={{ ...fix, timestamp: now - 31000 }} />);
-      expect(screen.getByRole("button", { name: "当前位置" })).toBeDisabled();
+      expect(screen.getByRole("button", { name: "当前位置" })).toBeEnabled();
+      expect(screen.getByText("站间模拟位置（粗估）")).toBeInTheDocument();
+      const simulated = circleMarker.mock.results.map(result => result.value as L.CircleMarker).find(marker =>
+        (marker.getTooltip()?.getContent() as HTMLElement)?.textContent === "站间模拟位置 · 未沿铁路径路");
+      expect(simulated).toBeDefined(); expect(polyline).not.toHaveBeenCalled();
       view.unmount();
     } finally {
       Object.assign(L.Browser, original);

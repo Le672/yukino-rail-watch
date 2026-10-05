@@ -5,6 +5,7 @@ import type { OfficialTimetable } from "./rail-official";
 import { railApiUrl } from "./rail-api";
 import { loadTrainEquipment } from "./rail-equipment";
 import { mtrLiveryModel } from "./mtr-vibrant";
+import { supplementStationCoordinates } from "./rail-station-coordinates";
 
 const BASE = "https://rg-api.zenglingkun.cn/api/v2/";
 type FetchedPayload = { payload: unknown; checkedAt: number };
@@ -49,6 +50,26 @@ export async function loadJourneyEquipment(journey: TrainJourney) {
 export async function loadRailway(journey: TrainJourney): Promise<RailwayMapData> {
   const url = new URL("mapLine", BASE);
   url.searchParams.set("train", journey.train);
-  const fetched = await request(url.href, 12 * 60 * 60000);
-  return parseRailwayMap(fetched.payload, journey);
+  let map: RailwayMapData;
+  let payload: unknown;
+  try {
+    const fetched = await request(url.href, 12 * 60 * 60000);
+    payload = fetched.payload;
+    map = parseRailwayMap(fetched.payload, journey);
+  } catch {
+    map = { route: null, stations: journey.stops.map(() => null), warning: "铁路线路暂不可用，按官方时刻表与可核实的车站坐标显示站间模拟位置；GPS 实时位置仍可显示。" };
+  }
+  if (!map.route) {
+    const stations = await supplementStationCoordinates(journey, map.stations);
+    // An otherwise usable track may only be missing a newly added station coordinate.
+    // Re-run all connection, station-distance and station-order checks after supplementing it.
+    if (payload && stations.every(Boolean)) {
+      const raw = payload as { data: Record<string, unknown> };
+      const repaired = parseRailwayMap({ ...raw, data: { ...raw.data, stations: journey.stops.map((stop, index) => ({ [stop.station]: stations[index] })) } }, journey);
+      if (repaired.route) return repaired;
+    }
+    return { ...map, stations,
+      warning: "完整铁路线路暂缺，已保留可核实的停靠站，并按时刻表与加减速过程显示站间模拟位置；该位置未沿铁路径路，GPS 实时位置仍可显示。" };
+  }
+  return map;
 }
