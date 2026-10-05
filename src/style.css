@@ -92,17 +92,19 @@ button { cursor: pointer; }
 .rail-train-foot > span { min-width: 0; overflow-wrap: anywhere; }
 .rail-disclaimer { margin-top: 30px; color: #9aa49a; text-align: center; font-size: 11px; line-height: 1.8; }
 .rail-attribution, .rail-site-footer { display: block; width: 100%; margin: 16px 0 0; overflow: hidden; border: 1px solid #b9ccb7; border-radius: 16px; background: #fffefb; color: #315c42; }
-.rail-attribution { margin-top: 24px; text-decoration: none; transition: border-color .15s, box-shadow .15s; }
+.rail-attribution { width: min(440px, 100%); margin: 18px auto 0; border-radius: 10px; text-decoration: none; transition: border-color .15s, box-shadow .15s; }
 .rail-attribution:hover { border-color: #648264; box-shadow: 0 8px 24px #315c420a; }
 .rail-attribution:focus-visible { outline: 2px solid #315c42; outline-offset: 4px; }
 .rail-attribution-main, .rail-site-footer-main { display: flex; align-items: center; gap: 16px; min-height: 70px; padding: 12px 24px; }
-.rail-attribution-icon { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 12px; background: #eef4e8; }
+.rail-attribution .rail-attribution-main { gap: 10px; min-height: 48px; padding: 9px 14px; }
+.rail-attribution-icon { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 8px; background: #eef4e8; }
 .rail-attribution-copy { display: grid; gap: 5px; min-width: 0; }
-.rail-attribution-copy strong { font-size: 20px; font-weight: 650; line-height: 1.25; letter-spacing: -.02em; }
+.rail-attribution-copy strong { font-size: 14px; font-weight: 650; line-height: 1.25; letter-spacing: -.02em; }
 .rail-attribution-copy { overflow-wrap: anywhere; }
-.rail-attribution-copy > span { color: #72836e; font-size: 11px; letter-spacing: .03em; }
+.rail-attribution-copy > span { color: #72836e; font-size: 10px; letter-spacing: .03em; }
 .rail-attribution-external { flex: none; margin-left: auto; opacity: .6; }
 .rail-attribution-caption, .rail-site-footer-caption { display: block; padding: 7px 24px; background: #315c42; color: #f7fbf3; text-align: center; font-size: 11px; line-height: 1.6; letter-spacing: .04em; }
+.rail-attribution .rail-attribution-caption { padding: 5px 12px; font-size: 10px; letter-spacing: 0; }
 .rail-site-footer-brand { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; color: #72836e; font-size: 12px; }
 .rail-site-footer .footer-brand { color: #315c42; font: 600 23px Georgia, serif; text-decoration: none; }
 .rail-site-footer nav { display: flex; align-items: center; flex-wrap: wrap; gap: 22px; margin-left: auto; font-size: 12px; line-height: 1.7; }
@@ -132,6 +134,6 @@ button { cursor: pointer; }
   .rail-route { min-width: 0; }
   .rail-badge { grid-column: 1 / -1; justify-self: start; margin-left: 0; }
   .rail-attribution-main { gap: 12px; padding: 12px 18px; }
-  .rail-attribution-copy strong { font-size: 18px; }
+  .rail-attribution-copy strong { font-size: 14px; }
   .rail-attribution-caption, .rail-site-footer-caption { padding: 7px 18px; font-size: 10px; }
 }

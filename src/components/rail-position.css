@@ -93,6 +93,11 @@
 .rail-position-timetable .is-next { background: #f4f0e3; }
 .rail-position-timetable .is-next td:last-child { color: #92702c; }
 .rail-position-timetable .is-current { background: #edf5e7; }
+.rail-position-timetable table { min-width: 1280px; }
+.rail-position-timetable .rail-timetable-gate { min-width: 145px; max-width: 180px; white-space: normal; overflow-wrap: anywhere; line-height: 1.6; font-size: 11px; }
+.rail-position-timetable .rail-stop-status.is-late, .rail-position-timetable .rail-stop-status.is-cancelled, .rail-position-timetable .rail-stop-status.is-not-running { color: #a35747; }
+.rail-position-timetable .rail-stop-status.is-on-time, .rail-position-timetable .rail-stop-status.is-early, .rail-position-timetable .rail-stop-checkin.is-checking { color: #315c42; }
+.rail-timetable-scroll:focus-visible { outline: 2px solid #78996b; outline-offset: 3px; border-radius: 4px; }
 .rail-position-warning { margin: 0; padding: 12px 16px; border: 1px solid #e4d4ad; border-radius: 9px; background: #fcf8ed; color: #93752f; font-size: 12px; }
 .rail-position-section .rail-position-source { margin-top: 0; }
 .rail-position-section .rail-error { margin-top: 0; }

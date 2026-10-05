@@ -6,6 +6,8 @@ export type { Train, Station, Seat } from "../lib/rail-tickets";
 export { matchingSeats } from "../lib/rail-tickets";
 import { matchingSeats } from "../lib/rail-tickets";
 import { railApiUrl } from "../lib/rail-api";
+import { railFeatureFromLocation } from "../lib/rail-navigation";
+import type { RailFeature } from "../lib/rail-navigation";
 
 type QueryMode = "train" | "route";
 export type Result = { checkedAt: string; date: string; from: string; to: string; fromCode?: string; toCode?: string; queryMode?: QueryMode; trains: Train[]; modelCheckedAt?: string | null };
@@ -86,7 +88,7 @@ export function useRailMonitor(desktop = window.railDesktop) {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
-  const [feature, setFeature] = useState<"tickets" | "position" | "transfer" | "board">(() => new URLSearchParams(window.location.search).get("view") === "board" ? "board" : "tickets");
+  const [feature, setFeature] = useState<RailFeature>(railFeatureFromLocation);
   const [positionSelection, setPositionSelection] = useState<{ train: string; date?: string }>({ train: "" });
   const [permission, setPermission] = useState(() => typeof Notification === "undefined" ? "unsupported" : Notification.permission);
   const availability = useRef<Record<string, boolean>>({});

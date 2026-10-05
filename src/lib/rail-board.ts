@@ -17,6 +17,10 @@ export type BoardRowDetail = {
   platform: string | null; wicket: string | null; status: BoardStatus; minutes: number | null;
   predicted: boolean; checkIn: CheckInStatus; warning?: string;
 };
+export type JourneyStopBoard = {
+  index: number; station: string; stationCode: string; stationDate: string; train: string; detail: BoardRowDetail;
+};
+export type JourneyBoardData = { source: "12306"; train: string; date: string; checkedAt: number; rows: JourneyStopBoard[] };
 export const BOARD_STATUS_TEXT: Record<BoardStatus, string> = {
   unknown: "未提供", "on-time": "正点", early: "早点", late: "晚点", cancelled: "取消", "not-running": "当日不开行", arrived: "已到站",
 };

@@ -5,11 +5,13 @@ import { StationBoard } from "./components/StationBoard";
 import { RailTransfer } from "./components/RailTransfer";
 import { RailResultControls, TrainFare, useTrainListing } from "./components/RailResultControls";
 import { money } from "./lib/rail-tickets";
+import { useRailPageNavigation } from "./hooks/useRailPageNavigation";
 import { equipmentLabel, equipmentTitle } from "./lib/rail-equipment";
 import { useRailMonitor, SEAT_OPTIONS, matchingSeats, formatCheckedAt } from "./hooks/useRailMonitor";
 
 export default function Rail() {
-  const { desktop, settings, stations, result, error, checking, feature, setFeature, positionSelection, setPositionSelection, permission, knownStations, matched, update, runCheck, toggleMonitor } = useRailMonitor();
+  const { desktop, settings, stations, result, error, checking, feature, setFeature: setScreen, positionSelection, setPositionSelection, permission, knownStations, matched, update, runCheck, toggleMonitor } = useRailMonitor();
+  const setFeature = useRailPageNavigation(setScreen);
   const { filters, setFilters, visibleTrains } = useTrainListing(result?.trains, settings.seat);
   return (
     <div className="rail-page">
@@ -90,7 +92,7 @@ export default function Rail() {
         <p className="rail-disclaimer">本工具仅展示公开查询结果，不提供购票或抢票。车票状态会随时变化，最终以 12306 官网为准。</p>
         <a className="rail-attribution" href="https://api.railgo.dev/" target="_blank" rel="noreferrer" aria-label="车型、配属与铁路坐标补充来源：RailGo 数据服务（打开数据服务文档）">
           <span className="rail-attribution-main">
-            <span className="rail-attribution-icon" aria-hidden="true"><TrainFront size={28} strokeWidth={1.4} /></span>
+            <span className="rail-attribution-icon" aria-hidden="true"><TrainFront size={18} strokeWidth={1.4} /></span>
             <span className="rail-attribution-copy"><strong>RailGo Data Service</strong><span>api.railgo.dev</span></span>
             <ExternalLink className="rail-attribution-external" size={17} aria-hidden="true" />
           </span>

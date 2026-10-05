@@ -1,9 +1,9 @@
 import type { Station } from "./rail-tickets";
-import type { TimetableStop } from "./train-position";
+import type { TimetableStop, TrainJourney } from "./train-position";
 import { chinaDateTime } from "./train-position";
 import { parseOfficialDelay } from "./rail-official";
 import { emptyBoardDetail, parseBoardExit, parseBoardOperating, parseBoardRealtime, parseStationBoard } from "./rail-board";
-import type { BoardDirection, BoardRowDetail, StationBoardData } from "./rail-board";
+import type { BoardDirection, BoardRow, BoardRowDetail, JourneyBoardData, StationBoardData } from "./rail-board";
 
 const MOBILE = "https://mobile.12306.cn";
 const HEADERS = { "User-Agent": "Mozilla/5.0", Referer: `${MOBILE}/`, "Content-Type": "application/x-www-form-urlencoded" };
@@ -15,6 +15,7 @@ const screens = new Map<string, { at: number; value: unknown; available: boolean
 const screenPending = new Map<string, Promise<unknown>>();
 const exits = new Map<string, { at: number; data: ReturnType<typeof parseBoardExit> }>();
 const operating = new Map<string, { at: number; value: boolean | null }>();
+const operatingPending = new Map<string, Promise<boolean | null>>();
 function prune<T>(cache: Map<string, T>, max: number) { if (cache.size >= max) cache.delete(cache.keys().next().value!); }
 
 export async function getStationBoard(station: Station, date: string): Promise<StationBoardData> {
@@ -55,25 +56,33 @@ async function realtimeScreen(board: StationBoardData, direction: BoardDirection
   try { return await request; } finally { screenPending.delete(key); }
 }
 
-export async function getStationBoardRow(board: StationBoardData, id: string, direction: BoardDirection): Promise<BoardRowDetail> {
+async function runningDay(row: BoardRow): Promise<boolean | null> {
+  const key = `${row.trainNo}/${row.originDate}`, cached = operating.get(key);
+  if (cached && Date.now() - cached.at < 5 * 60000) return cached.value;
+  if (operatingPending.has(key)) return operatingPending.get(key)!;
+  const request = (async () => {
+    let value: boolean | null = null;
+    try {
+      const response = await fetch(`${MOBILE}/wxxcx/wechat/bigScreen/queryTrainDiagram`, { method: "POST", headers: HEADERS,
+        body: new URLSearchParams({ queryDate: row.originDate.replace(/-/g, ""), trainCode: row.train }), signal: AbortSignal.timeout(6000) });
+      if (response.ok) value = parseBoardOperating(await response.json(), row.originDate);
+    } catch { /* No run-day record does not prove cancellation. */ }
+    prune(operating, 500); operating.set(key, { at: Date.now(), value }); return value;
+  })();
+  operatingPending.set(key, request);
+  try { return await request; } finally { operatingPending.delete(key); }
+}
+
+export async function getStationBoardRow(board: StationBoardData, id: string, direction: BoardDirection, options: { realtime?: boolean; nearbyOnly?: boolean } = {}): Promise<BoardRowDetail> {
   const row = board.rows.find(item => item.id === id);
   const plannedAt = row && (direction === "D" ? row.departureAt : row.arrivalAt);
   if (!row || plannedAt === null || plannedAt === undefined) throw new Error("该车次不在所选车站的到发列表中");
-  const key = `${board.stationCode}/${board.date}/${direction}/${id}`, cached = details.get(key);
+  const key = `${board.stationCode}/${board.date}/${direction}/${id}/${options.realtime === false ? "plan" : "live"}`, cached = details.get(key);
   if (cached && Date.now() - cached.checkedAt < 55000) return cached;
   if (detailPending.has(key)) return detailPending.get(key)!;
   const request = (async () => {
     const detail = emptyBoardDetail(id, direction), today = chinaDateTime().slice(0, 10);
-    const operatingKey = `${row.trainNo}/${row.originDate}/${row.train}`, cachedOperating = operating.get(operatingKey);
-    let isRunning = cachedOperating && Date.now() - cachedOperating.at < 5 * 60000 ? cachedOperating.value : null;
-    if (!cachedOperating || Date.now() - cachedOperating.at >= 5 * 60000) {
-      try {
-        const response = await fetch(`${MOBILE}/wxxcx/wechat/bigScreen/queryTrainDiagram`, { method: "POST", headers: HEADERS,
-          body: new URLSearchParams({ queryDate: row.originDate.replace(/-/g, ""), trainCode: row.train }), signal: AbortSignal.timeout(6000) });
-        if (response.ok) isRunning = parseBoardOperating(await response.json(), row.originDate);
-      } catch { /* No run-day record does not prove cancellation. */ }
-      prune(operating, 500); operating.set(operatingKey, { at: Date.now(), value: isRunning });
-    }
+    const isRunning = await runningDay(row);
     if (isRunning === false) {
       detail.status = "not-running"; detail.warning = "官方逐日计划标记该始发日不开行；这不等于临时取消";
       detail.checkedAt = Date.now(); prune(details, 500); details.set(key, detail); return detail;
@@ -88,7 +97,7 @@ export async function getStationBoardRow(board: StationBoardData, id: string, di
         if (response.ok) { const data = parseBoardExit(await response.json()); prune(exits, 500); exits.set(exitKey, { at: Date.now(), data }); Object.assign(detail, data); }
       } catch { /* Missing platform/gate data must not hide the train. */ }
     }
-    if (board.date === today) {
+    if (options.realtime !== false && board.date === today && (!options.nearbyOnly || plannedAt >= Date.now() - 5 * 60000 && plannedAt <= Date.now() + 3 * 3600000)) {
       const screen = parseBoardRealtime(await realtimeScreen(board, direction), board, row, direction);
       if (screen) Object.assign(detail, screen);
       if (detail.status === "unknown" && plannedAt >= Date.now() - 5 * 60000 && plannedAt <= Date.now() + 3 * 3600000) {
@@ -110,4 +119,29 @@ export async function getStationBoardRow(board: StationBoardData, id: string, di
   })();
   detailPending.set(key, request);
   try { return await request; } finally { detailPending.delete(key); }
+}
+
+/** Stops and service identity come from the validated official timetable, never client-supplied station names. */
+export async function getJourneyBoardStops(journey: TrainJourney, trainNo: string, indices: number[], realtime: boolean): Promise<JourneyBoardData> {
+  const first = journey.stops[0], last = journey.stops.at(-1)!;
+  const rows: JourneyBoardData["rows"] = [];
+  const queue = indices.slice();
+  const worker = async () => {
+    while (queue.length) {
+      const index = queue.shift()!, stop = journey.stops[index];
+      const direction: BoardDirection = index === journey.stops.length - 1 ? "A" : "D";
+      const stationDate = chinaDateTime(direction === "A" ? stop.arrivalAt : stop.departureAt).slice(0, 10);
+      const id = `${trainNo}/${journey.date}/${stop.trainCode}`;
+      const row: BoardRow = { id, train: stop.trainCode, trainNo, originDate: journey.date,
+        from: first.station, to: last.station, fromCode: first.telecode, toCode: last.telecode,
+        arrival: index === 0 ? null : stop.arrival, departure: direction === "A" ? null : stop.departure,
+        arrivalAt: index === 0 ? null : stop.arrivalAt, departureAt: direction === "A" ? null : stop.departureAt,
+        dwellMinutes: index === 0 || direction === "A" ? null : (stop.departureAt - stop.arrivalAt) / 60000, model: journey.model };
+      const board: StationBoardData = { source: "12306", station: stop.station, stationCode: stop.telecode, date: stationDate, checkedAt: journey.checkedAt, rows: [row] };
+      const detail = await getStationBoardRow(board, id, direction, { realtime, nearbyOnly: true });
+      rows.push({ index, station: stop.station, stationCode: stop.telecode, stationDate, train: stop.trainCode, detail });
+    }
+  };
+  await Promise.all([worker(), worker()]);
+  return { source: "12306", train: journey.train, date: journey.date, checkedAt: Date.now(), rows: rows.sort((a, b) => a.index - b.index) };
 }

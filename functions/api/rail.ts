@@ -5,7 +5,7 @@ import type { OfficialTimetable, OfficialTrainRoute } from "../../src/lib/rail-o
 import { parseOfficialEquipment } from "../../src/lib/rail-equipment";
 import type { TrainEquipment } from "../../src/lib/rail-equipment";
 import type { TrainJourney } from "../../src/lib/train-position";
-import { getStationBoard, getStationBoardRow } from "../../src/lib/rail-board-service";
+import { getJourneyBoardStops, getStationBoard, getStationBoardRow } from "../../src/lib/rail-board-service";
 
 const ORIGIN = "https://kyfw.12306.cn";
 const STATIONS_URL = `${ORIGIN}/otn/resources/js/framework/station_name.js`;
@@ -28,8 +28,8 @@ const trainRoutePending = new Map<string, Promise<TrainRoute>>();
 const equipmentCache = new Map<string, { at: number; value: TrainEquipment }>();
 const equipmentPending = new Map<string, Promise<TrainEquipment>>();
 const TRAIN_CODE = /^(?:[GDCZTKYS]\d{1,4}[A-Z]?|\d{4})$/;
-const timetableCache = new Map<string, { at: number; payload: OfficialTimetable; journey: TrainJourney }>();
-const timetablePending = new Map<string, Promise<{ at: number; payload: OfficialTimetable; journey: TrainJourney }>>();
+const timetableCache = new Map<string, { at: number; payload: OfficialTimetable; journey: TrainJourney; trainNo: string }>();
+const timetablePending = new Map<string, Promise<{ at: number; payload: OfficialTimetable; journey: TrainJourney; trainNo: string }>>();
 const delayCache = new Map<string, { at: number; report: ReturnType<typeof officialDelayReport> }>();
 const delayPending = new Map<string, Promise<ReturnType<typeof officialDelayReport>>>();
 type TicketData = { result: string[]; map: Record<string, string> };
@@ -259,7 +259,7 @@ async function getTimetable(date: string, train: string, stations: Station[]) {
     if (Array.isArray(payload.data?.data)) payload.data!.data = payload.data!.data!.map(row => ({ ...row, station_telecode: names.get(row.station_name || "") || "" }));
     const at = Date.now(), journey = parseOfficialJourney(payload, train, date, at);
     if (journey.stops[0].station !== route.from || journey.stops.at(-1)?.station !== route.to) throw new Error("12306 搜索与停站表的始发终到不一致，请稍后重试");
-    const value = { at, payload: { ...payload, source: "12306", train, date, checkedAt: at }, journey };
+    const value = { at, payload: { ...payload, source: "12306", train, date, checkedAt: at }, journey, trainNo: route.trainNo };
     if (timetableCache.size >= 200) timetableCache.delete(timetableCache.keys().next().value!);
     timetableCache.set(key, value);
     return value;
@@ -404,7 +404,7 @@ async function getHubs(date: string, from: Station, to: Station, stations: Stati
 export async function onRequestGet(context: { request: Request }) {
   const url = new URL(context.request.url);
   const mode = url.searchParams.get("mode") || "query";
-  if (!["stations", "query", "journey", "delays", "fare", "hubs", "equipment", "board", "board-row"].includes(mode)) return json({ error: "未知查询类型" }, 400);
+  if (!["stations", "query", "journey", "delays", "fare", "hubs", "equipment", "board", "board-row", "journey-board"].includes(mode)) return json({ error: "未知查询类型" }, 400);
 
   try {
     if (mode === "equipment") {
@@ -439,8 +439,16 @@ export async function onRequestGet(context: { request: Request }) {
       if (mode === "hubs") return json({ source: "12306", hubs: await getHubs(date, fromStation, toStation, stations) }, 200, 60);
       return json({ source: "12306", date, train: trainCode, fromCode: fromStation.code, toCode: toStation.code, checkedAt: new Date().toISOString(), prices: await getFare(date, fromStation.code, toStation.code, trainCode) }, 200, 60);
     }
-    if (mode === "journey" || mode === "delays") {
+    if (mode === "journey" || mode === "delays" || mode === "journey-board") {
       if (!isValidDate(date) || !TRAIN_CODE.test(trainCode)) return json({ error: "请填写有效车次和始发日期" }, 400);
+      if (mode === "journey-board") {
+        const requested = url.searchParams.get("stops") || "", realtime = url.searchParams.get("realtime") || "1";
+        if (!/^\d{1,3}(?:,\d{1,3}){0,5}$/.test(requested) || !["0", "1"].includes(realtime)) return json({ error: "每次查询需指定 1 至 6 个停站序号" }, 400);
+        const indices = requested.split(",").map(Number);
+        const { journey, trainNo } = await getTimetable(date, trainCode, stations);
+        if (new Set(indices).size !== indices.length || indices.some(index => index >= journey.stops.length || !/^[A-Z]{3}$/.test(journey.stops[index].telecode))) return json({ error: "停站序号不在该车次的官方时刻表中" }, 400);
+        return json(await getJourneyBoardStops(journey, trainNo, indices, realtime === "1"), 200, 15);
+      }
       if (mode === "journey") return json((await getTimetable(date, trainCode, stations)).payload, 200, 60);
       return json(await getDelays(date, trainCode, stations), 200, 30);
     }

@@ -14,6 +14,7 @@ Android / iOS 停止服务，后续更新仅提供网页与 Windows 桌面端。
 
 ## 功能
 
+- Windows 1.10.1 与网页的实时位置停站表补齐大屏字段，保持浅色界面；子域名采用 /ticket、/transfer、/live、/arrivalinfo 功能地址，RailGo 来源署名缩小。[功能地址与停站表说明](docs/rail-feature-paths.md)。
 - Windows 1.10.0 与网页新增深色车站大屏：全国 12306 车站、到达／出发、车次与到发站筛选、计划停靠时长、站台／检票口、官方列车和检票状态、每分钟刷新、分页、自动翻页与全屏。缺失实时数据明确标注未提供。[大屏使用与数据说明](docs/rail-station-board.md)。
 
 - Windows 1.9.6 与手机 1.1.5 的 2D 地图默认改用高德国内底图，保留 OpenStreetMap 备用；卫星图切换同步转换坐标并保留视野，加载失败可重试，窄屏也可选择来源。

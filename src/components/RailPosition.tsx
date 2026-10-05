@@ -11,6 +11,9 @@ import { readRailSpeed } from "../lib/rail-speed";
 import { estimateRailMotion } from "../lib/rail-motion";
 import { TrainIllustration } from "./TrainIllustration";
 import { equipmentLabel, equipmentTitle } from "../lib/rail-equipment";
+import { useJourneyStopBoard } from "../hooks/useJourneyStopBoard";
+import { visibleStopDetail } from "../lib/rail-stop-info";
+import { boardStatusText, CHECK_IN_TEXT } from "../lib/rail-board";
 import "./rail-position.css";
 
 function timeLabel(at: number) { return chinaDateTime(at).replace("T", " "); }
@@ -41,6 +44,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   const generation = useRef(0);
   const refreshing = useRef(false);
   const gps = useRailLocation();
+  const stopBoard = useJourneyStopBoard(journey, live);
   const gpsHistory = useRef<{ distanceKm: number; timestamp: number } | null>(null);
   const wgsRoute = useMemo(() => route ? railwayToWgs84(route) : null, [route]);
   const wgsStations = useMemo(() => mapData?.stations.map(point => point ? gcjToWgs84(point) : null) ?? [], [mapData]);
@@ -184,12 +188,21 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
       </div>
       <div className="rail-card rail-position-timetable">
         <div className="rail-card-heading"><div><span className="rail-overline">TIMETABLE</span><h3>本车次停站表</h3></div><span className="rail-small">{journey.stops.length} 站 · 不列通过站</span></div>
-        <div className="rail-timetable-scroll"><table><thead><tr><th scope="col">停靠站</th><th scope="col">到达</th><th scope="col">发车</th><th scope="col">状态</th></tr></thead><tbody>{journey.stops.map((stop, index) =>
+        <div className="rail-timetable-scroll" role="region" aria-label="停站表，窄屏可左右滑动" tabIndex={0}><table aria-label="本车次停站表"><thead><tr><th scope="col">停靠站</th><th scope="col">车次</th><th scope="col">始发站</th><th scope="col">终到站</th><th scope="col">到达</th><th scope="col">发车</th><th scope="col">停靠</th><th scope="col">站台</th><th scope="col">检票口</th><th scope="col">列车状态</th><th scope="col">检票状态</th><th scope="col">行程进度</th></tr></thead><tbody>{journey.stops.map((stop, index) => {
+          const detail = visibleStopDetail(stopBoard.rows[index]?.detail, now, live);
+          return (
           <tr key={`${stop.station}-${index}`} className={index === position.nextIndex ? "is-next" : index === position.currentIndex ? "is-current" : ""}>
-            <th scope="row"><span>{index + 1}</span>{stop.station}</th><td>{index ? stopClock(stop.arrivalAt, journey.date) : "始发"}</td><td>{index === journey.stops.length - 1 ? "终到" : stopClock(stop.departureAt, journey.date)}</td>
+            <th scope="row"><span>{index + 1}</span>{stop.station}</th><td>{stop.trainCode}</td><td>{journey.stops[0].station}</td><td>{journey.stops.at(-1)!.station}</td>
+            <td>{index ? stopClock(stop.arrivalAt, journey.date) : "始发"}</td><td>{index === journey.stops.length - 1 ? "终到" : stopClock(stop.departureAt, journey.date)}</td>
+            <td>{index === 0 ? "始发" : index === journey.stops.length - 1 ? "终到" : `${(stop.departureAt - stop.arrivalAt) / 60000} 分`}</td>
+            <td>{detail?.platform || "—"}</td><td className="rail-timetable-gate">{detail?.wicket || "—"}</td>
+            <td className={`rail-stop-status is-${detail?.status || "unknown"}`}>{boardStatusText(detail)}</td><td className={`rail-stop-checkin is-${detail?.checkIn || "unknown"}`}>{CHECK_IN_TEXT[detail?.checkIn || "unknown"]}</td>
             <td>{index === position.currentIndex ? position.phase === "arrived" ? "已到终点" : position.phase === "before" ? "等待发车" : "当前停站" : index === position.nextIndex ? "下一停靠站" : index < (position.nextIndex ?? journey.stops.length) ? "已过" : "待到达"}</td>
-          </tr>)}</tbody></table></div>
+          </tr>);
+        })}</tbody></table></div>
         <p className="rail-hint">表内为计划时刻 · 时刻表获取于 {timeLabel(journey.checkedAt)}{live && delays ? ` · 正晚点获取于 ${timeLabel(delays.checkedAt)}` : ""}。</p>
+        <p className="rail-hint">站台、检票口及列车／检票状态直接查询 12306，按各站实际到发日期显示。实时状态每分钟刷新，官方未提供时保留“未提供”；自定义观察时间仅显示计划资料，请以车站现场为准。</p>
+        {stopBoard.warning && <p className="rail-position-warning" role="status">{stopBoard.warning}</p>}
       </div>
     </div>}
     {!journey && !loading && !error && <div className="rail-empty">输入车次和始发日期，查看运行区间、下一停靠站及铁路线路图。</div>}
