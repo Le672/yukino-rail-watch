@@ -5,7 +5,33 @@ import { RailMap } from "../components/RailMap";
 import { locateJourney, parseJourney, parseRailwayMap } from "../lib/train-position";
 import { gcjToWgs84 } from "../lib/rail-gps";
 import { k123, k123Map } from "./fixtures/conventional-position";
+import * as networkLoader from "../lib/rail-network";
+import type { RailwayNetworkManifest } from "../lib/rail-network";
 describe("full map layer controls", () => {
+  it("draws the cached railway network even without a train route and lets the user hide it", async () => {
+    const original = { canvas: L.Browser.canvas, svg: L.Browser.svg };
+    Object.assign(L.Browser, { canvas: false, svg: true });
+    const cached = vi.spyOn(networkLoader, "loadRailNetworkOverview").mockResolvedValue({
+      manifest: { schema: 1, version: "20261004-v1", snapshotAt: "2026-10-04T20:20:21Z" } as RailwayNetworkManifest,
+      lines: [[[113, 23], [113.1, 23.1], [113.2, 23.15]]],
+    });
+    const factory = vi.spyOn(L, "polyline");
+    const view = render(<RailMap journey={null} route={null} position={null} fix={null} match={null} gpsEnabled={false} />);
+    try {
+      await screen.findByText("铁路网（本站缓存）");
+      const line = factory.mock.results.at(-1)!.value as L.Polyline;
+      expect(line.getLatLngs()).toHaveLength(1);
+      expect((line.getLatLngs()[0] as L.LatLng[])).toHaveLength(3);
+      expect(screen.getByRole("checkbox", { name: "铁路网" })).toBeChecked();
+      fireEvent.click(screen.getByRole("checkbox", { name: "铁路网" }));
+      expect(screen.queryByText("铁路网（本站缓存）")).toBeNull();
+      expect(line.getElement()).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("checkbox", { name: "铁路网" }));
+      fireEvent.click(screen.getByRole("button", { name: "卫星图" }));
+      const satellite = factory.mock.results.at(-1)!.value as L.Polyline;
+      expect((satellite.getLatLngs()[0] as L.LatLng[])[0]).toMatchObject({ lng: 113, lat: 23 });
+    } finally { view.unmount(); cached.mockRestore(); factory.mockRestore(); Object.assign(L.Browser, original); }
+  });
   it("switches 2D to satellite with visible provider credits and keeps map controls", () => {
     const view = render(<RailMap journey={null} route={null} position={null} fix={null} match={null} gpsEnabled={false} />);
     expect(screen.getByRole("button", { name: "2D 地图" })).toHaveAttribute("aria-pressed", "true");

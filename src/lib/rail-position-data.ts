@@ -6,6 +6,7 @@ import { railApiUrl } from "./rail-api";
 import { loadTrainEquipment } from "./rail-equipment";
 import { mtrLiveryModel } from "./mtr-vibrant";
 import { supplementStationCoordinates } from "./rail-station-coordinates";
+import { loadCachedRailway } from "./rail-network";
 
 const BASE = "https://rg-api.zenglingkun.cn/api/v2/";
 type FetchedPayload = { payload: unknown; checkedAt: number };
@@ -48,6 +49,12 @@ export async function loadJourneyEquipment(journey: TrainJourney) {
     modelScope: equipment.model ? equipment.scope : "reference" as const, modelDate: equipment.date, modelNumber: equipment.number, modelCheckedAt: equipment.checkedAt };
 }
 export async function loadRailway(journey: TrainJourney): Promise<RailwayMapData> {
+  // The national, versioned network is persisted on our server/CDN. A cache
+  // lookup never sends the train or station selection to a third-party API.
+  try {
+    const cached = await loadCachedRailway(journey);
+    if (cached?.route) return cached;
+  } catch { /* A source/network failure must not block the official timetable. */ }
   const url = new URL("mapLine", BASE);
   url.searchParams.set("train", journey.train);
   let map: RailwayMapData;

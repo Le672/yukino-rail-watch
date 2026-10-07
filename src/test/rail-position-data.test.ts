@@ -13,7 +13,8 @@ describe("position data dates and caching", () => {
     const { loadRailway } = await import("../lib/rail-position-data");
     const map = await loadRailway(parseJourney(k123, "K123", "2026-09-29"));
     expect(map.route).toBeNull(); expect(map.stations[3]).not.toBeNull(); expect(map.warning).toContain("站间模拟位置");
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0][0])).toBe("/rail-network/manifest.json");
   });
   it("loads conventional station coordinates without requiring track geometry", async () => {
     vi.resetModules();
@@ -21,7 +22,7 @@ describe("position data dates and caching", () => {
     const { loadRailway } = await import("../lib/rail-position-data");
     const map = await loadRailway(parseJourney(k123, "K123", "2026-09-29"));
     expect(map.route).toBeNull(); expect(map.stations).toHaveLength(4);
-    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get("train")).toBe("K123");
+    expect(new URL(String(fetchMock.mock.calls.at(-1)![0])).searchParams.get("train")).toBe("K123");
   });
   it("coalesces requests, preserves the fetched timestamp and sends an explicit origin date", async () => {
     vi.resetModules(); vi.useFakeTimers(); vi.setSystemTime(new Date("2026-09-29T02:01:00Z"));

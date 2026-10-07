@@ -15,9 +15,12 @@ export type DelayReport = { rows: TrainDelay[]; checkedAt: number; source?: "123
 export type Coordinate = [number, number]; // longitude, latitude; RailGo routes are GCJ-02 until explicitly converted.
 export type RailwayRoute = {
   points: Coordinate[]; distances: number[]; stopDistances: number[]; stops: Coordinate[]; lengthKm: number;
+  coordinateSystem?: "WGS84" | "GCJ02"; source?: "server-cache" | "RailGo";
+  inferred?: boolean; snapshotAt?: string; networkVersion?: string;
 };
 export type RailwayMapData = {
   route: RailwayRoute | null; stations: (Coordinate | null)[]; warning: string | null;
+  coordinateSystem?: "WGS84" | "GCJ02";
 };
 export type JourneyPosition = {
   phase: "before" | "running" | "stopped" | "arrived";

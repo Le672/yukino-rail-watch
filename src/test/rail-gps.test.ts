@@ -67,7 +67,7 @@ describe("GPS / basemap coordinate consistency", () => {
     expect(gcjToWgs84([-74, 40])).toEqual([-74, 40]);
   });
   it("recomputes route distance after conversion and preserves stop order", () => {
-    const raw = { ...route, points: points.map(point => wgs84togcj02(...point)), stops: route.stops.map(point => wgs84togcj02(...point)) };
+    const raw = { ...route, coordinateSystem: "GCJ02" as const, points: points.map(point => wgs84togcj02(...point)), stops: route.stops.map(point => wgs84togcj02(...point)) };
     const converted = railwayToWgs84(raw);
     expect(converted.coordinateSystem).toBe("WGS84");
     expect(distanceKm(converted.points[0], points[0]) * 1000).toBeLessThan(1);

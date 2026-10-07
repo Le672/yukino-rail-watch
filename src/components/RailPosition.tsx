@@ -47,7 +47,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   const stopBoard = useJourneyStopBoard(journey, live);
   const gpsHistory = useRef<{ distanceKm: number; timestamp: number } | null>(null);
   const wgsRoute = useMemo(() => route ? railwayToWgs84(route) : null, [route]);
-  const wgsStations = useMemo(() => mapData?.stations.map(point => point ? gcjToWgs84(point) : null) ?? [], [mapData]);
+  const wgsStations = useMemo(() => mapData?.stations.map(point => point ? mapData.coordinateSystem === "WGS84" ? point : gcjToWgs84(point) : null) ?? [], [mapData]);
   useEffect(() => { gpsHistory.current = null; }, [route, train, date, gps.enabled]);
 
   useEffect(() => {
@@ -209,6 +209,6 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
     {!journey && !loading && !error && <div className="rail-empty">输入车次和始发日期，查看运行区间、下一停靠站及铁路线路图。</div>}
     {!position && <div className="rail-card rail-position-route"><RailMap journey={journey} route={wgsRoute} stations={wgsStations} position={null} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} /></div>}
     {(delayError || position?.warning) && journey && <p className="rail-position-warning">{position?.warning || delayError}</p>}
-    <p className="rail-hint rail-position-source">车次、停站时刻表和正晚点来自 12306，车型优先查询 12306；官方缺少车型时才使用第三方参考资料，铁路坐标由 RailGo 补充。开启 GPS 后显示设备实时位置；有完整线路时匹配下一站，缺少线路或有效定位时按官方时刻表估算。正晚点仅覆盖未来 3 小时，实际到发及临时停站请以列车广播、站内显示和 12306 为准。</p>
+    <p className="rail-hint rail-position-source">车次、停站时刻表和正晚点来自 12306，车型优先查询 12306。铁路网使用本站服务器缓存，覆盖国铁、城际及香港高铁段，排除城市轨道交通；按停站顺序推定的路径不代表官方确认的运行径路。官方缺少车型或缓存路径不可用时才使用第三方补充资料。开启 GPS 显示设备实测位置；模拟位置与速度仍可能受临时限速、停车和改线影响，请以列车广播、站内显示和 12306 为准。</p>
   </section>;
 }

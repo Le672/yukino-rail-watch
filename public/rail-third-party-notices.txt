@@ -93,3 +93,16 @@ Database license: ODbL 1.0 - https://opendatacommons.org/licenses/odbl/1-0/
 https://www.openstreetmap.org/copyright
 Source database: https://github.com/Le672/yukino-rail-watch/blob/main/src/data/rail-station-coordinates.json
 Only missing coordinates are supplemented. This is not a live train location feed.
+
+Nationwide physical railway geometry cache: OpenStreetMap contributors
+China (including Hong Kong and Macau) snapshot: 2026-10-04T20:20:21Z.
+Laos railway supplement snapshot: 2026-10-03T20:20:50Z.
+Source extracts: https://download.geofabrik.de/asia/china.html and https://download.geofabrik.de/asia/laos.html
+Database license: ODbL 1.0 - https://opendatacommons.org/licenses/odbl/1-0/
+Public derived database, full geometry, source hashes and station coverage:
+https://www.yukino.bond/rail-network/manifest.json
+https://github.com/Le672/raptor/tree/master/public/rail-network
+No urban subway, light rail, tram, monorail or funicular geometry is imported.
+Connectivity uses original OSM node identities. Train paths are inferred along
+the physical network in official stopping order; actual operational paths and
+live train positions are not supplied by OSM.

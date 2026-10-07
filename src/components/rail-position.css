@@ -120,3 +120,6 @@
   .rail-map-view-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto; }
   .rail-map-toolbar button { justify-content: center; min-width: 0; min-height: 36px; padding: 7px; }
 }
+.rail-map-network-toggle { display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; font-size: .78rem; }
+.rail-map-network-toggle input { width: 14px; height: 14px; accent-color: #315c42; }
+.rail-map-legend .is-network { background: #777e69; height: 3px; border-radius: 0; }
