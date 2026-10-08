@@ -123,3 +123,15 @@
 .rail-map-network-toggle { display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; font-size: .78rem; }
 .rail-map-network-toggle input { width: 14px; height: 14px; accent-color: #315c42; }
 .rail-map-legend .is-network { background: #777e69; height: 3px; border-radius: 0; }
+/* GPS discovery retains the page's card layout at narrow widths. */
+.rail-train-detection { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--rail-border, #dce5d5); border-radius: 16px; background: #f8faf5; }
+.rail-train-detection h3 { font-size: 1.05rem; margin: 0; }
+.rail-train-detection > p { margin: .6rem 0; line-height: 1.6; }
+.rail-train-detection > small { display: block; line-height: 1.7; color: #758376; }
+.rail-detection-candidates { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: .75rem; margin: .9rem 0; }
+.rail-detection-candidates button { display: grid; gap: .35rem; min-width: 0; padding: .9rem; border: 1px solid #cbd9c3; border-radius: 12px; background: #fffefb; color: #315c42; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.rail-detection-candidates button:hover { border-color: #315c42; }
+.rail-detection-candidates button:focus-visible { outline: 2px solid #315c42; outline-offset: 2px; }
+.rail-detection-candidates strong { font-size: 1.15rem; }
+.rail-detection-candidates small { color: #758376; line-height: 1.5; }
+.rail-train-map-label { color: #315c42; border-color: #acc2a1; background: #fffefb; font-weight: 600; max-width: 250px; white-space: normal; }

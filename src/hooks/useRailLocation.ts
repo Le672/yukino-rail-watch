@@ -20,13 +20,15 @@ export function useRailLocation() {
     if (!enabled) { setFix(null); setSamples([]); return; }
     let active = true, watch: number | null = null, lastTimestamp = 0, generation = 0;
     const desktop = window.railLocation;
+    const geolocation = navigator.geolocation;
     const update = (event: LocationEvent) => {
       if (!active || document.hidden) return;
       if (event.fix && validLocation(event.fix) && event.fix.timestamp > lastTimestamp) {
         const point = event.fix;
         lastTimestamp = point.timestamp;
         setFix(point); setError(null);
-        setSamples(previous => [...previous.filter(sample => point.timestamp - sample.timestamp <= 12000).slice(-49), point]);
+        // Short, memory-only history also provides movement direction for train identification.
+        setSamples(previous => [...previous.filter(sample => point.timestamp - sample.timestamp <= 180000).slice(-179), point]);
       } else if (event.error) {
         setFix(null); setSamples([]); lastTimestamp = 0;
         setError(locationError(event.error.code)); if (event.error.code === 1) setEnabled(false);
@@ -36,17 +38,17 @@ export function useRailLocation() {
     const stop = () => {
       generation++;
       if (desktop) void desktop.stop().catch(() => {});
-      if (watch !== null) { navigator.geolocation.clearWatch(watch); watch = null; }
+      if (watch !== null) { geolocation.clearWatch(watch); watch = null; }
     };
     const start = () => {
       if (document.hidden) return;
       setError(null);
       if (desktop) { void desktop.start().catch(() => update({ error: { code: 2, message: "" } })); return; }
-      if (!window.isSecureContext || !navigator.geolocation) {
+      if (!window.isSecureContext || !geolocation) {
         setError("当前环境不支持安全定位，请使用 HTTPS 页面或 Windows 版。"); setEnabled(false); return;
       }
       const current = ++generation;
-      watch = navigator.geolocation.watchPosition(position => { if (generation !== current) return; update({ fix: {
+      watch = geolocation.watchPosition(position => { if (generation !== current) return; update({ fix: {
         longitude: position.coords.longitude, latitude: position.coords.latitude, accuracy: position.coords.accuracy,
         speed: Number.isFinite(position.coords.speed) && position.coords.speed! >= 0 ? position.coords.speed : null,
         heading: Number.isFinite(position.coords.heading) ? position.coords.heading : null, timestamp: position.timestamp,

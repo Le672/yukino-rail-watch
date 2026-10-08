@@ -47,8 +47,15 @@ describe("GPS rail matching", () => {
     const fix = fixAt(5);
     expect(match({ ...fix, timestamp: fix.timestamp - 31000 }).reason).toContain("30 秒");
     expect(match({ ...fix, timestamp: fix.timestamp + 6000 }).position).toBeNull();
-    expect(match({ ...fix, accuracy: 501 }).reason).toContain("精度不足");
+    expect(match({ ...fix, accuracy: 2001 }).reason).toContain("精度不足");
     expect(match({ ...fix, longitude: NaN }).position).toBeNull();
+  });
+  it("keeps coarse rail matching explicit and never uses it to skip an uncertain station", () => {
+    const running = match({ ...fixAt(5), accuracy: 1501 });
+    expect(running.position?.nextIndex).toBe(1); expect(running.approximate).toBe(true);
+    const boundary = match({ ...fixAt(distances[2] + .8, "12:03"), accuracy: 1501 }, "12:03");
+    expect(boundary.position).toBeNull(); expect(boundary.coordinate).not.toBeNull();
+    expect(boundary.reason).toContain("误差范围跨越停靠站");
   });
   it("does not apply another journey date or a location away from this railway", () => {
     expect(match({ ...fixAt(5), longitude: 114.5 }).reason).toContain("偏离");

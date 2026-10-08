@@ -11,6 +11,7 @@ export type Wgs84RailwayRoute = RailwayRoute & { coordinateSystem: "WGS84" };
 export type GpsMatch = {
   position: JourneyPosition | null; reason: string | null; coordinate: Coordinate | null;
   distanceKm: number; errorMeters: number; remainingKm: number;
+  approximate?: boolean;
 };
 export function gcjToWgs84(point: Coordinate): Coordinate {
   // Iterative inverse reduces the one-step conversion's metre-scale error.
@@ -47,7 +48,7 @@ export function matchGpsJourney(journey: TrainJourney, route: Wgs84RailwayRoute,
   const fail = (reason: string): GpsMatch => ({ position: null, reason, coordinate: null, distanceKm: 0, errorMeters: Infinity, remainingKm: 0 });
   if (!validLocation(fix)) return fail("设备返回的定位数据不完整，无法匹配列车位置。");
   if (now - fix.timestamp > 30000 || fix.timestamp > now + 5000) return fail("GPS 定位超过 30 秒未更新，已暂停用定位判断下一站。");
-  if (fix.accuracy > 500) return fail("定位精度不足（误差超过 500 米），暂不用于判断下一站。");
+  if (fix.accuracy > 2000) return fail("定位精度不足（误差超过 2 公里），暂不用于判断下一站。");
   if (now < journey.stops[0].departureAt - 2 * 3600000 || now > journey.stops.at(-1)!.arrivalAt + 24 * 3600000)
     return fail("该始发日期不在当前行程时间内，请选择正在乘坐的车次和始发日期。");
   const target: Coordinate = [fix.longitude, fix.latitude], cos = Math.cos(fix.latitude * Math.PI / 180);
@@ -75,6 +76,12 @@ export function matchGpsJourney(journey: TrainJourney, route: Wgs84RailwayRoute,
   if (nearby.some(item => Math.abs(item.distance - nearby[0].distance) > 2))
     return fail("线路在此处重叠，当前 GPS 无法唯一确定运行区间。");
   const best = nearby[0], along = best.distance, last = journey.stops.length - 1;
+  const approximate = fix.accuracy > 500;
+  // Coarse positioning may locate a rail corridor, but cannot prove passage of a stop.
+  if (approximate && route.stopDistances.some(distance => Math.abs(distance - along) * 1000 <= fix.accuracy)) {
+    return { ...fail("定位误差范围跨越停靠站，铁路位置仅作近似匹配，下一站暂按时刻表判断。"),
+      coordinate: coordinateAt(route, along), distanceKm: along, errorMeters: best.error, approximate: true };
+  }
   const radius = Math.max(0.08, Math.min(0.35, fix.accuracy * 1.25 / 1000));
   const atStation = route.stopDistances.findIndex(distance => Math.abs(distance - along) <= radius);
   const moving = fix.speed !== null && Number.isFinite(fix.speed) && fix.speed > 2.5;
@@ -99,5 +106,5 @@ export function matchGpsJourney(journey: TrainJourney, route: Wgs84RailwayRoute,
     departureAt: phase === "before" || phase === "stopped" ? planned.departureAt : null,
     delayUsed: sameNext && planned.delayUsed, warning: planned.warning };
   return { position, reason: null, coordinate: coordinateAt(route, along), distanceKm: along,
-    errorMeters: best.error, remainingKm: nextIndex === null ? 0 : Math.max(0, route.stopDistances[nextIndex] - along) };
+    errorMeters: best.error, remainingKm: nextIndex === null ? 0 : Math.max(0, route.stopDistances[nextIndex] - along), approximate };
 }

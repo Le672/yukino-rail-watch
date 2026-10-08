@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RailPosition } from "../components/RailPosition";
 import { parseJourney, parseRailwayMap } from "../lib/train-position";
 import { k123, k123Map } from "./fixtures/conventional-position";
-import { distanceKm } from "../lib/train-position";
+import { coordinateAt, distanceKm } from "../lib/train-position";
+import * as detector from "../lib/rail-train-detection";
 import { wgs84togcj02 } from "coordtransform";
 
 const loaders = vi.hoisted(() => ({ loadJourney: vi.fn(), loadDelays: vi.fn(), loadRailway: vi.fn(), loadJourneyEquipment: vi.fn() }));
@@ -25,6 +26,34 @@ beforeEach(() => {
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("position query user workflow", () => {
+  it("identifies a sufficiently distinct train and next station with GPS, without a typed train", async () => {
+    const now = Date.parse("2026-09-29T10:01:00+08:00");
+    vi.spyOn(Date, "now").mockReturnValue(now);
+    const journey = parseJourney(payload, "G6003", "2026-09-29", now);
+    const points: [number,number][] = [[113.06,28.15],[113.26,22.99],[114.03,22.61]];
+    const distances=[0,distanceKm(points[0],points[1]),distanceKm(points[0],points[1])+distanceKm(points[1],points[2])];
+    const route={points,distances,stopDistances:distances,stops:points,lengthKm:distances[2],coordinateSystem:"WGS84" as const};
+    const item={journey,route,map:{route,stations:points,coordinateSystem:"WGS84" as const,warning:null}};
+    const discover=vi.spyOn(detector,"discoverTrainRoutes").mockImplementation(async (_fix,_samples,_now,_signal,onProgress)=>{
+      const progress={routes:[item],stations:18,timetables:3,failed:0,truncated:false,complete:true};onProgress(progress);return progress;
+    });
+    vi.stubGlobal("isSecureContext",true);
+    const watchPosition=vi.fn().mockReturnValue(10), clearWatch=vi.fn();
+    vi.stubGlobal("navigator",{geolocation:{watchPosition,clearWatch}});
+    const view=render(<RailPosition initialDate="2026-09-29"/>);
+    expect(screen.getByLabelText("定位车次")).toHaveValue("");
+    fireEvent.click(screen.getByRole("button",{name:"开启 GPS 实时定位"}));
+    for(const seconds of [-12,-6,0]){
+      const [longitude,latitude]=coordinateAt(route,5+seconds*.07);
+      await act(async()=>watchPosition.mock.calls[0][0]({coords:{longitude,latitude,accuracy:20,speed:70,heading:180},timestamp:now+seconds*1000}));
+    }
+    await screen.findByRole("heading",{name:"G6003"});
+    expect(screen.getByLabelText("定位车次")).toHaveValue("G6003");
+    expect(within(screen.getByLabelText("下一停靠站")).getByText("广州南")).toBeInTheDocument();
+    expect(loaders.loadJourney).not.toHaveBeenCalled();
+    expect(discover).toHaveBeenCalledTimes(1);
+    view.unmount();expect(clearWatch).toHaveBeenCalledWith(10);
+  });
   it("automatically loads the selected board train without starting device geolocation", async () => {
     vi.stubGlobal("isSecureContext", true); const watchPosition = vi.fn();
     vi.stubGlobal("navigator", { geolocation: { watchPosition, clearWatch: vi.fn() } });
@@ -84,7 +113,7 @@ describe("position query user workflow", () => {
     expect(screen.getByText(/距下一站沿铁路约/)).toBeInTheDocument();
     const speed = within(screen.getByRole("group", { name: "实时速度" }));
     expect(speed.getByText("234")).toBeInTheDocument();
-    expect(speed.getByText("设备瞬时读数")).toBeInTheDocument();
+    expect(speed.getByText("GPS／设备瞬时读数")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "停止 GPS 定位" }));
     expect(clearWatch).toHaveBeenCalledWith(8);
     expect(within(screen.getByLabelText("下一停靠站")).getByText("深圳北")).toBeInTheDocument();

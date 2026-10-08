@@ -39,9 +39,14 @@ describe("current device speed and short GPS speed estimation", () => {
     expect(readRailSpeed([fix(-11, 0, 80)], now).reason).toContain("10 秒");
     expect(readRailSpeed([fix(2, 0, 80)], now).kmh).toBeNull();
     expect(readRailSpeed([{ ...fix(0, 0, 80), latitude: NaN }], now).kmh).toBeNull();
-    expect(readRailSpeed([fix(0, 0, 80, 101)], now).kmh).toBeNull();
+    expect(readRailSpeed([fix(0, 0, null, 101)], now).kmh).toBeNull();
     expect(readRailSpeed([fix(0, 0, -1)], now).kmh).toBeNull();
     expect(readRailSpeed([fix(0, 0, 1000)], now).kmh).toBeNull();
+  });
+  it("keeps an independent device velocity when the horizontal coordinate error is 1501 metres", () => {
+    expect(readRailSpeed([fix(0, 0, 80, 1501)], now)).toMatchObject({ kmh: 288, source: "device" });
+    expect(readRailSpeed([fix(0, 0, null, 1501)], now).reason).toContain("设备未返回瞬时速度");
+    expect(readRailSpeed([fix(-11, 0, 80, 1501)], now).kmh).toBeNull();
   });
   it("rejects location teleporting even with a seemingly valid device speed", () => {
     expect(readRailSpeed([fix(-2, -2000, 80), fix(0, 0, 80)], now).reason).toContain("异常跳跃");

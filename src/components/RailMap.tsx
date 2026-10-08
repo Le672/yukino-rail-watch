@@ -57,6 +57,7 @@ export function RailMap({ journey, route, stations, position, fix, match, gpsEna
   const plannedPoint = useMemo(() => position ? route ? positionOnRailway(route, position).coordinate : stationSimulationPoint(stopPoints, position) : null,
     [route, stopPoints, position]);
   const liveFix = gpsEnabled && fix && Date.now() - fix.timestamp >= -5000 && Date.now() - fix.timestamp <= 30000 ? fix : null;
+  const trainPoint = liveFix && match?.coordinate ? match.coordinate : plannedPoint;
   const point: Coordinate | null = liveFix ? [liveFix.longitude, liveFix.latitude] : plannedPoint;
   const pointRef = useRef(point); pointRef.current = point;
   useEffect(() => {
@@ -159,20 +160,19 @@ export function RailMap({ journey, route, stations, position, fix, match, gpsEna
       L.circle(raw, { radius: liveFix.accuracy, color: "#367ba7", fillColor: "#66a6cf", fillOpacity: 0.12, weight: 1, interactive: false }).addTo(group);
       L.circleMarker(raw, { radius: 7, color: "white", fillColor: "#2678b0", fillOpacity: 1, weight: 3 })
         .bindTooltip(tooltip(`设备实时位置 · 精度 ±${Math.round(liveFix.accuracy)} 米`)).addTo(group);
-      if (match?.coordinate) {
-        L.circleMarker(latLng(match.coordinate), { radius: 5, color: "#315c42", fillColor: "#315c42", fillOpacity: 1, weight: 2 })
-          .bindTooltip(tooltip("GPS 匹配的铁路位置")).addTo(group);
-      }
-    } else if (plannedPoint) {
-      L.circleMarker(latLng(plannedPoint), { radius: 7, color: "#fffefb", fillColor: "#315c42", fillOpacity: 1, weight: 3 })
-        .bindTooltip(tooltip(route ? route.inferred ? "沿铁路网推定路径的预估位置" : "时刻表估算位置" : "站间模拟位置 · 未沿铁路径路")).addTo(group);
+    }
+    // A coarse or unmatched GPS fix must never suppress the separate train marker.
+    if (trainPoint) {
+      const basis = liveFix && match?.coordinate ? match.approximate ? `GPS 铁路近似位置 · 误差 ±${Math.round(liveFix.accuracy)} 米` : "GPS 匹配的铁路位置" : route ? route.inferred ? "沿铁路网推定路径的预估位置" : "时刻表估算位置" : "站间模拟位置 · 未沿铁路径路";
+      L.circleMarker(latLng(trainPoint), { radius: 9, color: "#fffefb", fillColor: "#315c42", fillOpacity: .95, weight: 3 })
+        .bindTooltip(tooltip(`${journey?.codes.join(" / ") || "列车"} · ${basis}`), { permanent: true, direction: "top", offset: [0,-10], className: "rail-train-map-label" }).addTo(group);
     }
     if (liveFix && !gpsCentered.current) {
       gpsCentered.current = true;
       instance.setView(latLng([liveFix.longitude, liveFix.latitude]), Math.max(12, instance.getZoom()), { animate: false });
       setFollowing(true);
     } else if (following && point) instance.panTo(latLng(point), { animate: false });
-  }, [route, journey, stopPoints, position, liveFix, match, plannedPoint, following, point?.[0], point?.[1], latLng]);
+  }, [route, journey, stopPoints, position, liveFix, match, plannedPoint, trainPoint, following, point?.[0], point?.[1], latLng]);
   const locate = () => { const target = pointRef.current; if (target && map.current) { map.current.setView(latLng(target), Math.max(12, map.current.getZoom())); setFollowing(true); } };
   const overview = () => { setFollowing(false); const bounds = route?.points ?? availableStops; if (map.current && bounds.length) map.current.fitBounds(L.latLngBounds(bounds.map(latLng)), { padding: [26, 30], maxZoom: 11 }); };
 
@@ -189,6 +189,7 @@ export function RailMap({ journey, route, stations, position, fix, match, gpsEna
         <label className="rail-map-network-toggle"><input type="checkbox" checked={showNetwork} onChange={event => setShowNetwork(event.target.checked)} />铁路网</label>
         <button type="button" onClick={overview} disabled={!route && !availableStops.length}>全程</button>
         <button type="button" onClick={locate} disabled={!point} aria-pressed={following}><LocateFixed size={14} />当前位置</button>
+        <button type="button" disabled={!trainPoint} onClick={() => { if (trainPoint && map.current) { setFollowing(false); map.current.setView(latLng(trainPoint), Math.max(12, map.current.getZoom())); } }}>列车位置</button>
         <button type="button" onClick={() => setExpanded(!expanded)} aria-label={expanded ? "收起地图区域" : "展开地图区域"}><Maximize2 size={14} /></button>
       </div>
     </div>
@@ -197,7 +198,7 @@ export function RailMap({ journey, route, stations, position, fix, match, gpsEna
       <button type="button" onClick={() => setTileRevision(value => value + 1)}>重试底图</button>
       {mode === "satellite" ? <button type="button" onClick={() => setMode("streets")}>切回 2D 地图</button> : streetProvider === "amap" && <button type="button" onClick={() => setStreetProvider("osm")}>使用备用 2D</button>}
     </div>}
-    <div className="rail-map-legend"><span><i className="is-gps" />设备位置与精度范围</span><span><i className="is-train" />{match?.position ? route?.inferred ? "GPS 匹配推定路径" : "GPS 匹配铁路位置" : route ? route.inferred ? "沿铁路网预估位置" : "时刻表估算位置" : plannedPoint ? "站间模拟位置（粗估）" : "本车次停靠站"}</span><span><i className="is-next" />下一停靠站{!route && "（时刻表）"}</span>{network && showNetwork && <span><i className="is-network" />铁路网（本站缓存）</span>}</div>
+    <div className="rail-map-legend"><span><i className="is-gps" />设备位置与精度范围</span><span><i className="is-train" />{match?.coordinate ? match.approximate ? "GPS 铁路近似位置" : route?.inferred ? "GPS 匹配推定路径" : "GPS 匹配铁路位置" : route ? route.inferred ? "沿铁路网预估位置" : "时刻表估算位置" : plannedPoint ? "站间模拟位置（粗估）" : "本车次停靠站"}</span><span><i className="is-next" />下一停靠站{!route && "（时刻表）"}</span>{network && showNetwork && <span><i className="is-network" />铁路网（本站缓存）</span>}</div>
     {(network || route?.source === "server-cache") && <p className="rail-map-note">铁路线路快照 {(network?.manifest.snapshotAt || route?.snapshotAt || "").slice(0,10)} · 缓存包含国铁、地方铁路、城际及香港高铁段，不含地铁等城市轨道交通。{route?.inferred && "绿色路径按本车次停站顺序沿真实轨道推定，实际运行径路可能不同。"} © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>。</p>}
     {networkError && <p className="rail-map-note" role="status">铁路网缓存暂未加载成功，停站表和设备定位仍可使用。</p>}
     {journey && !route && <p className="rail-map-note">已显示 {availableStops.length} / {journey.stops.length} 个停靠站。完整铁路线路暂缺时，按当前两站坐标和时刻表模拟位置，未沿铁路径路；速度按地理距离粗估，停站与下一站仍以官方时刻表为准。开启 GPS 可查看设备实测位置。补充站点坐标 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>。</p>}

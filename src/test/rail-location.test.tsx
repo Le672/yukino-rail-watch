@@ -51,11 +51,13 @@ describe("explicit geolocation consent and lifecycle", () => {
       coords: { longitude: 113, latitude: 28, accuracy: 5, speed: null, heading: null }, timestamp: now + seconds * 1000,
     }));
     [0, 2, 4, 4, 3, 6, 8, 10, 12, 14].forEach(deliver);
-    expect(result.current.samples.map(sample => sample.timestamp)).toEqual([2, 4, 6, 8, 10, 12, 14].map(seconds => now + seconds * 1000));
+    expect(result.current.samples.map(sample => sample.timestamp)).toEqual([0, 2, 4, 6, 8, 10, 12, 14].map(seconds => now + seconds * 1000));
+    deliver(200);
+    expect(result.current.samples.map(sample => sample.timestamp)).toEqual([now + 200000]);
     act(() => watchPosition.mock.calls[0][1]({ code: 3, message: "timeout" }));
     expect(result.current.samples).toEqual([]);
     expect(result.current.fix).toBeNull();
-    deliver(16);
+    deliver(202);
     expect(result.current.samples).toHaveLength(1);
     act(() => result.current.stop());
     expect(result.current.samples).toEqual([]);

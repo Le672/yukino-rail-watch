@@ -5,6 +5,8 @@ import { chinaDateTime, locateJourney, observationTime } from "../lib/train-posi
 import type { DelayReport, RailwayMapData, TrainJourney } from "../lib/train-position";
 import { gcjToWgs84, matchGpsJourney, railwayToWgs84 } from "../lib/rail-gps";
 import { useRailLocation } from "../hooks/useRailLocation";
+import { useRailTrainDetection } from "../hooks/useRailTrainDetection";
+import type { DetectedTrain } from "../lib/rail-train-detection";
 import { RailMap } from "./RailMap";
 import { RailSpeed } from "./RailSpeed";
 import { readRailSpeed } from "../lib/rail-speed";
@@ -44,6 +46,10 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   const generation = useRef(0);
   const refreshing = useRef(false);
   const gps = useRailLocation();
+  const [autoIdentify, setAutoIdentify] = useState(!initialTrain);
+  const [gpsIdentified, setGpsIdentified] = useState(false);
+  const identifiedKey = useRef("");
+  const detection = useRailTrainDetection(gps.enabled && live && autoIdentify, gps.fix, gps.samples, now);
   const stopBoard = useJourneyStopBoard(journey, live);
   const gpsHistory = useRef<{ distanceKm: number; timestamp: number } | null>(null);
   const wgsRoute = useMemo(() => route ? railwayToWgs84(route) : null, [route]);
@@ -63,8 +69,28 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   const invalidate = () => {
     generation.current++; setJourney(null); setMapData(null); setDelays(null); setError(null);
     setRouteError(null); setDelayError(null); setLoading(false); setDetailsLoading(false);
+    identifiedKey.current = ""; setGpsIdentified(false);
   };
+  const useDetectedTrain = (candidate: DetectedTrain, automatic: boolean) => {
+    if (automatic && identifiedKey.current === candidate.key) return;
+    identifiedKey.current = candidate.key;
+    const version = ++generation.current;
+    setTrain(candidate.journey.train); setDate(candidate.journey.date);
+    setJourney(candidate.journey); setMapData(candidate.map); setDelays(null);
+    setError(null); setRouteError(null); setDelayError(null); setLoading(false); setDetailsLoading(true);
+    setGpsIdentified(automatic); if (!automatic) setAutoIdentify(false);
+    void loadJourneyEquipment(candidate.journey).then(equipment => {
+      if (version === generation.current) setJourney(current => current ? { ...current, ...equipment } : current);
+    }).catch(() => {});
+    void loadDelays(candidate.journey.train, candidate.journey.date).then(value => {
+      if (version === generation.current) { setDelays(value); setDelayError(value.warning || null); }
+    }).catch(() => { if (version === generation.current) setDelayError("正晚点资料暂不可用，当前按计划时刻估算。"); })
+      .finally(() => { if (version === generation.current) setDetailsLoading(false); });
+  };
+  useEffect(() => { if (autoIdentify && detection.automatic) useDetectedTrain(detection.automatic, true); }, [autoIdentify, detection.automatic]);
   const queryPosition = async () => {
+    if (!train.trim()) { setAutoIdentify(true); setLive(true); setNow(Date.now()); if (!gps.enabled) gps.start(); return; }
+    setAutoIdentify(false); setGpsIdentified(false); identifiedKey.current = "";
     const version = ++generation.current;
     setLoading(true); setDetailsLoading(false); setError(null); setJourney(null); setMapData(null); setDelays(null);
     setRouteError(null); setDelayError(null);
@@ -145,12 +171,13 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
   return <section className="rail-position-section" aria-labelledby="rail-position-title">
     <div className="rail-card rail-position-form">
       <div className="rail-card-heading"><div><span className="rail-overline">ON BOARD / NEXT STOP</span><h2 id="rail-position-title">列车位置与下一站</h2></div><span className="rail-small">北京时间 · UTC+8</span></div>
-      <p className="rail-search-help">支持 G／D／C、Z／T／K 及四位数字车次。乘车时开启 GPS 查看设备实时位置；地图支持 2D 与卫星图切换。</p>
+      <p className="rail-search-help">可直接输入车次，也可留空后开启 GPS，结合运行方向、铁路线路与 12306 时刻表推断候选车次和下一站。</p>
       <form onSubmit={event => { event.preventDefault(); void queryPosition(); }}>
         <div className="rail-position-fields">
-          <label>定位车次<input placeholder="例如 G6003、K123 或 1461" value={train} onChange={event => { invalidate(); setTrain(event.target.value.toUpperCase()); }} required /></label>
+          <label>定位车次（可留空）<input aria-label="定位车次" placeholder="留空自动识别，或输入 G6003、K123" value={train} onChange={event => { invalidate(); setAutoIdentify(!event.target.value.trim()); setTrain(event.target.value.toUpperCase()); }} /></label>
           <label>始发日期<input type="date" value={date} onChange={event => { invalidate(); setDate(event.target.value); }} required /></label>
           <label className="rail-clock-option"><input type="checkbox" checked={live} onChange={event => { gps.stop(); setLive(event.target.checked); setNow(Date.now()); setCustomTime(chinaDateTime()); }} />跟随当前时间</label>
+          {live && <label className="rail-clock-option"><input type="checkbox" checked={autoIdentify} onChange={event => { setAutoIdentify(event.target.checked); if (event.target.checked) { invalidate(); setTrain(""); } }} />根据 GPS 识别车次</label>}
           {live ? <div className="rail-current-clock"><Clock3 size={16} /><span>{timeLabel(now)}<small>每秒更新位置估算</small></span></div> :
             <label>观察时间（北京时间）<input type="datetime-local" value={customTime} onChange={event => setCustomTime(event.target.value)} required /></label>}
         </div>
@@ -159,9 +186,19 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
       </form>
       <div className="rail-gps-overview"><div className={`rail-gps-status${gpsPosition ? " is-matched" : ""}`} role="status">
         <strong>{gps.enabled ? freshFix ? `定位精度 ±${Math.round(freshFix.accuracy)} 米` : "正在等待 GPS／设备定位信号" : "GPS 未开启"}</strong>
-        <span>{gps.error || gpsMatch?.reason || (gpsPosition ? `已匹配本车次线路 · 距线路约 ${Math.round(gpsMatch!.errorMeters)} 米` : gps.enabled ? journey ? route ? "等待有效定位后判断下一站。" : detailsLoading ? "正在读取铁路线路，暂按时刻表显示。" : freshFix ? "地图显示设备 GPS 位置；完整线路暂缺，下一站按时刻表判断。" : "等待 GPS 信号后显示设备位置；完整线路暂缺，下一站按时刻表判断。" : "输入车次并查询后，将用定位匹配下一站。" : "仅在乘坐此车次时开启；GPS 未开启时按时刻表估算。")}</span>
+        <span>{gps.error || gpsMatch?.reason || (gpsPosition ? `${gpsMatch?.approximate ? "低精度 GPS 铁路近似匹配" : "已匹配本车次线路"} · 距线路约 ${Math.round(gpsMatch!.errorMeters)} 米` : gps.enabled ? journey ? route ? "等待有效定位后判断下一站。" : detailsLoading ? "正在读取铁路线路，暂按时刻表显示。" : freshFix ? "地图显示设备 GPS 位置；完整线路暂缺，下一站按时刻表判断。" : "等待 GPS 信号后显示设备位置；完整线路暂缺，下一站按时刻表判断。" : autoIdentify ? "正在根据定位与官方到发车次推断，连续移动轨迹有助于区分车次。" : "输入车次并查询后，将用定位匹配下一站。" : "仅在乘坐此车次时开启；GPS 未开启时按时刻表估算。")}</span>
         {gps.fix && gps.enabled && <small>定位更新于 {timeLabel(gps.fix.timestamp)}</small>}
       </div><RailSpeed reading={speed} estimate={motion} enabled={gps.enabled} live={live} matched={Boolean(gpsPosition)} now={now} error={gps.error} /></div>
+      {autoIdentify && gps.enabled && live && <div className="rail-train-detection" aria-label="GPS 车次识别">
+        <div className="rail-card-heading"><h3>{gpsIdentified ? "GPS 推断车次" : "GPS 车次识别"}</h3><span className="rail-small">{detection.loading ? "正在比对" : "持续校核定位"}</span></div>
+        <p role="status">{detection.error || (!freshFix ? "等待定位信号后自动查询附近车站的到发车次。" : detection.candidates.length ? detection.automatic ? `当前高概率车次：${detection.automatic.journey.codes.join(" / ")}，已自动显示行程。` : "当前定位无法唯一确定车次，以下列出相符的候选行程。" : detection.loading ? "正在查询官方时刻表与铁路线路，候选结果会逐步显示。" : "暂未找到相符车次。继续移动并等待新定位，或直接输入已知车次。")}</p>
+        {detection.candidates.length > 0 && <div className="rail-detection-candidates">{detection.candidates.map(candidate => <button type="button" key={candidate.key} onClick={() => useDetectedTrain(candidate, false)}>
+          <strong>{candidate.journey.codes.join(" / ")}</strong><span>下一停靠站：{candidate.journey.stops[candidate.nextIndex].station}</span>
+          <small>{candidate.journey.date} 始发 · {candidate.direction === "same" ? "方向相符" : "方向待确认"} · 距路径 {Math.round(candidate.errorMeters)} 米</small>
+          <small>时刻偏差约 {Math.round(Math.abs(candidate.timeErrorMinutes))} 分钟 · 点击查看此行程</small>
+        </button>)}</div>}
+        <small>已比对 {detection.progress.stations} 个附近车站、{detection.progress.timetables} 份时刻表。{detection.progress.failed > 0 && ` ${detection.progress.failed} 项资料暂不可用。`}{detection.progress.truncated && " 高密度区先比对时间最接近的候选，尚未穷尽全部车次。"}同一线路与时刻重合的列车无法仅凭 GPS 区分；推断结果不代表官方列车身份。</small>
+      </div>}
       <p className="rail-gps-privacy">定位在设备上匹配，不保存位置历史或上传到本站。地图服务会接收当前视野的瓦片请求；精度取决于 GPS 和系统定位，车厢或隧道内可能暂时无信号。</p>
       <p className="rail-hint">跨日普速车请填列车从首站发车的日期，可能早于你的乘车日期。下一站仅指本车次实际停靠站；自定义观察时间按计划时刻推算。</p>
     </div>
@@ -172,7 +209,8 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
       <div className="rail-position-summary rail-card">
         <div className="rail-position-identity"><div><span className="rail-overline">{journey.date} 始发</span><h3>{journey.codes.join(" / ")}</h3></div><TrainIllustration model={journey.model} /></div>
         <p className="rail-small" title={equipmentTitle({ trainsetModel: journey.model, trainsetSource: journey.modelSource, trainsetScope: journey.modelScope, trainsetDate: journey.modelDate, trainsetNumber: journey.modelNumber })}>{equipmentLabel({ trainsetModel: journey.model, trainsetOwner: journey.owner, trainOperator: journey.operator, trainsetScope: journey.modelScope })}</p>
-        <span className="rail-position-status"><MapPin size={14} />{status} · {gpsPosition ? "GPS 实时匹配" : position.delayUsed ? "结合正晚点估算" : "按时刻表估算"}</span>
+        {gpsIdentified && <p className="rail-small">车次来自 GPS 轨迹推断{!detection.automatic && " · 当前信号尚不足以唯一确认"}</p>}
+        <span className="rail-position-status"><MapPin size={14} />{status} · {gpsPosition ? gpsMatch?.approximate ? "GPS 近似匹配" : "GPS 实时匹配" : position.delayUsed ? "结合正晚点估算" : "按时刻表估算"}</span>
         <p className="rail-position-current">{position.phase === "running" ? `${previous!.station} → ${next!.station}` : `${current!.station}${position.phase === "before" ? " · 等待始发" : position.phase === "arrived" ? " · 行程结束" : " · 停站中"}`}</p>
         <div className="rail-next-stop" aria-label="下一停靠站">
           <span>{position.phase === "arrived" ? "终点站" : "下一停靠站"}</span>
@@ -206,7 +244,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
         {stopBoard.warning && <p className="rail-position-warning" role="status">{stopBoard.warning}</p>}
       </div>
     </div>}
-    {!journey && !loading && !error && <div className="rail-empty">输入车次和始发日期，查看运行区间、下一停靠站及铁路线路图。</div>}
+    {!journey && !loading && !error && <div className="rail-empty">输入车次和始发日期，或留空开启 GPS 识别候选车次；选定行程后显示下一停靠站和列车位置。</div>}
     {!position && <div className="rail-card rail-position-route"><RailMap journey={journey} route={wgsRoute} stations={wgsStations} position={null} fix={gps.fix} match={gpsMatch} gpsEnabled={gps.enabled} /></div>}
     {(delayError || position?.warning) && journey && <p className="rail-position-warning">{position?.warning || delayError}</p>}
     <p className="rail-hint rail-position-source">车次、停站时刻表和正晚点来自 12306，车型优先查询 12306。铁路网使用本站服务器缓存，覆盖国铁、城际及香港高铁段，排除城市轨道交通；按停站顺序推定的路径不代表官方确认的运行径路。官方缺少车型或缓存路径不可用时才使用第三方补充资料。开启 GPS 显示设备实测位置；模拟位置与速度仍可能受临时限速、停车和改线影响，请以列车广播、站内显示和 12306 为准。</p>

@@ -23,11 +23,10 @@ export function readRailSpeed(samples: readonly LocationFix[], now: number): Spe
   if (!validLocation(latest) || !Number.isFinite(now)) return unavailable("定位数据不完整，暂不测速。");
   if (now - latest.timestamp > 10000 || latest.timestamp > now + 1000)
     return unavailable("超过 10 秒未获得新定位，已暂停实时测速。");
-  if (latest.accuracy > 100) return unavailable("定位误差超过 100 米，暂不用于测速。");
 
   const history: LocationFix[] = [];
   for (const fix of samples) {
-    if (!validLocation(fix) || fix.accuracy > 100 || latest.timestamp - fix.timestamp > 12000) continue;
+    if (!validLocation(fix) || latest.timestamp - fix.timestamp > 12000) continue;
     if (history.length && fix.timestamp <= history.at(-1)!.timestamp) return unavailable("定位时间未连续递增，等待新定位。");
     history.push(fix);
   }
@@ -47,8 +46,11 @@ export function readRailSpeed(samples: readonly LocationFix[], now: number): Spe
     sampleSeconds: null, uncertaintyKmh: null, reason: null,
   };
   if (latest.speed !== null && Number.isFinite(latest.speed)) return unavailable("设备速度读数超出有效范围，暂不显示。");
+  // The OS velocity and the horizontal position uncertainty are different measurements.
+  // A coarse cell-assisted coordinate must not discard a separately measured velocity.
+  if (latest.accuracy > 100) return unavailable("设备未返回瞬时速度，且定位误差超过 100 米，无法可靠实测速度。");
 
-  const window = history.filter(fix => latest.timestamp - fix.timestamp <= 8000);
+  const window = history.filter(fix => fix.accuracy <= 100 && latest.timestamp - fix.timestamp <= 8000);
   const first = window[0], seconds = first ? (latest.timestamp - first.timestamp) / 1000 : 0;
   if (window.length < 3 || seconds < 3) return unavailable("设备未提供速度，正在收集最近几秒的定位点。");
   if (window.some((fix, index) => index > 0 && fix.timestamp - window[index - 1].timestamp > 5000))

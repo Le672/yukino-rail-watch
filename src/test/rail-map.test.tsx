@@ -70,6 +70,8 @@ describe("full map layer controls", () => {
       const tooltips = circleMarker.mock.results.map(result => (result.value as L.CircleMarker).getTooltip()?.getContent()).filter(Boolean) as HTMLElement[];
       expect(tooltips.some(element => element.textContent === "下一停靠站：十堰（时刻表）")).toBe(true);
       expect(tooltips.some(element => element.textContent?.includes("设备实时位置"))).toBe(true);
+      expect(tooltips.some(element => element.textContent?.includes("K123") && element.textContent.includes("站间模拟位置"))).toBe(true);
+      expect(screen.getByRole("button", { name: "列车位置" })).toBeEnabled();
       // Changing the basemap redraws the very same GPS fix, rather than moving the device or double-converting it.
       fireEvent.click(screen.getByRole("button", { name: "卫星图" }));
       const satelliteGps = circleMarker.mock.results.map(result => result.value as L.CircleMarker).filter(marker =>
@@ -88,7 +90,7 @@ describe("full map layer controls", () => {
       expect(screen.getByRole("button", { name: "当前位置" })).toBeEnabled();
       expect(screen.getByText("站间模拟位置（粗估）")).toBeInTheDocument();
       const simulated = circleMarker.mock.results.map(result => result.value as L.CircleMarker).find(marker =>
-        (marker.getTooltip()?.getContent() as HTMLElement)?.textContent === "站间模拟位置 · 未沿铁路径路");
+        (marker.getTooltip()?.getContent() as HTMLElement)?.textContent?.includes("站间模拟位置 · 未沿铁路径路"));
       expect(simulated).toBeDefined(); expect(polyline).not.toHaveBeenCalled();
       view.unmount();
     } finally {

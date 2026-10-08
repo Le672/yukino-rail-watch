@@ -60,6 +60,15 @@ export async function loadRailNetworkManifest(): Promise<RailwayNetworkManifest>
   manifestCache = { until: Date.now() + 5 * 60000, value };
   return value;
 }
+/** Station anchors alone do not require downloading the graph's node/edge parts. */
+export async function loadRailNetworkStations() {
+  const manifest = await loadRailNetworkManifest();
+  const raw = await readAsset(manifest.graph.file, manifest.graph) as SplitGraph;
+  if (raw.version !== manifest.version || !raw.stations) throw new Error("铁路车站索引不完整");
+  return Object.entries(raw.stations).flatMap(([code, station]) =>
+    /^[A-Z]{3}$/.test(code) && station.coordinate?.length === 2 && station.coordinate.every(Number.isFinite)
+      ? [{ code, name: station.name, coordinate: station.coordinate }] : []);
+}
 export async function loadRailNetworkOverview(view?: { bounds: number[]; zoom: number }) {
   const manifest = await loadRailNetworkManifest();
   const overview = await readAsset(manifest.overview.file, manifest.overview) as Overview;

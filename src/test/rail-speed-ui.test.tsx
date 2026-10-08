@@ -13,7 +13,7 @@ describe("speed source and freshness presentation", () => {
     render(<RailSpeed reading={reading} enabled live matched now={22000} error={null} />);
     const card = within(screen.getByRole("group", { name: "实时速度" }));
     expect(card.getByText("249")).toBeInTheDocument();
-    expect(card.getByText("GPS 短时估算")).toBeInTheDocument();
+    expect(card.getByText("GPS 短时测速")).toBeInTheDocument();
     expect(card.getByText(/6.0 秒.*误差参考 ±6 km\/h/)).toBeInTheDocument();
     expect(card.getByText("2 秒前更新")).toBeInTheDocument();
   });
@@ -47,7 +47,7 @@ describe("speed source and freshness presentation", () => {
   it("prefers an available device speed, preserving measured zero over a moving estimate", () => {
     render(<RailSpeed reading={{ ...reading, source: "device", kmh: 0 }} estimate={estimate} enabled live matched now={22000} error={null} />);
     expect(screen.getByText("0")).toBeInTheDocument();
-    expect(screen.getByText("设备瞬时读数")).toBeInTheDocument();
+    expect(screen.getByText("GPS／设备瞬时读数")).toBeInTheDocument();
     expect(screen.queryByText("预估速度")).toBeNull();
     expect(screen.queryByText("86")).toBeNull();
   });
