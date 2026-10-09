@@ -32,6 +32,16 @@ describe("transfer gateway recovery", () => {
     await vi.advanceTimersByTimeAsync(1); await expect(query).resolves.toMatchObject({ source: "12306" });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+  it.each([60, 120])("waits the actual Cloudflare retry interval of %s seconds before recovering", async seconds => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(new Response("edge unavailable", { status: 502, headers: { "retry-after": String(seconds) } })).mockImplementationOnce(success);
+    vi.stubGlobal("fetch", fetchMock); const onRetry = vi.fn();
+    const query = requestRailData(params, undefined, onRetry);
+    await vi.advanceTimersByTimeAsync(seconds * 1000 - 1); expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(onRetry).toHaveBeenCalledWith({ attempt: 1, delayMs: seconds * 1000, status: 502 });
+    await vi.advanceTimersByTimeAsync(1); await expect(query).resolves.toMatchObject({ source: "12306" });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ headers: { Accept: "application/json" }, cache: "no-store" });
+  });
   it("keeps persistent failures after a bounded number of attempts", async () => {
     const fetchMock = vi.fn(() => Response.json({ error: "12306 暂不可用" }, { status: 503 }));
     vi.stubGlobal("fetch", fetchMock);
@@ -46,9 +56,9 @@ describe("transfer gateway recovery", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
   it("does not shorten a long server-requested pause", async () => {
-    const fetchMock = vi.fn(() => Response.json({ error: "busy" }, { status: 429, headers: { "retry-after": "60" } }));
+    const fetchMock = vi.fn(() => Response.json({ error: "busy" }, { status: 429, headers: { "retry-after": "300" } }));
     vi.stubGlobal("fetch", fetchMock);
-    await expect(requestRailData(params)).rejects.toMatchObject({ status: 429, retryAfterMs: 60000 });
+    await expect(requestRailData(params)).rejects.toMatchObject({ status: 429, retryAfterMs: 300000 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
   it("cancels during backoff without sending another request", async () => {

@@ -1,4 +1,5 @@
 import { requestRailData } from "./rail-api";
+import type { RailRetry } from "./rail-api";
 import { candidateHubs, findStation, interchangeVariants, stationVariants, transferLink } from "./rail-station-groups";
 import type { TransferLink } from "./rail-station-groups";
 import { chinaDateTime, isJourneyDate } from "./train-position";
@@ -66,8 +67,8 @@ export function makeTrip(legs: Leg[], connections: TransferLink[], settings: Tra
   const urbanIds = [access, ...connections, egress].flatMap(link => link?.urban ? [link.urban.id] : []);
   return { id: legs.map(l => trainIdentity(l)).join("|") + (urbanIds.length ? `|urban:${urbanIds.join("|")}` : ""), legs, connections, access, egress, departureAt, arrivalAt, duration: Math.round((arrivalAt - departureAt) / 60000) };
 }
-async function json<T>(params: URLSearchParams, signal?: AbortSignal) {
-  const data = await requestRailData<T & { source?: string }>(params, signal);
+async function json<T>(params: URLSearchParams, signal?: AbortSignal, onRetry?: (retry: RailRetry) => void) {
+  const data = await requestRailData<T & { source?: string }>(params, signal, onRetry);
   if (data.source !== "12306") throw new Error("12306 查询资料暂不可用");
   return data as T;
 }
@@ -136,7 +137,8 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
       queryCount++;
       onProgress({ queryCount, text: `${date} · ${a.name} → ${b.name}` });
       try {
-        const data = await json<{ trains: Train[]; checkedAt: string }>(new URLSearchParams({ date, search: "route", from: a.code, to: b.code }), signal);
+        const data = await json<{ trains: Train[]; checkedAt: string }>(new URLSearchParams({ date, search: "route", from: a.code, to: b.code }), signal,
+          retry => onProgress({ queryCount, text: `${date} · ${a.name} → ${b.name} · 稍候 ${Math.ceil(retry.delayMs / 1000)} 秒后自动重试（${retry.attempt}/2）` }));
         if (!Array.isArray(data.trains)) throw new Error("12306 区间响应格式异常");
         consecutiveFailures = 0;
         if (routeCache.size >= 300) routeCache.delete(routeCache.keys().next().value!);

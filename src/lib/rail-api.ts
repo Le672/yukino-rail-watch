@@ -40,19 +40,22 @@ function waitForRetry(milliseconds: number, signal?: AbortSignal) {
 }
 
 /** Recover transient gateway/network failures at most twice; validation errors are never retried. */
-export async function requestRailData<T>(params: URLSearchParams, signal?: AbortSignal): Promise<T> {
+export type RailRetry = { attempt: number; delayMs: number; status?: number };
+export async function requestRailData<T>(params: URLSearchParams, signal?: AbortSignal, onRetry?: (retry: RailRetry) => void): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     signal?.throwIfAborted();
     try {
-      const response = await fetch(railApiUrl(params), { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000) });
+      const response = await fetch(railApiUrl(params), { headers: { Accept: "application/json" }, cache: "no-store", signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000) });
       return await readRailResponse<T>(response);
     } catch (error) {
       signal?.throwIfAborted();
       const transient = error instanceof RailGatewayError ? [429, 502, 503, 504, 521, 522, 523, 524].includes(error.status) :
         error instanceof TypeError || !!error && typeof error === "object" && "name" in error && error.name === "TimeoutError";
       const requestedDelay = error instanceof RailGatewayError ? error.retryAfterMs : 0;
-      if (!transient || attempt >= 2 || requestedDelay > 30000) throw error;
-      await waitForRetry(Math.max(1250 * 2 ** attempt, requestedDelay), signal);
+      if (!transient || attempt >= 2 || requestedDelay > 120000) throw error;
+      const delayMs = Math.max(1250 * 2 ** attempt, requestedDelay);
+      onRetry?.({ attempt: attempt + 1, delayMs, status: error instanceof RailGatewayError ? error.status : undefined });
+      await waitForRetry(delayMs, signal);
     }
   }
 }
