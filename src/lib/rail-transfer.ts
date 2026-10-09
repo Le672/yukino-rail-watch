@@ -1,4 +1,4 @@
-import { railApiUrl, readRailResponse } from "./rail-api";
+import { requestRailData } from "./rail-api";
 import { candidateHubs, findStation, interchangeVariants, stationVariants, transferLink } from "./rail-station-groups";
 import type { TransferLink } from "./rail-station-groups";
 import { chinaDateTime, isJourneyDate } from "./train-position";
@@ -67,8 +67,7 @@ export function makeTrip(legs: Leg[], connections: TransferLink[], settings: Tra
   return { id: legs.map(l => trainIdentity(l)).join("|") + (urbanIds.length ? `|urban:${urbanIds.join("|")}` : ""), legs, connections, access, egress, departureAt, arrivalAt, duration: Math.round((arrivalAt - departureAt) / 60000) };
 }
 async function json<T>(params: URLSearchParams, signal?: AbortSignal) {
-  const response = await fetch(railApiUrl(params), { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000) });
-  const data = await readRailResponse<T & { source?: string }>(response);
+  const data = await requestRailData<T & { source?: string }>(params, signal);
   if (data.source !== "12306") throw new Error("12306 查询资料暂不可用");
   return data as T;
 }
@@ -118,7 +117,7 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   const queue: (() => void)[] = [];
   const limited = async <T,>(operation: () => Promise<T>): Promise<T> => {
     signal.throwIfAborted();
-    if (active >= 3) await new Promise<void>(resolve => queue.push(resolve)); else active++;
+    if (active >= 2) await new Promise<void>(resolve => queue.push(resolve)); else active++;
     try { signal.throwIfAborted(); return await operation(); } finally { const next = queue.shift(); if (next) next(); else active--; }
   };
   const route = (a: Station, b: Station, date: string): Promise<Leg[]> => {

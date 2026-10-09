@@ -52,10 +52,12 @@ describe("nationwide station interchange", () => {
 
 describe("nationwide actual-leg assembly", () => {
   it("stops an unavailable official service without claiming that no connections exist", async () => {
+    const now = Date.now(); vi.useRealTimers(); vi.useFakeTimers(); vi.setSystemTime(now);
     const from = s("失败起点", "FAA", "甲城", "8001"), to = s("失败终点", "FBB", "乙城", "8002");
     const all = [from, to, ...Array.from({ length: 75 }, (_, i) => s(`失败节点${i}`, `F${String(i).padStart(2, "0")}`, `城市${i}`, `${i + 1000}`))];
     vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => new URL(String(input), "https://cr.yukino.bond").searchParams.get("mode") === "hubs" ? Response.json({ source: "12306", hubs: [] }) : Response.json({ error: "官方暂不可用" }, { status: 502 })));
-    const result = await searchTransfers({ ...DEFAULT_TRANSFER, date: "2026-10-09", from: from.name, to: to.name }, all, new AbortController().signal, vi.fn());
+    const query = searchTransfers({ ...DEFAULT_TRANSFER, date: "2026-10-09", from: from.name, to: to.name }, all, new AbortController().signal, vi.fn());
+    await vi.runAllTimersAsync(); const result = await query;
     expect(result.queryCount).toBeGreaterThanOrEqual(8);
     expect(result.queryCount).toBeLessThanOrEqual(10);
     expect(result.serviceUnavailable).toBe(true);

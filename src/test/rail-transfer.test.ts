@@ -130,9 +130,10 @@ describe("official multi-leg search", () => {
     expect(fetchMock.mock.calls.some(([url]) => String(url).includes("date=2026-10-05"))).toBe(true);
   });
   it("retains partial-failure warnings instead of asserting there are no routes and honours cancellation", async () => {
-    vi.useFakeTimers(); vi.setSystemTime(Date.now() + 120000);
+    const now = Date.now(); vi.useRealTimers(); vi.useFakeTimers(); vi.setSystemTime(now + 120000);
     vi.stubGlobal("fetch", vi.fn(async () => Response.json({ error: "12306 暂不可用" }, { status: 502 })));
-    const result = await searchTransfers({ ...DEFAULT_TRANSFER, date, from: a.name, to: d.name, via: b.name }, stations, new AbortController().signal, vi.fn());
+    const query = searchTransfers({ ...DEFAULT_TRANSFER, date, from: a.name, to: d.name, via: b.name }, stations, new AbortController().signal, vi.fn());
+    await vi.runAllTimersAsync(); const result = await query;
     expect(result.trips).toHaveLength(0); expect(result.warnings.join(" ")).toMatch(/不代表没有可行中转/);
     const controller = new AbortController(); controller.abort();
     await expect(searchTransfers({ ...DEFAULT_TRANSFER, date, from: a.name, to: d.name, via: b.name }, stations, controller.signal, vi.fn())).rejects.toThrow();
