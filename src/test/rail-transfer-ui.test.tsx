@@ -1,10 +1,30 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { RailTransfer } from "../components/RailTransfer";
 import type { Train, Station } from "../lib/rail-tickets";
 const stations: Station[] = [{ name: "深圳北", code: "IOQ", pinyin: "", city: "深圳" }, { name: "广州南", code: "IZQ", pinyin: "", city: "广州" }, { name: "番禺", code: "PYA", pinyin: "", city: "广州" }, { name: "西平西", code: "EGQ", pinyin: "", city: "东莞" }];
 const make = (code: string, fromCode: string, toCode: string, departure: string, arrival: string, duration: string, price: number, model: string, value = "有"): Train => ({ code, trainNo: `TRAIN${code}`, fromCode, toCode, from: stations.find(s => s.code === fromCode)!.name, to: stations.find(s => s.code === toCode)!.name, departure, arrival, duration, saleStatus: "Y", trainsetModel: model, date: "2026-10-04", originDate: code === "G2" ? "2026-10-03" : "2026-10-04", seats: [{ label: "二等座", value, available: value === "有", price }] });
-afterEach(() => { cleanup(); localStorage.clear(); vi.unstubAllGlobals(); });
+beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-04T08:00:00+08:00")); });
+afterEach(() => { cleanup(); localStorage.clear(); vi.unstubAllGlobals(); vi.useRealTimers(); });
+
+it("updates an expired saved date while preserving stations and transfer choices", () => {
+  localStorage.setItem("yukino-rail-transfer-v1", JSON.stringify({ date: "2026-10-02", from: "深圳北", to: "西平西", via: "广州南", minimum: 35 }));
+  render(<RailTransfer stations={stations} onPosition={vi.fn()}/>);
+  expect(screen.getByLabelText("首程乘车日期")).toHaveValue("2026-10-04");
+  expect(screen.getByLabelText("出发站")).toHaveValue("深圳北");
+  expect(screen.getByLabelText("中转站 1（可选）")).toHaveValue("广州南");
+  expect(screen.getByLabelText("同站最短预留（分钟）")).toHaveValue(35);
+  expect(screen.getByRole("status")).toHaveTextContent("2026-10-02 已过期，已更新为今天 2026-10-04");
+  expect(screen.getByLabelText("首程乘车日期")).toHaveAttribute("min", "2026-10-04");
+  expect(screen.getByLabelText("首程乘车日期")).toHaveAttribute("max", "2026-10-18");
+});
+
+it("retains a saved future travel date", () => {
+  localStorage.setItem("yukino-rail-transfer-v1", JSON.stringify({ date: "2026-10-08", from: "深圳北" }));
+  render(<RailTransfer stations={stations} onPosition={vi.fn()}/>);
+  expect(screen.getByLabelText("首程乘车日期")).toHaveValue("2026-10-08");
+  expect(screen.queryByText(/已更新为今天/)).not.toBeInTheDocument();
+});
 it("shows each leg and physical walk transfer, sorts the summed price and filters whole-trip availability and exact models", async () => {
   localStorage.clear(); const onPosition = vi.fn();
   vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {

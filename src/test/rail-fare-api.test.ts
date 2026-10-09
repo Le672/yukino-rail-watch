@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const date = "2026-10-04";
 const stationText = "@x|广州南|IZQ|guangzhounan|gzn|0|1502|广州|||@x|长沙南|CWQ|changshanan|csn|1|1407|长沙|||" +
   Array.from({ length: 105 }, (_, i) => `@x|车站${i}|Z${String.fromCharCode(65 + Math.floor(i / 26))}${String.fromCharCode(65 + i % 26)}|station|s|2|||`).join("");
@@ -20,7 +20,8 @@ function mock(encoded = "", additionalRows: string[] = []) {
   });
   vi.stubGlobal("fetch", fetchMock); return fetchMock;
 }
-afterEach(() => vi.unstubAllGlobals());
+beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-04T08:00:00+08:00")); });
+afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 describe("official ticket price and transfer node gateway", () => {
   it("shares initialization across concurrent distinct ticket routes", async () => {
     vi.resetModules(); const fetchMock = mock();

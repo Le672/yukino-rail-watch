@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { UrbanRailPlanner, loadUrbanRail } from "../lib/urban-rail";
 import type { UrbanNetwork, UrbanMode } from "../lib/urban-rail-types";
 import { DEFAULT_TRANSFER, makeTrip, timedLeg, sortTrips, tripFare, tripRailFare, searchTransfers } from "../lib/rail-transfer";
@@ -9,6 +9,8 @@ const base: UrbanNetwork = { schema: 1, source: "OpenStreetMap", updatedAt: "202
   { id: "c", name: "终点", area: "测试网络", lat: 30, lon: 120.02 }, { id: "far", name: "换线", area: "另一城市", lat: 31, lon: 121 },
 ], lines: [ { id: "1", name: "一号线", mode: "subway", stops: ["a", "b"], bidirectional: false }, { id: "2", name: "二号线", mode: "tram", stops: ["b", "c"], bidirectional: true } ] };
 const date = "2026-10-06";
+beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-04T08:00:00+08:00")); });
+afterEach(() => vi.useRealTimers());
 describe("optional urban rail routing", () => {
   it("keeps rail transit off by default, supports every rail mode and charges for changing lines", () => {
     expect(DEFAULT_TRANSFER.allowUrban).toBe(false);

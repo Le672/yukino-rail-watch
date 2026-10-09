@@ -1,9 +1,10 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { candidateHubs, interchangeVariants, stationVariants, transferLink } from "../lib/rail-station-groups";
 import { nationalHubRanking, sameOfficialCity } from "../lib/rail-national-network";
 import { DEFAULT_TRANSFER, searchTransfers, tripFare } from "../lib/rail-transfer";
 import type { Station, Train } from "../lib/rail-tickets";
 const s = (name: string, code: string, city: string, cityCode: string): Station => ({ name, code, city, cityCode, pinyin: "" });
+beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-04T08:00:00+08:00")); });
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("nationwide station interchange", () => {

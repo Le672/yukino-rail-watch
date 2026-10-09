@@ -5,6 +5,7 @@ import type { OfficialTimetable, OfficialTrainRoute } from "../../src/lib/rail-o
 import { parseOfficialEquipment } from "../../src/lib/rail-equipment";
 import type { TrainEquipment } from "../../src/lib/rail-equipment";
 import type { TrainJourney } from "../../src/lib/train-position";
+import { ticketDateError, ticketDateRange } from "../../src/lib/rail-ticket-date";
 import { getJourneyBoardStops, getStationBoard, getStationBoardRow } from "../../src/lib/rail-board-service";
 
 const ORIGIN = "https://kyfw.12306.cn";
@@ -407,6 +408,12 @@ export async function onRequestGet(context: { request: Request }) {
   if (!["stations", "query", "journey", "delays", "fare", "hubs", "equipment", "board", "board-row", "journey-board"].includes(mode)) return json({ error: "未知查询类型" }, 400);
 
   try {
+    const date = url.searchParams.get("date") || ticketDateRange().min;
+    if (["query", "fare", "hubs"].includes(mode)) {
+      const error = ticketDateError(date);
+      // Reject expired/out-of-sale dates before station/session/upstream requests.
+      if (error) return json({ error, code: "INVALID_TICKET_DATE", dateRange: ticketDateRange() }, 400);
+    }
     if (mode === "equipment") {
       const date = url.searchParams.get("date") || "", train = (url.searchParams.get("train") || "").trim().toUpperCase();
       if (!isValidDate(date) || !TRAIN_CODE.test(train)) return json({ error: "请填写有效车次和始发日期" }, 400);
@@ -416,7 +423,6 @@ export async function onRequestGet(context: { request: Request }) {
     const stations = await getStations();
     if (mode === "stations") return json({ stations }, 200, 86400);
 
-    const date = url.searchParams.get("date") || new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
     let from = (url.searchParams.get("from") || "").trim();
     let to = (url.searchParams.get("to") || "").trim();
     const trainCode = (url.searchParams.get("train") || "").trim().toUpperCase();
@@ -480,6 +486,13 @@ export async function onRequestGet(context: { request: Request }) {
       trains: parseTrains(data.result, { ...names, ...data.map }, trainCode, trainNo, date),
     }, 200, 30);
   } catch (error) {
-    return json({ error: error instanceof Error ? error.message : "查询 12306 失败" }, error instanceof QueryError ? error.status : 502);
+    return json({ error: railQueryError(error) }, error instanceof QueryError ? error.status : 502);
   }
+}
+
+export function railQueryError(error: unknown) {
+  const name = error && typeof error === "object" && "name" in error ? error.name : "";
+  if (name === "SyntaxError") return "12306 暂未返回可用资料，请稍后重试或前往官网查询";
+  if (name === "AbortError" || name === "TimeoutError") return "12306 查询超时，请稍后重试";
+  return error instanceof Error ? error.message : "查询 12306 失败，请稍后重试";
 }

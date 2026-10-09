@@ -1,7 +1,8 @@
-import { railApiUrl } from "./rail-api";
+import { railApiUrl, readRailResponse } from "./rail-api";
 import { candidateHubs, findStation, interchangeVariants, stationVariants, transferLink } from "./rail-station-groups";
 import type { TransferLink } from "./rail-station-groups";
 import { chinaDateTime, isJourneyDate } from "./train-position";
+import { ticketDateError } from "./rail-ticket-date";
 import { compareNullable, minutes, seatScore, trainIdentity, trainPrice } from "./rail-tickets";
 import type { Station, Train, TrainFilters } from "./rail-tickets";
 import { isUrbanStation, loadUrbanRail } from "./urban-rail";
@@ -67,11 +68,13 @@ export function makeTrip(legs: Leg[], connections: TransferLink[], settings: Tra
 }
 async function json<T>(params: URLSearchParams, signal?: AbortSignal) {
   const response = await fetch(railApiUrl(params), { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000) });
-  const data = await response.json();
-  if (!response.ok || data.source !== "12306") throw new Error(data.error || "12306 查询资料暂不可用");
+  const data = await readRailResponse<T & { source?: string }>(response);
+  if (data.source !== "12306") throw new Error("12306 查询资料暂不可用");
   return data as T;
 }
 export async function searchTransfers(settings: TransferSettings, stations: Station[], signal: AbortSignal, onProgress: (progress: TransferProgress) => void): Promise<TransferResult> {
+  const dateError = ticketDateError(settings.date);
+  if (dateError) throw new Error(dateError);
   let urban: UrbanRailPlanner | undefined;
   if (settings.allowUrban) { onProgress({ queryCount: 0, text: "载入全国城市轨道网络" }); urban = await loadUrbanRail(); signal.throwIfAborted(); }
   const from = findStation(stations, settings.from) || urban?.findStation(settings.from), to = findStation(stations, settings.to) || urban?.findStation(settings.to);
@@ -120,6 +123,10 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   };
   const route = (a: Station, b: Station, date: string): Promise<Leg[]> => {
     if (a.code === b.code) return Promise.resolve([]);
+    if (ticketDateError(date)) {
+      warnings.add(`${date} 的衔接程超出当前余票查询日期范围，已跳过；尚未开售不代表没有车次。`);
+      return Promise.resolve([]);
+    }
     const key = `${date}/${a.code}/${b.code}`;
     if (local.has(key)) return local.get(key)!;
     const operation = limited(async () => {
@@ -224,7 +231,7 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
     }
   }
   signal.throwIfAborted();
-  if (!trips.size && warnings.size) warnings.add("部分区间查询失败，暂无方案不代表没有可行中转。");
+  if (!trips.size && warnings.size) warnings.add("部分区间尚未完成查询，暂无方案不代表没有可行中转。");
   return { date: settings.date, from: from.name, to: to.name, checkedAt: new Date().toISOString(), trips: [...trips.values()], hubs, warnings: [...warnings], queryCount, candidateCount, hubLimit, serviceUnavailable,
     urban: urban ? { lines: urban.network.lines.length, stops: urban.stations().length, sourceDate: urban.network.sourceDate } : undefined };
 }

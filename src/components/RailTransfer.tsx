@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRightLeft, RefreshCw, X, ExternalLink } from "lucide-react";
 import { SEAT_OPTIONS } from "../hooks/useRailMonitor";
 import { enrichTrainList, mergeTrainDetails } from "../lib/rail-enrichment";
-import { chinaDateTime } from "../lib/train-position";
+import { chinaDateTime, isJourneyDate } from "../lib/train-position";
+import { ticketDateRange } from "../lib/rail-ticket-date";
 import { DEFAULT_TRANSFER, searchTransfers, sortTrips, tripFare, tripRailFare, tripSeats, hasUrban } from "../lib/rail-transfer";
 import type { TransferSettings, TransferResult, TransferProgress } from "../lib/rail-transfer";
 import { DEFAULT_TRAIN_FILTERS, durationLabel, money, trainIdentity } from "../lib/rail-tickets";
@@ -15,12 +16,21 @@ import { UrbanRailRoute } from "./UrbanRailRoute";
 import { equipmentLabel, equipmentTitle } from "../lib/rail-equipment";
 import "./rail-transfer.css";
 const STORAGE = "yukino-rail-transfer-v1";
-function initialSettings(): TransferSettings {
-  try { const saved = JSON.parse(localStorage.getItem(STORAGE) || "null"); return saved && typeof saved === "object" ? { ...DEFAULT_TRANSFER, ...saved } : DEFAULT_TRANSFER; }
-  catch { return DEFAULT_TRANSFER; }
+function initialSettings(): { settings: TransferSettings; notice: string | null } {
+  const today = ticketDateRange().min, defaults = { ...DEFAULT_TRANSFER, date: today };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE) || "null");
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return { settings: defaults, notice: null };
+    const validDate = typeof saved.date === "string" && isJourneyDate(saved.date), expired = validDate && saved.date < today;
+    return { settings: { ...defaults, ...saved, date: validDate && !expired ? saved.date : today },
+      notice: expired ? `上次保存的乘车日期 ${saved.date} 已过期，已更新为今天 ${today}，请核对出行日期。` : null };
+  } catch { return { settings: defaults, notice: null }; }
 }
 export function RailTransfer({ stations, onPosition }: { stations: Station[]; onPosition: (train: string, date: string) => void }) {
-  const [settings, setSettings] = useState(initialSettings), [result, setResult] = useState<TransferResult | null>(null);
+  const [initial] = useState(initialSettings);
+  const [settings, setSettings] = useState(initial.settings), [dateNotice, setDateNotice] = useState(initial.notice);
+  const [result, setResult] = useState<TransferResult | null>(null);
+  const [dateRange, setDateRange] = useState(ticketDateRange);
   const [filters, setFilters] = useState<TrainFilters>({ ...DEFAULT_TRAIN_FILTERS, sort: "duration" });
   const [seat, setSeat] = useState("任意席别"), [everyModel, setEveryModel] = useState(false), [page, setPage] = useState(1);
   const [checking, setChecking] = useState(false), [error, setError] = useState<string | null>(null);
@@ -28,7 +38,13 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
   const [urbanStations, setUrbanStations] = useState<Station[]>([]), [urbanLoading, setUrbanLoading] = useState(false), [urbanError, setUrbanError] = useState<string | null>(null);
   const [urbanStats, setUrbanStats] = useState<{ lines: number; sourceDate: string } | null>(null), [railFirst, setRailFirst] = useState(true);
   const controller = useRef<AbortController | null>(null), generation = useRef(0);
-  useEffect(() => { localStorage.setItem(STORAGE, JSON.stringify(settings)); }, [settings]);
+  useEffect(() => { try { localStorage.setItem(STORAGE, JSON.stringify(settings)); } catch { /* Querying remains available without browser storage. */ } }, [settings]);
+  useEffect(() => {
+    const refresh = () => setDateRange(ticketDateRange());
+    const timer = window.setInterval(refresh, 60000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+  }, []);
   useEffect(() => () => { controller.current?.abort(); generation.current++; }, []);
   useEffect(() => {
     if (!settings.allowUrban) return;
@@ -40,6 +56,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
   }, [settings.allowUrban]);
   const update = (patch: Partial<TransferSettings>) => {
     controller.current?.abort(); generation.current++;
+    if (patch.date !== undefined) setDateNotice(null);
     setSettings(current => ({ ...current, ...patch })); setResult(null); setChecking(false); setProgress(null); setDetails(null); setError(null); setPage(1);
   };
   const run = async (query = settings) => {
@@ -76,7 +93,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
     <div className="rail-transfer-intro"><span className="rail-overline">NATIONWIDE TRANSFER / 12306</span><h2>中转行程</h2><p>全国铁路、高铁、普速与 12306 城际／市域列车一起规划。可选城市轨道接驳，铁路方案默认优先。</p></div>
     <form className="rail-transfer-form" onSubmit={event => { event.preventDefault(); void run(); }}>
       <div className="rail-transfer-fields">
-        <label>首程乘车日期<input type="date" required value={settings.date} onChange={e => update({ date: e.target.value })}/></label>
+        <label>首程乘车日期<input type="date" required min={dateRange.min} max={dateRange.max} value={settings.date} onChange={e => update({ date: e.target.value })}/></label>
         <label>出发站<input list="rail-transfer-origins" required placeholder={settings.allowUrban ? "输入城市／站名检索候选" : "例如 深圳北"} value={settings.from} onChange={e => update({ from: e.target.value })}/></label>
         <label>到达站<input list="rail-transfer-destinations" required placeholder={settings.allowUrban ? "输入城市／站名检索候选" : "例如 西平西 / 树木岭"} value={settings.to} onChange={e => update({ to: e.target.value })}/></label>
         <label>最早出发<input type="time" required value={settings.earliest} onChange={e => update({ earliest: e.target.value })}/></label>
@@ -88,6 +105,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
         <label>单次最长等待（分钟）<input type="number" min={settings.minimum} max={1440} required value={settings.maximumWait} onChange={e => update({ maximumWait: Number(e.target.value) })}/></label>
         <label>站外预留（分钟）<input type="number" min={45} max={360} required value={settings.cityMinutes} onChange={e => update({ cityMinutes: Number(e.target.value) })}/></label>
       </div>
+      <p className="rail-transfer-help" role={dateNotice ? "status" : undefined}>{dateNotice || `余票查询范围：${dateRange.min} 至 ${dateRange.max}（含当天 15 天）；已过期的保存日期会自动更新为今天。`}</p>
       <datalist id="rail-transfer-origins">{suggestions(settings.from).map(s => <option key={s.code} value={s.name}>{s.city || s.pinyin}</option>)}</datalist>
       <datalist id="rail-transfer-destinations">{suggestions(settings.to).map(s => <option key={s.code} value={s.name}>{s.city || s.pinyin}</option>)}</datalist>
       <datalist id="rail-transfer-via1">{suggestions(settings.via, stations).map(s => <option key={s.code} value={s.name}>{s.city || s.pinyin}</option>)}</datalist>

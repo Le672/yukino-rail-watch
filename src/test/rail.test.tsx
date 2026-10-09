@@ -1,9 +1,10 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Rail from "../Rail";
 import { parseStations, parseTrains, seatsFromFields } from "../../functions/api/rail";
 
-afterEach(() => { cleanup(); localStorage.clear(); vi.unstubAllGlobals(); });
+beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-09-27T08:00:00+08:00")); });
+afterEach(() => { cleanup(); localStorage.clear(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("12306 result handling", () => {
   it("extracts station names and codes from the official station list format", () => {

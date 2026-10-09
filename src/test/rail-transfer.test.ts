@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { intercityFares, parseEncodedFares, parsePriceResponse } from "../lib/rail-fares";
 import { DEFAULT_TRAIN_FILTERS, seatScore, sortTrains, trainPrice } from "../lib/rail-tickets";
 import type { Train, Station } from "../lib/rail-tickets";
@@ -13,6 +13,7 @@ function train(code: string, from: Station, to: Station, departure: string, arri
     seats: [{ label: "二等座", value: count, available: count === "有" || Number(count) > 0, price }] };
 }
 const block = (code: string, price: number, flag = "0") => code + String(Math.round(price * 10)).padStart(5, "0") + flag + "001";
+beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-04T08:00:00+08:00")); });
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); localStorage.clear(); });
 describe("official fares and journey ordering", () => {
   it("decodes official fare tenths and the standing-seat marker, rejecting malformed or zero prices", () => {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const date = "2026-10-04";
 const stationText = "@sz|深圳|SZQ|shenzhen|sz|1|||@yy|岳阳|YYQ|yueyang|yy|2|||" + Array.from({ length: 110 }, (_, i) => `@${i}|站${i}|Z${String.fromCharCode(65 + Math.floor(i / 26))}${String.fromCharCode(65 + i % 26)}|station|s|2|||`).join("");
 const names = [{ station_train_code: "C206(深圳-岳阳)", train_no: "650000C20603" }, { station_train_code: "C206(深圳-岳阳)", train_no: "650000C20603" }];
@@ -24,7 +24,8 @@ function upstream(list = names, keyword: unknown = { status: true, data: [] }) {
     throw new Error(`Unexpected official request ${url.pathname}`);
   }); vi.stubGlobal("fetch", fetchMock); return fetchMock;
 }
-afterEach(() => vi.unstubAllGlobals());
+beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-04T08:00:00+08:00")); });
+afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 describe("official service list and model gateway", () => {
   it("finds a train omitted by keyword search using only the official date list", async () => {
     vi.resetModules(); const fetchMock = upstream();
