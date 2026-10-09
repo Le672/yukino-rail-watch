@@ -17,7 +17,7 @@ const REQUEST_HEADERS = {
 };
 
 let stationCache: { at: number; stations: Station[] } | undefined;
-let sessionCache: { at: number; cookie: string } | undefined;
+let sessionCache: { at: number; cookie: string; queryPath: string } | undefined;
 let sessionPending: Promise<string> | undefined;
 let nextTicketRequestAt = 0;
 let nextEquipmentRequestAt = 0;
@@ -137,7 +137,10 @@ async function getSessionCookie(): Promise<string> {
     }
     if (cookies.size === 0) throw new Error("12306 未返回查询会话");
     const cookie = [...cookies].map(([name, value]) => `${name}=${value}`).join("; ");
-    sessionCache = { at: Date.now(), cookie };
+    const html = await response.text();
+    const queryPath = html.match(/CLeftTicketUrl\s*=\s*["']([^"']+)["']/)?.[1] || "leftTicket/queryA";
+    if (!/^leftTicket\/query[A-Z]?$/.test(queryPath)) throw new Error("12306 返回了未知查询地址");
+    sessionCache = { at: Date.now(), cookie, queryPath };
     return cookie;
   })();
   sessionPending = request;
@@ -305,15 +308,19 @@ async function fetchTicketPayload(url: URL, cookie: string) {
     headers: { ...REQUEST_HEADERS, Cookie: cookie },
     signal: AbortSignal.timeout(15000),
   });
-  if (!response.ok) throw new Error(`12306 余票接口返回 ${response.status}`);
+  if (!response.ok) {
+    if (sessionCache?.cookie === cookie) sessionCache = undefined;
+    throw new Error(`12306 余票接口返回 ${response.status}`);
+  }
   if (!response.headers.get("content-type")?.includes("json")) {
-    sessionCache = undefined;
+    if (sessionCache?.cookie === cookie) sessionCache = undefined;
     throw new Error("12306 暂时未返回余票数据，请稍后重试或前往官网查询");
   }
   return await response.json() as {
     httpstatus?: number;
+    c_url?: string;
     data?: { result?: string[]; map?: Record<string, string>; c_url?: string };
-    messages?: string[];
+    messages?: string[] | string;
   };
 }
 
@@ -335,13 +342,23 @@ async function getTicketData(date: string, fromCode: string, toCode: string): Pr
     query.searchParams.set("leftTicketDTO.to_station", toCode);
     query.searchParams.set("purpose_codes", "ADULT");
     const cookie = await getSessionCookie();
+    query.pathname = `/otn/${sessionCache?.queryPath || "leftTicket/queryA"}`;
     let payload = await fetchTicketPayload(query, cookie);
-    if (payload.data?.c_url && !payload.data.result) {
-      if (!/^leftTicket\/query[A-Z]?$/.test(payload.data.c_url)) throw new Error("12306 返回了未知查询地址");
-      query.pathname = `/otn/${payload.data.c_url}`;
+    const visited = new Set([query.pathname]);
+    for (let redirects = 0; !Array.isArray(payload.data?.result); redirects++) {
+      const target = payload.c_url || payload.data?.c_url;
+      if (!target) break;
+      if (typeof target !== "string" || !/^leftTicket\/query[A-Z]?$/.test(target) || redirects >= 2 || visited.has(`/otn/${target}`)) throw new Error("12306 返回了未知或循环的查询地址");
+      query.pathname = `/otn/${target}`;
+      visited.add(query.pathname);
       payload = await fetchTicketPayload(query, cookie);
     }
-    if (!Array.isArray(payload.data?.result)) throw new Error(payload.messages?.join("；") || "12306 返回了无法识别的余票数据");
+    if (!Array.isArray(payload.data?.result)) {
+      if (sessionCache?.cookie === cookie) sessionCache = undefined;
+      const message = Array.isArray(payload.messages) ? payload.messages.join("；") : typeof payload.messages === "string" ? payload.messages : "";
+      throw new Error(message || "12306 返回了无法识别的余票数据");
+    }
+    if (sessionCache?.cookie === cookie) sessionCache.queryPath = query.pathname.slice("/otn/".length);
     // queryA may return neighbouring city stations too. Never substitute their departure station.
     const data = { result: payload.data.result.filter(row => {
       const fields = row.split("|"); return fields[6] === fromCode && fields[7] === toCode;
