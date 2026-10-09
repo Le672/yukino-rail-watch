@@ -40,7 +40,7 @@ describe("transfer gateway recovery", () => {
     expect(onRetry).toHaveBeenCalledWith({ attempt: 1, delayMs: seconds * 1000, status: 502 });
     await vi.advanceTimersByTimeAsync(1); await expect(query).resolves.toMatchObject({ source: "12306" });
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[0][1]).toMatchObject({ headers: { Accept: "application/json" }, cache: "no-store" });
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: "POST", headers: { Accept: "application/json" }, cache: "no-store" });
   });
   it("keeps persistent failures after a bounded number of attempts", async () => {
     const fetchMock = vi.fn(() => Response.json({ error: "12306 暂不可用" }, { status: 503 }));

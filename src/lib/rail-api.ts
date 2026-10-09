@@ -45,7 +45,7 @@ export async function requestRailData<T>(params: URLSearchParams, signal?: Abort
   for (let attempt = 0; ; attempt++) {
     signal?.throwIfAborted();
     try {
-      const response = await fetch(railApiUrl(params), { headers: { Accept: "application/json" }, cache: "no-store", signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000) });
+      const response = await fetch(railApiUrl(params), { method: "POST", headers: { Accept: "application/json" }, cache: "no-store", signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20000)]) : AbortSignal.timeout(20000) });
       return await readRailResponse<T>(response);
     } catch (error) {
       signal?.throwIfAborted();

@@ -490,6 +490,16 @@ export async function onRequestGet(context: { request: Request }) {
   }
 }
 
+/** Public, read-only transfer queries use an uncacheable transport at the edge. */
+export async function onRequestPost(context: { request: Request }) {
+  const mode = new URL(context.request.url).searchParams.get("mode") || "query";
+  if (!["query", "fare", "hubs"].includes(mode)) return json({ error: "此查询方式不支持 POST" }, 405);
+  const response = await onRequestGet(context);
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "no-store");
+  return new Response(response.body, { status: response.status, headers });
+}
+
 export function railQueryError(error: unknown) {
   const name = error && typeof error === "object" && "name" in error ? error.name : "";
   if (name === "SyntaxError") return "12306 暂未返回可用资料，请稍后重试或前往官网查询";

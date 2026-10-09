@@ -23,6 +23,19 @@ function mock(encoded = "", additionalRows: string[] = []) {
 beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-04T08:00:00+08:00")); });
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 describe("official ticket price and transfer node gateway", () => {
+  it("returns the same official trains, fares and hubs through uncacheable read-only POST", async () => {
+    vi.resetModules(); const fetchMock = mock("O032050001M051000002");
+    const { onRequestGet, onRequestPost } = await import("../../functions/api/rail");
+    for (const mode of ["query", "fare", "hubs"]) {
+      const url = `https://cr.yukino.bond/api/rail?mode=${mode}&date=${date}&from=IZQ&to=CWQ&train=G101`;
+      const get = await onRequestGet({ request: new Request(url) });
+      const post = await onRequestPost({ request: new Request(url, { method: "POST" }) });
+      expect(post.status).toBe(200); expect(post.headers.get("cache-control")).toBe("no-store");
+      expect(post.headers.get("access-control-allow-origin")).toBe("*");
+      expect(await post.json()).toEqual(await get.json());
+    }
+    expect(fetchMock.mock.calls.every(([input]) => new URL(String(input)).hostname.endsWith(".12306.cn"))).toBe(true);
+  });
   it("shares initialization across concurrent distinct ticket routes", async () => {
     vi.resetModules(); const fetchMock = mock();
     const { onRequestGet } = await import("../../functions/api/rail");

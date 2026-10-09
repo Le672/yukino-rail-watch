@@ -33,6 +33,18 @@ describe("ticket date window and expired transfer requests", () => {
     expect(fetchMock).not.toHaveBeenCalled(); expect(progress).not.toHaveBeenCalled();
   });
 
+  it("validates read-only POST queries before upstream calls and never caches their errors", async () => {
+    vi.resetModules(); const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);
+    const { onRequestPost } = await import("../../functions/api/rail");
+    for (const mode of ["query", "fare", "hubs"]) {
+      const response = await onRequestPost({ request: new Request(`https://cr.yukino.bond/api/rail?mode=${mode}&date=2026-10-07`, { method: "POST" }) });
+      expect(response.status).toBe(400); expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(await response.json()).toMatchObject({ code: "INVALID_TICKET_DATE" });
+    }
+    const unsupported = await onRequestPost({ request: new Request("https://cr.yukino.bond/api/rail?mode=equipment", { method: "POST" }) });
+    expect(unsupported.status).toBe(405); expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("skips next-day legs outside the sale window without claiming an upstream failure", async () => {
     const stations: Station[] = ["甲", "乙", "丙"].map((name, index) => ({ name, code: ["AAA", "BBB", "CCC"][index], pinyin: "" }));
     const first: Train = { code: "G1", trainNo: "TRAIN1", from: "甲", to: "乙", fromCode: "AAA", toCode: "BBB", departure: "23:30", arrival: "00:30", duration: "01:00", saleStatus: "Y", trainsetModel: null, seats: [] };
