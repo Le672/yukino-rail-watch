@@ -25,6 +25,30 @@ it("retains a saved future travel date", () => {
   expect(screen.getByLabelText("首程乘车日期")).toHaveValue("2026-10-08");
   expect(screen.queryByText(/已更新为今天/)).not.toBeInTheDocument();
 });
+it("shows the requested walking connection before slow city alternatives and retains it on cancellation", async () => {
+  vi.setSystemTime(new Date("2026-10-05T08:00:00+08:00"));
+  const extra: Station = { name: "广州东", code: "GGQ", pinyin: "", city: "广州" };
+  const fetchMock = vi.fn(async (input: string | URL, options?: RequestInit) => {
+    const url = new URL(String(input), "https://cr.yukino.bond"), key = `${url.searchParams.get("from")}/${url.searchParams.get("to")}`;
+    if (url.searchParams.get("to") === "GGQ") return await new Promise<Response>((_resolve, reject) => {
+      options?.signal?.addEventListener("abort", () => reject(options.signal!.reason), { once: true });
+    });
+    const trains = url.searchParams.get("date") !== "2026-10-05" ? [] : key === "IOQ/IZQ" ? [make("G91", "IOQ", "IZQ", "09:00", "10:00", "01:00", 80, "CR400AF")] : key === "PYA/EGQ" ? [make("C92", "PYA", "EGQ", "10:30", "11:00", "00:30", 30, "CRH6A")] : [];
+    return Response.json({ source: "12306", trains: trains.map(t => ({ ...t, date: "2026-10-05", originDate: "2026-10-05" })), checkedAt: new Date().toISOString() });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  const { container } = render(<RailTransfer stations={[...stations, extra]} onPosition={vi.fn()}/>);
+  for (const [label, value] of [["出发站", "深圳北"], ["到达站", "西平西"], ["中转站 1（可选）", "广州南"]]) fireEvent.change(screen.getByLabelText(label), { target: { value } });
+  fireEvent.click(screen.getByRole("button", { name: "查询中转" }));
+  await screen.findByText("已确认的方案先行展示，其余区间及车型票价资料仍在查询中。");
+  expect(container.querySelectorAll(".rail-trip")).toHaveLength(1);
+  expect(screen.getByRole("button", { name: "取消查询" })).toBeVisible();
+  const calls = fetchMock.mock.calls.map(([input]) => new URL(String(input), "https://cr.yukino.bond").searchParams);
+  expect(calls.findIndex(query => query.get("from") === "PYA" && query.get("to") === "EGQ")).toBeLessThan(calls.findIndex(query => query.get("to") === "GGQ"));
+  fireEvent.click(screen.getByRole("button", { name: "取消查询" }));
+  expect(screen.getByText("查询已停止，以下保留已确认的部分方案；其余区间与缺失资料尚未完成。")).toBeVisible();
+  expect(screen.getByText("G91")).toBeVisible(); expect(screen.getByText("C92")).toBeVisible();
+});
 it("shows each leg and physical walk transfer, sorts the summed price and filters whole-trip availability and exact models", async () => {
   localStorage.clear(); const onPosition = vi.fn();
   vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {

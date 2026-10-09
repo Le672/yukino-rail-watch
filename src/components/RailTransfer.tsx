@@ -63,7 +63,9 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
     controller.current?.abort(); const current = ++generation.current, abort = new AbortController(); controller.current = abort;
     setChecking(true); setError(null); setResult(null); setDetails(null); setPage(1);
     try {
-      const next = await searchTransfers(query, stations, abort.signal, value => { if (current === generation.current) setProgress(value); });
+      const next = await searchTransfers(query, stations, abort.signal, value => { if (current === generation.current) setProgress(value); }, value => {
+        if (current === generation.current) setResult(value);
+      });
       if (current !== generation.current) return;
       setResult(next); setChecking(false); setProgress(null);
       const unique = [...new Map(next.trips.flatMap(trip => trip.legs).map(l => [trainIdentity(l), l])).values()];
@@ -120,6 +122,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
     {error && <div className="rail-error" role="alert">{error}</div>}
     {result && <div className="rail-transfer-results">
       <div className="rail-transfer-results-heading"><h3>{result.from} → {result.to}</h3><span>{result.date} · {result.trips.length} 个方案</span></div>
+      {result.incomplete && <p className="rail-transfer-loading" role="status">{checking ? "已确认的方案先行展示，其余区间及车型票价资料仍在查询中。" : "查询已停止，以下保留已确认的部分方案；其余区间与缺失资料尚未完成。"}</p>}
       {!settings.via && result.hubs.length < result.candidateCount && result.hubLimit < 512 && <div className="rail-transfer-actions"><button type="button" onClick={() => { const next = { ...settings, hubLimit: Math.min(512, result.hubLimit * 2) }; setSettings(next); void run(next); }}>扩大范围重新查询</button><span>本次选取 {result.hubs.length} / {result.candidateCount} 个全国候选站；扩大范围需更多查询时间。</span></div>}
       <div className="rail-transfer-seat-filter"><label>票价与余票席别<select value={seat} onChange={e => { setSeat(e.target.value); setPage(1); }}>{SEAT_OPTIONS.map(s => <option key={s}>{s}</option>)}</select></label><label className="rail-control-checkbox"><input type="checkbox" checked={everyModel} onChange={e => { setEveryModel(e.target.checked); setPage(1); }}/>车型筛选要求每程均匹配</label>{result.urban && <label>方案优先顺序<select value={railFirst ? "railway" : "sort"} onChange={e => { setRailFirst(e.target.value === "railway"); setPage(1); }}><option value="railway">铁路方案优先，轨道作为备选</option><option value="sort">按所选排序统一比较</option></select></label>}</div>
       <RailResultControls filters={currentFilters} onChange={filter} trains={trains} count={sorted.length} multi railSegmentsOnly={!!result.urban}/>
