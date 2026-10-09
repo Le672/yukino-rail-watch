@@ -37,6 +37,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
   const [progress, setProgress] = useState<TransferProgress | null>(null), [details, setDetails] = useState<{ done: number; total: number } | null>(null);
   const [urbanStations, setUrbanStations] = useState<Station[]>([]), [urbanLoading, setUrbanLoading] = useState(false), [urbanError, setUrbanError] = useState<string | null>(null);
   const [urbanStats, setUrbanStats] = useState<{ lines: number; sourceDate: string } | null>(null), [railFirst, setRailFirst] = useState(true);
+  const [showAlternatives, setShowAlternatives] = useState(false), [journeyKind, setJourneyKind] = useState("all");
   const controller = useRef<AbortController | null>(null), generation = useRef(0);
   useEffect(() => { try { localStorage.setItem(STORAGE, JSON.stringify(settings)); } catch { /* Querying remains available without browser storage. */ } }, [settings]);
   useEffect(() => {
@@ -57,33 +58,36 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
   const update = (patch: Partial<TransferSettings>) => {
     controller.current?.abort(); generation.current++;
     if (patch.date !== undefined) setDateNotice(null);
-    setSettings(current => ({ ...current, ...patch })); setResult(null); setChecking(false); setProgress(null); setDetails(null); setError(null); setPage(1);
+    setSettings(current => ({ ...current, ...patch })); setResult(null); setChecking(false); setProgress(null); setDetails(null); setError(null); setPage(1); setShowAlternatives(false); setJourneyKind("all");
   };
   const run = async (query = settings) => {
     controller.current?.abort(); const current = ++generation.current, abort = new AbortController(); controller.current = abort;
-    setChecking(true); setError(null); setResult(null); setDetails(null); setPage(1);
+    setChecking(true); setError(null); setResult(null); setDetails(null); setPage(1); setShowAlternatives(false); setJourneyKind("all");
     try {
       const next = await searchTransfers(query, stations, abort.signal, value => { if (current === generation.current) setProgress(value); }, value => {
         if (current === generation.current) setResult(value);
       });
       if (current !== generation.current) return;
       setResult(next); setChecking(false); setProgress(null);
-      const unique = [...new Map(next.trips.flatMap(trip => trip.legs).map(l => [trainIdentity(l), l])).values()];
+      const unique = [...new Map([...next.trips, ...next.alternatives || []].flatMap(trip => trip.legs).map(l => [trainIdentity(l), l])).values()];
       if (!unique.length) return;
       setDetails({ done: 0, total: unique.length });
       await enrichTrainList(unique, query.date, (updates, done) => {
         const byId = new Map(updates.map(t => [trainIdentity(t), t]));
         if (current !== generation.current) return;
-        setResult(previous => previous ? { ...previous, trips: previous.trips.map(trip => ({ ...trip, legs: trip.legs.map(l => mergeTrainDetails(l, byId.get(trainIdentity(l)))) })) } : previous);
+        setResult(previous => previous ? { ...previous, trips: previous.trips.map(trip => ({ ...trip, legs: trip.legs.map(l => mergeTrainDetails(l, byId.get(trainIdentity(l)))) })),
+          alternatives: previous.alternatives?.map(trip => ({ ...trip, legs: trip.legs.map(l => mergeTrainDetails(l, byId.get(trainIdentity(l)))) })) } : previous);
         setDetails({ done, total: unique.length });
       }, abort.signal);
     } catch (cause) { if (current === generation.current && !abort.signal.aborted) setError(cause instanceof Error ? cause.message : String(cause)); }
     finally { if (current === generation.current) { setChecking(false); setProgress(null); } }
   };
   const currentFilters = useMemo(() => ({ ...filters, seat }), [filters, seat]);
-  const sorted = useMemo(() => sortTrips(result?.trips || [], currentFilters, everyModel, railFirst), [result, currentFilters, everyModel, railFirst]);
+  const selectedTrips = showAlternatives ? result?.alternatives || [] : result?.trips || [];
+  const urbanCount = selectedTrips.filter(hasUrban).length;
+  const sorted = useMemo(() => sortTrips((showAlternatives ? result?.alternatives || [] : result?.trips || []).filter(trip => journeyKind === "all" || (journeyKind === "urban" ? hasUrban(trip) : !hasUrban(trip))), currentFilters, everyModel, railFirst), [result, showAlternatives, journeyKind, currentFilters, everyModel, railFirst]);
   const pages = Math.max(1, Math.ceil(sorted.length / 20)), currentPage = Math.min(page, pages), shown = sorted.slice((currentPage - 1) * 20, currentPage * 20);
-  const trains = useMemo(() => result?.trips.flatMap(t => t.legs) || [], [result]);
+  const trains = useMemo(() => [...result?.trips || [], ...result?.alternatives || []].flatMap(t => t.legs), [result]);
   const filter = (value: TrainFilters) => { setFilters(value); setPage(1); };
   const cityCount = new Set(stations.flatMap(s => officialCityKey(s) ? [officialCityKey(s)!] : [])).size;
   const endpointStations = useMemo(() => [...stations, ...(settings.allowUrban ? urbanStations : [])], [stations, settings.allowUrban, urbanStations]);
@@ -115,22 +119,24 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
       <div className="rail-transfer-options"><label><input type="checkbox" checked={settings.stationGroupEndpoints} onChange={e => update({ stationGroupEndpoints: e.target.checked })}/>起终点也纳入相邻站群</label><label><input type="checkbox" checked={settings.allowCity} onChange={e => update({ allowCity: e.target.checked })}/>允许全国同城异站换乘（需站外交通）</label></div>
       <div className="rail-transfer-options rail-urban-option"><label><input type="checkbox" checked={!!settings.allowUrban} onChange={e => update({ allowUrban: e.target.checked })}/>城市轨道交通（可选，默认关闭）</label><span>地铁、轻轨、有轨电车、单轨、磁浮、市域、APM 与轨道缆车，作为备选接驳</span></div>
       {settings.allowUrban && <div className="rail-urban-status" role="status">{urbanLoading ? "正在加载全国轨道线路与站点…" : urbanError ? urbanError : urbanStats ? <>已载入 {urbanStats.lines} 条方向／支线、{urbanStations.length} 个轨道站 · 数据快照 {urbanStats.sourceDate.slice(0, 10)}。输入城市或站名检索，展示前 80 个匹配候选；重复名称需选择完整站名。<br/>网络覆盖全国已收录线路，开放数据可能漏站或缺线；未录入的线路不会伪造接驳。班次、运营日期与票价缺失时标为待确认。</> : "轨道网络待加载"}</div>}
-      <p className="rail-transfer-help">已载入 {stations.length} 个官方车站、{cityCount} 个城市标识，全国车站均可作为中转候选。北京、上海、成渝、长三角、东北、西北、西南及各地城际／市域车次以当日 12306 返回为准；选择中转站后也会检查同城异站，可关闭站外换乘。</p>
-      <p className="rail-transfer-help">广州南／番禺等七组已核对的相邻站群按方向至少预留 20–40 分钟；其他同城异站按站外交通预留，不能视为同站通道。含未核实城区范围的站点至少预留 180 分钟，地面路线需自行确认；站外交通费用不计入铁路总票价。</p>
+      <p className="rail-transfer-help">已载入 {stations.length} 个官方车站、{cityCount} 个城市标识，全国车站均可作为中转候选。指定中转站的方案必须经过该站或已核实的相邻站群；同城其他车站不会替代指定站。开启城市轨道后，两中转站之间可乘地铁，不要求中间再坐一趟铁路。</p>
+      <p className="rail-transfer-help">广州南／番禺、惠州北高铁／城际等已核对的相邻站群按方向至少预留 20–40 分钟，保留各自 12306 代码。其他同城异站按站外交通预留，不能视为同站通道；含未核实城区范围的站点至少预留 180 分钟。轨道耗时包含步行、候车、换线及衔接铁路进站预留。</p>
       <div className="rail-transfer-actions"><button className="rail-transfer-primary" disabled={checking || !stations.length || !!settings.allowUrban && (urbanLoading || !!urbanError)} type="submit"><ArrowRightLeft size={16}/>{checking ? "正在规划" : result ? "重新查询 / 刷新余票" : "查询中转"}</button>{checking && <button type="button" onClick={() => { controller.current?.abort(); generation.current++; setChecking(false); setProgress(null); }}><X size={15}/>取消查询</button>}<span>{!stations.length ? "正在加载官方车站表…" : progress ? `${progress.queryCount} 个区间 · ${progress.text}` : "铁路车次、时刻、余票及票价来自 12306"}</span></div>
     </form>
     {error && <div className="rail-error" role="alert">{error}</div>}
     {result && <div className="rail-transfer-results">
       <div className="rail-transfer-results-heading"><h3>{result.from} → {result.to}</h3><span>{result.date} · {result.trips.length} 个方案</span></div>
+      {!!result.alternatives?.length && <div className="rail-transfer-alternatives"><div className="rail-transfer-actions" role="group" aria-label="中转条件方案"><button type="button" aria-pressed={!showAlternatives} onClick={() => { setShowAlternatives(false); setJourneyKind("all"); setPage(1); }}>指定中转站方案（{result.trips.length}）</button><button type="button" aria-pressed={showAlternatives} onClick={() => { setShowAlternatives(true); setJourneyKind("all"); setPage(1); }}>减少中转备选（{result.alternatives.length}）</button></div><p className="rail-transfer-help">{showAlternatives ? `以下备选经过 ${settings.via} 或相邻站群，不限定第二中转站 ${result.omittedVia}，可直接衔接城际等后续铁路。` : `另找到 ${result.alternatives.length} 个经过第一中转站或相邻站群、无需经过 ${result.omittedVia} 的备选，可切换查看。`}</p></div>}
       {result.incomplete && <p className="rail-transfer-loading" role="status">{checking ? "已确认的方案先行展示，其余区间及车型票价资料仍在查询中。" : "查询已停止，以下保留已确认的部分方案；其余区间与缺失资料尚未完成。"}</p>}
       {!settings.via && result.hubs.length < result.candidateCount && result.hubLimit < 512 && <div className="rail-transfer-actions"><button type="button" onClick={() => { const next = { ...settings, hubLimit: Math.min(512, result.hubLimit * 2) }; setSettings(next); void run(next); }}>扩大范围重新查询</button><span>本次选取 {result.hubs.length} / {result.candidateCount} 个全国候选站；扩大范围需更多查询时间。</span></div>}
       <div className="rail-transfer-seat-filter"><label>票价与余票席别<select value={seat} onChange={e => { setSeat(e.target.value); setPage(1); }}>{SEAT_OPTIONS.map(s => <option key={s}>{s}</option>)}</select></label><label className="rail-control-checkbox"><input type="checkbox" checked={everyModel} onChange={e => { setEveryModel(e.target.checked); setPage(1); }}/>车型筛选要求每程均匹配</label>{result.urban && <label>方案优先顺序<select value={railFirst ? "railway" : "sort"} onChange={e => { setRailFirst(e.target.value === "railway"); setPage(1); }}><option value="railway">铁路方案优先，轨道作为备选</option><option value="sort">按所选排序统一比较</option></select></label>}</div>
       <RailResultControls filters={currentFilters} onChange={filter} trains={trains} count={sorted.length} multi railSegmentsOnly={!!result.urban}/>
+      {result.urban && <div className="rail-transfer-actions" role="group" aria-label="行程类型"><button type="button" aria-pressed={journeyKind === "all"} onClick={() => { setJourneyKind("all"); setPage(1); }}>全部（{selectedTrips.length}）</button><button type="button" aria-pressed={journeyKind === "railway"} onClick={() => { setJourneyKind("railway"); setPage(1); }}>铁路方案（{selectedTrips.length - urbanCount}）</button><button type="button" aria-pressed={journeyKind === "urban"} onClick={() => { setJourneyKind("urban"); setPage(1); }}>含地铁／城市轨道（{urbanCount}）</button></div>}
       <p className="rail-transfer-help">总耗时包含乘车、等待与站群步行；总票价按所选席别逐程相加，“任意席别”取各程最低适用票价。余票按最少的一程排序，“有”表示未提供精确数量。未知价格排在已知总价之后。</p>
       {result.urban && <p className="rail-transfer-help">默认先显示铁路方案，各组内按所选条件排序；可切换为统一比较。城市轨道票价不明时，总价保持未知并单列铁路小计；余票和车型筛选只核验铁路程，轨道段没有实时余票，首末班与预估时间需另行确认。</p>}
       {details && details.done < details.total && <p className="rail-transfer-loading" role="status"><RefreshCw size={13} className="rail-spin"/> 正在补充车型及缺失票价：{details.done} / {details.total}；筛选结果会随资料更新。</p>}
       {result.warnings.length > 0 && <details className="rail-transfer-warnings" open={!result.trips.length}><summary>查询范围与未完成区间（{result.warnings.length}）</summary><ul>{result.warnings.map(w => <li key={w}>{w}</li>)}</ul></details>}
-      {!shown.length ? <div className="rail-transfer-empty">{result.trips.length ? "没有符合当前车型或余票筛选的方案。" : result.serviceUnavailable ? "12306 暂时无法完成查询，请稍后重试；不能据此判断没有可行中转。" : "当前查询范围内暂无符合预留时间的方案，可调整时间或指定中转站。"}</div> : shown.map(trip => <article className="rail-trip" key={trip.id}>
+      {!shown.length ? <div className="rail-transfer-empty">{selectedTrips.length ? "没有符合当前行程类型、车型或余票筛选的方案。" : result.serviceUnavailable ? "12306 暂时无法完成查询，请稍后重试；不能据此判断没有可行中转。" : "当前查询范围内暂无符合预留时间的方案，可调整时间或指定中转站。"}</div> : shown.map(trip => <article className="rail-trip" key={trip.id}>
         <header className="rail-trip-header"><div><strong>{hasUrban(trip) ? "预估行程 · " : ""}{chinaDateTime(trip.departureAt).replace("T", " ")} → {chinaDateTime(trip.arrivalAt).replace("T", " ")}</strong><span>{durationLabel(trip.duration)} · {trip.urbanOnly ? "纯轨道备选" : trip.legs.length === 1 ? "1 程铁路" : `${trip.legs.length - 1} 次铁路中转`}{hasUrban(trip) ? " · 含城市轨道（运营待确认）" : trip.connections.some(c => c.kind === "city") ? " · 含站外换乘" : ""}</span></div><div className="rail-trip-total"><strong>{money(tripFare(trip, seat))}</strong>{hasUrban(trip) && trip.legs.length > 0 && <span>铁路小计 {money(tripRailFare(trip, seat))} · 轨道费用未计</span>}<span>{!trip.legs.length ? "轨道班次及余票暂无实时数据" : tripSeats(trip, seat) > 0 ? hasUrban(trip) ? "铁路段有关注席别余票 · 轨道段待确认" : "全程有关注席别余票" : "部分铁路车次暂无关注席别余票"}</span></div></header>
         {trip.urbanOnly && <UrbanRailRoute route={trip.urbanOnly} title="城市轨道行程（备选）"/>}
         {trip.access && <div className="rail-trip-connection"><b>{trip.access.urban ? "出发轨道接驳" : "出发站群"}：{trip.access.from.name} → {trip.access.to.name}</b><span>至少预留 {trip.access.minimum} 分钟（含进站）</span>{trip.access.urban ? <UrbanRailRoute route={trip.access.urban}/> : <small>{trip.access.note}</small>}</div>}

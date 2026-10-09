@@ -8,10 +8,11 @@ import { compareNullable, minutes, seatScore, trainIdentity, trainPrice } from "
 import type { Station, Train, TrainFilters } from "./rail-tickets";
 import { isUrbanStation, loadUrbanRail } from "./urban-rail";
 import type { UrbanRailPlanner, UrbanRoute } from "./urban-rail";
+import { officialStationCatalog } from "./rail-official-stations";
 export type Leg = Train & { date: string; departureAt: number; arrivalAt: number; fromCode: string; toCode: string };
 export type Trip = { id: string; legs: Leg[]; connections: TransferLink[]; access?: TransferLink; egress?: TransferLink; urbanOnly?: UrbanRoute; departureAt: number; arrivalAt: number; duration: number };
 export type TransferSettings = { date: string; from: string; to: string; via: string; via2: string; maxChanges: 1 | 2; minimum: number; maximumWait: number; cityMinutes: number; allowCity: boolean; stationGroupEndpoints: boolean; earliest: string; hubLimit?: number; allowUrban?: boolean };
-export type TransferResult = { date: string; from: string; to: string; checkedAt: string; trips: Trip[]; hubs: Station[]; warnings: string[]; queryCount: number; candidateCount: number; hubLimit: number; serviceUnavailable?: boolean; incomplete?: boolean; urban?: { lines: number; stops: number; sourceDate: string } };
+export type TransferResult = { date: string; from: string; to: string; checkedAt: string; trips: Trip[]; alternatives?: Trip[]; omittedVia?: string; hubs: Station[]; warnings: string[]; queryCount: number; candidateCount: number; hubLimit: number; serviceUnavailable?: boolean; incomplete?: boolean; urban?: { lines: number; stops: number; sourceDate: string } };
 export type TransferProgress = { queryCount: number; text: string };
 export const DEFAULT_TRANSFER: TransferSettings = { date: chinaDateTime().slice(0, 10), from: "", to: "", via: "", via2: "", maxChanges: 1, minimum: 20, maximumWait: 240, cityMinutes: 90, allowCity: true, stationGroupEndpoints: true, earliest: "00:00", hubLimit: 64, allowUrban: false };
 const routeCache = new Map<string, { at: number; trains: Train[]; checkedAt: string }>();
@@ -73,6 +74,7 @@ async function json<T>(params: URLSearchParams, signal?: AbortSignal, onRetry?: 
   return data as T;
 }
 export async function searchTransfers(settings: TransferSettings, stations: Station[], signal: AbortSignal, onProgress: (progress: TransferProgress) => void, onPartialResult?: (result: TransferResult) => void): Promise<TransferResult> {
+  stations = officialStationCatalog(stations);
   const dateError = ticketDateError(settings.date);
   if (dateError) throw new Error(dateError);
   let urban: UrbanRailPlanner | undefined;
@@ -85,7 +87,8 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   const manual = [settings.via, settings.via2].filter(Boolean).map(value => findStation(stations, value));
   if (manual.some(s => !s) || (settings.via2 && !settings.via) || (settings.via2 && settings.maxChanges !== 2)) throw new Error("请使用官方站名填写中转站；第二中转站需要允许两次中转。");
   if (manual.some(s => s!.code === from.code || s!.code === to.code) || manual.length === 2 && manual[0]!.code === manual[1]!.code) throw new Error("中转站不能与起终点或另一中转站相同。");
-  const warnings = new Set<string>(), local = new Map<string, Promise<Leg[]>>(), trips = new Map<string, Trip>();
+  const warnings = new Set<string>(), local = new Map<string, Promise<Leg[]>>(), trips = new Map<string, Trip>(), alternatives = new Map<string, Trip>();
+  const required = manual.map(s => new Set(stationVariants(s!, stations).map(s => s.code)));
   const urbanLink = (a: Station, b: Station, enteringRail = true): TransferLink | null => {
     if (!urban || a.code === b.code) return null;
     const route = urban.route(a, b, signal);
@@ -117,10 +120,11 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   let queryCount = 0, active = 0, consecutiveFailures = 0, serviceUnavailable = false;
   let lastPartialAt = -Infinity;
   const snapshot = (incomplete = false): TransferResult => ({ date: settings.date, from: from.name, to: to.name, checkedAt: new Date().toISOString(),
-    trips: [...trips.values()], hubs, warnings: [...warnings], queryCount, candidateCount, hubLimit, serviceUnavailable, incomplete,
+    trips: [...trips.values()], alternatives: manual[1] ? [...alternatives.values()].filter(t => !trips.has(t.id)) : undefined, omittedVia: manual[1]?.name,
+    hubs, warnings: [...warnings], queryCount, candidateCount, hubLimit, serviceUnavailable, incomplete,
     urban: urban ? { lines: urban.network.lines.length, stops: urban.stations().length, sourceDate: urban.network.sourceDate } : undefined });
   const publishPartial = () => {
-    if (!onPartialResult || !trips.size || Date.now() - lastPartialAt < 750) return;
+    if (!onPartialResult || !trips.size && !alternatives.size || Date.now() - lastPartialAt < 750) return;
     lastPartialAt = Date.now(); onPartialResult(snapshot(true));
   };
   const queue: (() => void)[] = [];
@@ -185,12 +189,13 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   const origins = [...new Map(originRail.map(s => [s.code, s])).values()], destinations = [...new Map(destinationRail.map(s => [s.code, s])).values()];
   const station = (code: string) => stations.find(s => s.code === code)!;
   const firstLegs = new Map<string, Leg[]>();
-  const add = (legs: Leg[], links: TransferLink[]) => {
+  const add = (legs: Leg[], links: TransferLink[], alternative = false) => {
     const access = legs[0].fromCode !== from.code ? accessLinks.get(legs[0].fromCode) || transferLink(from, station(legs[0].fromCode), 0) || undefined : undefined;
     const last = legs.at(-1)!, egress = last.toCode !== to.code ? egressLinks.get(last.toCode) || transferLink(station(last.toCode), to, 0) || undefined : undefined;
     if (legs[0].fromCode !== from.code && !access || last.toCode !== to.code && !egress) return;
     const trip = makeTrip(legs, links, settings, access, egress);
-    if (trip && trips.size < 50000) { trips.set(trip.id, trip); publishPartial(); }
+    const target = alternative ? alternatives : trips;
+    if (trip && trips.size + alternatives.size < 50000) { target.set(trip.id, trip); publishPartial(); }
     else if (trip) warnings.add("方案组合超过 50000 个，请指定节点或缩短等待范围。");
   };
   if (!manual.length) for (const a of origins) for (const b of destinations) for (const leg of await route(a, b, settings.date)) add([leg], []);
@@ -206,18 +211,24 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
     dates.push(chinaDateTime(end).slice(0, 10));
     return dates;
   }))].sort();
-  const linksFor = (arrivals: Station[], departures: Station[]) => arrivals.flatMap(a => departures.flatMap(b => {
+  const linksFor = (arrivals: Station[], departures: Station[], requiredCodes?: Set<string>) => arrivals.flatMap(a => departures.flatMap(b => {
     if (origins.some(s => s.code === a.code || s.code === b.code) || destinations.some(s => s.code === a.code || s.code === b.code)) return [];
+    // A named via station binds this interchange to that physical station/group.
+    // Being in the same city is not evidence that the journey visits it.
+    if (requiredCodes && !requiredCodes.has(a.code) && !requiredCodes.has(b.code)) return [];
     const link = transferLink(a, b, settings.minimum, settings.allowCity, settings.cityMinutes);
-    const optional = a.code !== b.code && firstLegs.get(a.code)?.length && link?.kind !== "walk" ? urbanLink(a, b) : null;
+    const optional = a.code !== b.code && link?.kind !== "walk" ? urbanLink(a, b) : null;
     return [link, optional].filter((value): value is TransferLink => !!value);
   }));
   const manual1 = manual[0] ? interchangeVariants(manual[0]!, stations, settings.allowCity || !!settings.allowUrban) : hubs, manual2 = manual[1] ? interchangeVariants(manual[1]!, stations, settings.allowCity || !!settings.allowUrban) : hubs;
-  const readSecond = async (links: TransferLink[]) => Promise.all(links.map(async link => {
+  const readSecond = async (links: TransferLink[], alternative = false) => Promise.all(links.map(async link => {
     const first = firstLegs.get(link.from.code) || [];
     if (!first.length) return;
     const second = (await Promise.all(datesAfter(first, link).flatMap(date => destinations.map(dest => route(link.to, dest, date))))).flat();
-    for (const a of first) for (const b of second) add([a, b], [link]);
+    for (const a of first) for (const b of second) {
+      const passesSecond = required[1]?.has(link.from.code) || required[1]?.has(link.to.code);
+      add([a, b], [link], alternative && !passesSecond);
+    }
   }));
   const readThird = async (links1: TransferLink[], links2: TransferLink[]) => {
     let connectors = 0;
@@ -246,12 +257,22 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
     const links1 = linksFor(priority1, priority1).filter(link => firstLegs.get(link.from.code)?.length);
     if (manual[1]) {
       const priority2 = stationVariants(manual[1], stations);
+      // Ground/urban transit can be the middle journey, without inventing a
+      // third railway train between the two mandatory physical interchanges.
+      await readSecond(linksFor(priority1, priority2));
       await readThird(links1, linksFor(priority2, priority2));
+      // Fewer-change alternatives are separate results: never silently drop via2.
+      await readSecond(links1, true);
     } else await readSecond(links1);
   }
-  await readFirst(hubs);
-  if (manual.length < 2) await readSecond(linksFor(manual1, manual1));
-  if (settings.maxChanges === 2) await readThird(linksFor(manual1, manual1).filter(l => firstLegs.get(l.from.code)?.length), linksFor(manual2, manual2));
+  // With named vias, the incoming railway must reach that physical station or
+  // its verified adjacent group. Other city stations remain departure options,
+  // so metro/same-city onward travel is retained without probing every arrival.
+  const arrivals1 = manual[0] ? stationVariants(manual[0], stations) : hubs;
+  const arrivals2 = manual[1] ? stationVariants(manual[1], stations) : manual2;
+  await readFirst(arrivals1);
+  if (manual.length < 2) await readSecond(linksFor(arrivals1, manual1, required[0]));
+  if (settings.maxChanges === 2) await readThird(linksFor(arrivals1, manual1, required[0]).filter(l => firstLegs.get(l.from.code)?.length), linksFor(arrivals2, manual2, required[1]));
   signal.throwIfAborted();
   if (!trips.size && warnings.size) warnings.add("部分区间尚未完成查询，暂无方案不代表没有可行中转。");
   return snapshot();

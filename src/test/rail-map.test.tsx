@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import L from "leaflet";
 import { RailMap } from "../components/RailMap";
@@ -19,6 +19,8 @@ describe("full map layer controls", () => {
     const view = render(<RailMap journey={null} route={null} position={null} fix={null} match={null} gpsEnabled={false} />);
     try {
       await screen.findByText("铁路网（本站缓存）");
+      // The cache label can render before Leaflet's scheduled drawing effect.
+      await waitFor(() => expect(factory).toHaveBeenCalled());
       const line = factory.mock.results.at(-1)!.value as L.Polyline;
       expect(line.getLatLngs()).toHaveLength(1);
       expect((line.getLatLngs()[0] as L.LatLng[])).toHaveLength(3);

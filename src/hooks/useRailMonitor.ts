@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { enrichTrainList, mergeTrainDetails } from "../lib/rail-enrichment";
 import { trainIdentity } from "../lib/rail-tickets";
+import { officialStationCatalog } from "../lib/rail-official-stations";
 import type { Train, Station, Seat } from "../lib/rail-tickets";
 export type { Train, Station, Seat } from "../lib/rail-tickets";
 export { matchingSeats } from "../lib/rail-tickets";
@@ -96,7 +97,7 @@ export function useRailMonitor(desktop = window.railDesktop) {
 
   useEffect(() => {
     const load = desktop ? desktop.stations() : fetchJson<{ stations: Station[] }>(railApiUrl(new URLSearchParams({ mode: "stations" })));
-    load.then((data) => setStations(data.stations)).catch((cause) => setError(`车站列表加载失败：${String(cause)}`));
+    load.then((data) => setStations(officialStationCatalog(data.stations))).catch((cause) => setError(`车站列表加载失败：${String(cause)}`));
   }, [desktop]);
 
   useEffect(() => {

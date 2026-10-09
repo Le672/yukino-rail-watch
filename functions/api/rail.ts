@@ -7,6 +7,7 @@ import type { TrainEquipment } from "../../src/lib/rail-equipment";
 import type { TrainJourney } from "../../src/lib/train-position";
 import { ticketDateError, ticketDateRange } from "../../src/lib/rail-ticket-date";
 import { getJourneyBoardStops, getStationBoard, getStationBoardRow } from "../../src/lib/rail-board-service";
+import { officialStationCatalog, stationNames } from "../../src/lib/rail-official-stations";
 
 const ORIGIN = "https://kyfw.12306.cn";
 const STATIONS_URL = `${ORIGIN}/otn/resources/js/framework/station_name.js`;
@@ -119,7 +120,7 @@ async function getStations(): Promise<Station[]> {
     signal: AbortSignal.timeout(12000),
   });
   if (!response.ok) throw new Error(`12306 车站列表返回 ${response.status}`);
-  const stations = parseStations(await response.text());
+  const stations = officialStationCatalog(parseStations(await response.text()));
   if (stations.length < 100) throw new Error("12306 车站列表格式异常");
   stationCache = { at: Date.now(), stations };
   return stations;
@@ -266,7 +267,7 @@ async function getTimetable(date: string, train: string, stations: Station[]) {
     const response = await fetch(url, { headers: REQUEST_HEADERS, signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error(`12306 停站表接口返回 ${response.status}`);
     const payload = await response.json() as OfficialTimetable;
-    const names = new Map(stations.map(station => [station.name, station.code]));
+    const names = stationNames(stations);
     if (Array.isArray(payload.data?.data)) payload.data!.data = payload.data!.data!.map(row => ({ ...row, station_telecode: names.get(row.station_name || "") || "" }));
     const at = Date.now(), journey = parseOfficialJourney(payload, train, date, at);
     if (journey.stops[0].station !== route.from || journey.stops.at(-1)?.station !== route.to) throw new Error("12306 搜索与停站表的始发终到不一致，请稍后重试");
@@ -508,7 +509,7 @@ export async function onRequestGet(context: { request: Request }) {
     } else if (!from || !to) {
       return json({ error: "按区间查询时请填写出发站和到达站，无需填写车次" }, 400);
     }
-    const byName = new Map(stations.map((station) => [station.name, station.code]));
+    const byName = stationNames(stations);
     const fromCode = byName.get(from) || (stations.some((s) => s.code === from) ? from : "");
     const toCode = byName.get(to) || (stations.some((s) => s.code === to) ? to : "");
     if (!fromCode || !toCode || fromCode === toCode) return json({ error: "请选择两个不同的 12306 车站" }, 400);
@@ -519,7 +520,7 @@ export async function onRequestGet(context: { request: Request }) {
       source: "12306",
       checkedAt: new Date().toISOString(),
       date, from, to, fromCode, toCode, trainCode, queryMode: search,
-      trains: parseTrains(data.result, { ...names, ...data.map }, trainCode, trainNo, date),
+      trains: parseTrains(data.result, { ...data.map, ...names }, trainCode, trainNo, date),
     }, 200, 30);
   } catch (error) {
     const message = railQueryError(error);

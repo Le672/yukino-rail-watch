@@ -25,12 +25,43 @@ it("retains a saved future travel date", () => {
   expect(screen.getByLabelText("首程乘车日期")).toHaveValue("2026-10-08");
   expect(screen.queryByText(/已更新为今天/)).not.toBeInTheDocument();
 });
+
+it("makes the metro bridge discoverable and labels Panyu intercity alternatives which omit via2", async () => {
+  vi.setSystemTime(new Date("2026-10-09T08:00:00+08:00"));
+  const { officialStationCatalog } = await import("../lib/rail-official-stations");
+  const all = officialStationCatalog([...stations, { name: "广州新塘", code: "XWQ", pinyin: "", city: "广州" }, { name: "惠州北", code: "HUA", pinyin: "", city: "惠州" }]);
+  const raw = (code: string, fromCode: string, toCode: string, departure: string, arrival: string, duration: string): Train => ({ code, trainNo: code, fromCode, toCode, from: all.find(s => s.code === fromCode)!.name, to: all.find(s => s.code === toCode)!.name,
+    departure, arrival, duration, saleStatus: "Y", trainsetModel: "CRH6A", date: "2026-10-09", originDate: "2026-10-09", seats: [{ label: "二等座", value: "有", available: true, price: 50 }] });
+  const services = [raw("G9101", "IOQ", "IZQ", "09:00", "10:00", "01:00"), raw("G9103", "XWQ", "HUA", "14:00", "15:00", "01:00"), raw("C9105", "PYA", "KBA", "10:30", "13:30", "03:00")];
+  vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+    const q = new URL(String(input), "https://cr.yukino.bond").searchParams;
+    return Response.json({ source: "12306", checkedAt: new Date().toISOString(), trains: services.filter(t => t.fromCode === q.get("from") && t.toCode === q.get("to") && t.date === q.get("date")) });
+  }));
+  const { container } = render(<RailTransfer stations={all} onPosition={vi.fn()}/>);
+  for (const [label, value] of [["出发站", "深圳北"], ["到达站", "惠州北"], ["中转站 1（可选）", "广州南"], ["最多中转", "2"], ["中转站 2（可选）", "广州新塘"]]) fireEvent.change(screen.getByLabelText(label), { target: { value } });
+  fireEvent.click(screen.getByLabelText("城市轨道交通（可选，默认关闭）"));
+  await waitFor(() => expect(screen.getByRole("button", { name: "查询中转" })).toBeEnabled());
+  fireEvent.click(screen.getByRole("button", { name: "查询中转" }));
+  await screen.findByRole("button", { name: /^含地铁／城市轨道（[1-9]/ });
+  fireEvent.click(screen.getByRole("button", { name: /^含地铁／城市轨道/ }));
+  await waitFor(() => expect(container.querySelectorAll(".rail-trip")).toHaveLength(1));
+  let trip = container.querySelector(".rail-trip") as HTMLElement;
+  expect(within(trip).getByText(/地铁 7号线/)).toBeVisible();
+  expect(within(trip).getByText(/地铁 13号线/)).toBeVisible();
+  expect(within(trip).getByText("G9103")).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: /^减少中转备选/ }));
+  expect(screen.getByText(/以下备选经过 广州南.*不限定第二中转站 广州新塘/)).toBeVisible();
+  trip = container.querySelector(".rail-trip") as HTMLElement;
+  expect(within(trip).getByText("C9105")).toBeVisible();
+  expect(within(trip).getByText("惠州北（城际）")).toBeVisible();
+  expect(screen.getByLabelText("中转站 2（可选）")).toHaveValue("广州新塘");
+});
 it("shows the requested walking connection before slow city alternatives and retains it on cancellation", async () => {
   vi.setSystemTime(new Date("2026-10-05T08:00:00+08:00"));
   const extra: Station = { name: "广州东", code: "GGQ", pinyin: "", city: "广州" };
   const fetchMock = vi.fn(async (input: string | URL, options?: RequestInit) => {
     const url = new URL(String(input), "https://cr.yukino.bond"), key = `${url.searchParams.get("from")}/${url.searchParams.get("to")}`;
-    if (url.searchParams.get("to") === "GGQ") return await new Promise<Response>((_resolve, reject) => {
+    if (url.searchParams.get("from") === "GGQ") return await new Promise<Response>((_resolve, reject) => {
       options?.signal?.addEventListener("abort", () => reject(options.signal!.reason), { once: true });
     });
     const trains = url.searchParams.get("date") !== "2026-10-05" ? [] : key === "IOQ/IZQ" ? [make("G91", "IOQ", "IZQ", "09:00", "10:00", "01:00", 80, "CR400AF")] : key === "PYA/EGQ" ? [make("C92", "PYA", "EGQ", "10:30", "11:00", "00:30", 30, "CRH6A")] : [];
@@ -44,7 +75,7 @@ it("shows the requested walking connection before slow city alternatives and ret
   expect(container.querySelectorAll(".rail-trip")).toHaveLength(1);
   expect(screen.getByRole("button", { name: "取消查询" })).toBeVisible();
   const calls = fetchMock.mock.calls.map(([input]) => new URL(String(input), "https://cr.yukino.bond").searchParams);
-  expect(calls.findIndex(query => query.get("from") === "PYA" && query.get("to") === "EGQ")).toBeLessThan(calls.findIndex(query => query.get("to") === "GGQ"));
+  expect(calls.findIndex(query => query.get("from") === "PYA" && query.get("to") === "EGQ")).toBeLessThan(calls.findIndex(query => query.get("from") === "GGQ"));
   fireEvent.click(screen.getByRole("button", { name: "取消查询" }));
   expect(screen.getByText("查询已停止，以下保留已确认的部分方案；其余区间与缺失资料尚未完成。")).toBeVisible();
   expect(screen.getByText("G91")).toBeVisible(); expect(screen.getByText("C92")).toBeVisible();
@@ -75,7 +106,7 @@ it("shows each leg and physical walk transfer, sorts the summed price and filter
   fireEvent.change(screen.getByLabelText("至少一程车型"), { target: { value: "CRH380A" } });
   expect(container.querySelectorAll(".rail-trip")).toHaveLength(1);
   fireEvent.click(screen.getByLabelText("车型筛选要求每程均匹配"));
-  expect(screen.getByText("没有符合当前车型或余票筛选的方案。")).toBeVisible();
+  expect(screen.getByText("没有符合当前行程类型、车型或余票筛选的方案。")).toBeVisible();
 });
 
 it("exposes nationwide city transfers and expands the automatic station search when requested", async () => {

@@ -11,10 +11,13 @@ export const WALK_GROUPS = [
   { names: ["肇庆东", "鼎湖东"], minutes: [20, 30], note: "高铁肇庆东与城际鼎湖东经综合体连廊衔接，需出闸、步行并重新进站。" },
   { names: ["惠州", "小金口"], minutes: [20, 30], note: "普铁惠州与城际小金口为相邻站群，需出站沿现场指引步行，返回国铁预留安检检票时间。" },
   { names: ["东莞东", "常平东"], minutes: [30, 40], note: "两站需站外沿道路步行并过路口，不能按同站通道换乘；预留步行、安检和检票时间。" },
+  { names: ["惠州北", "惠州北（城际）"], minutes: [25, 35], note: "惠州北高铁与广惠城际处于同一枢纽，12306 使用 HUA／KBA 两个代码；需出闸换乘，返回高铁须重新安检检票。" },
+  { names: ["佛山西", "佛山西（城际）"], minutes: [25, 35], note: "佛山西国铁与广东城际使用 FOQ／FXA 两个代码；按枢纽指引出闸换乘，返回国铁须预留安检检票。" },
+  { names: ["肇庆", "肇庆（城际）"], minutes: [25, 35], note: "肇庆国铁与广东城际使用 ZVQ／ZQA 两个代码；按现场指引出闸换乘，不能互相替代车票的出发到达站。" },
 ] as const;
 export function findStation(stations: Station[], input: string) {
   const value = input.trim();
-  return stations.find(s => s.name === value || s.code === value) || (value === "新塘" ? stations.find(s => s.name === "广州新塘") : undefined);
+  return stations.find(s => s.name === value || s.code === value || s.officialName === value) || (value === "新塘" ? stations.find(s => s.name === "广州新塘") : undefined);
 }
 export function stationVariants(station: Station, stations: Station[]) {
   const group = WALK_GROUPS.find(g => g.names.some(name => name === station.name));
