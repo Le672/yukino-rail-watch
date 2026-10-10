@@ -28,7 +28,7 @@ function stopClock(at: number, origin: string) {
   return `${value.slice(0, 10) === origin ? "" : `${value.slice(5, 10)} `}${value.slice(11)}`;
 }
 
-export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().slice(0, 10), autoQuery = false }: { initialTrain?: string; initialDate?: string; autoQuery?: boolean }) {
+export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().slice(0, 10), autoQuery = false, onQuery }: { initialTrain?: string; initialDate?: string; autoQuery?: boolean; onQuery?: (train: string, date: string) => void }) {
   const [train, setTrain] = useState(initialTrain);
   const [date, setDate] = useState(initialDate);
   const [live, setLive] = useState(true);
@@ -77,6 +77,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
     const version = ++generation.current;
     setTrain(candidate.journey.train); setDate(candidate.journey.date);
     setJourney(candidate.journey); setMapData(candidate.map); setDelays(null);
+    onQuery?.(candidate.journey.train, candidate.journey.date);
     setError(null); setRouteError(null); setDelayError(null); setLoading(false); setDetailsLoading(true);
     setGpsIdentified(automatic); if (!automatic) setAutoIdentify(false);
     void loadJourneyEquipment(candidate.journey).then(equipment => {
@@ -98,6 +99,7 @@ export function RailPosition({ initialTrain = "", initialDate = chinaDateTime().
       const next = await loadJourney(train.trim().toUpperCase(), date);
       if (version !== generation.current) return;
       setJourney(next); setLoading(false); setDetailsLoading(true);
+      onQuery?.(next.train, next.date);
       void loadJourneyEquipment(next).then(equipment => {
         if (version === generation.current) setJourney(current => current ? { ...current, ...equipment } : current);
       }).catch(() => {});

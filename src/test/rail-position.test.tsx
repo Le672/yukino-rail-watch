@@ -57,13 +57,16 @@ describe("position query user workflow", () => {
   it("automatically loads the selected board train without starting device geolocation", async () => {
     vi.stubGlobal("isSecureContext", true); const watchPosition = vi.fn();
     vi.stubGlobal("navigator", { geolocation: { watchPosition, clearWatch: vi.fn() } });
-    render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" autoQuery/>);
+    const onQuery = vi.fn();
+    render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" autoQuery onQuery={onQuery}/>);
     await screen.findByRole("heading", { name: "G6003" });
     expect(loaders.loadJourney).toHaveBeenCalledWith("G6003", "2026-09-29");
     expect(watchPosition).not.toHaveBeenCalled();
+    expect(onQuery).toHaveBeenCalledExactlyOnceWith("G6003", "2026-09-29");
   });
   it("shows Guangzhou South at 10:01 even if map and delay data are unavailable", async () => {
-    render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" />);
+    const onQuery = vi.fn();
+    render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" onQuery={onQuery} />);
     fireEvent.click(screen.getByLabelText("跟随当前时间"));
     fireEvent.change(screen.getByLabelText("观察时间（北京时间）"), { target: { value: "2026-09-29T10:01" } });
     fireEvent.click(screen.getByRole("button", { name: "查询位置" }));
@@ -72,6 +75,7 @@ describe("position query user workflow", () => {
     expect(within(screen.getByLabelText("下一停靠站")).getByText("计划到达 12:02")).toBeInTheDocument();
     await screen.findByText(/线路资料暂不可用/);
     expect(loaders.loadJourney).toHaveBeenCalledWith("G6003", "2026-09-29");
+    expect(onQuery).toHaveBeenCalledExactlyOnceWith("G6003", "2026-09-29");
     expect(loaders.loadDelays).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText("观察时间（北京时间）"), { target: { value: "2026-09-29T12:03" } });
     expect(screen.getByText("广州南 · 停站中")).toBeInTheDocument();
@@ -82,12 +86,14 @@ describe("position query user workflow", () => {
   it("discards a late response after the user changes train", async () => {
     let finish: (value: unknown) => void;
     loaders.loadJourney.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
-    render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" />);
+    const onQuery = vi.fn();
+    render(<RailPosition initialTrain="G6003" initialDate="2026-09-29" onQuery={onQuery} />);
     fireEvent.click(screen.getByRole("button", { name: "查询位置" }));
     await waitFor(() => expect(loaders.loadJourney).toHaveBeenCalled());
     fireEvent.change(screen.getByLabelText("定位车次"), { target: { value: "G1" } });
     await act(async () => finish!(parseJourney(payload, "G6003", "2026-09-29")));
     expect(screen.queryByRole("heading", { name: "G6003" })).toBeNull();
+    expect(onQuery).not.toHaveBeenCalled();
     expect(loaders.loadRailway).not.toHaveBeenCalled();
   });
   it("GPS corrects next station when a delayed train is still before Guangzhou after planned departure", async () => {

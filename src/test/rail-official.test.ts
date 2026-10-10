@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { locateJourney } from "../lib/train-position";
 import { officialDelayTargets, parseOfficialDelay, parseOfficialJourney } from "../lib/rail-official";
+import g3068 from "./fixtures/official-g3068.json";
 
 const date = "2026-10-03", train = "G6003";
 const at = (clock: string, day = 3) => Date.parse(`2026-10-${String(day).padStart(2, "0")}T${clock}:00+08:00`);
@@ -35,13 +36,24 @@ describe("official timetable and three-hour delay interpretation", () => {
     expect(delay).toMatchObject({ code: "DELAY_PREDICTION", minutes: 10 });
   });
   it("rejects missing station order, mismatched service/date, unknown reports and prefix train matches", () => {
-    expect(() => parseOfficialJourney({ status: true, data: { data: [rows[0], rows[2]] } }, train, date)).toThrow(/站序/);
+    for (const invalid of [
+      [rows[0], { ...rows[1], station_no: "" }, rows[2]],
+      [rows[0], { ...rows[1], station_no: "01" }, rows[2]],
+      [rows[1], rows[2]],
+    ]) expect(() => parseOfficialJourney({ status: true, data: { data: invalid } }, train, date)).toThrow(/站序/);
     expect(() => parseOfficialJourney({ ...payload, source: "12306", train, date: "2026-10-04" }, train, date)).toThrow(/日期/);
     const stop = parseOfficialJourney(payload, train, date).stops[1];
     for (const data of ["当前无正晚点信息", "G60030次列车到达广州南站的预计时间为12:12。", "G6003次列车到达广州站的预计时间为12:12。", "G6003次列车到达广州南站的预计时间为20:12。"]) {
       expect(parseOfficialDelay({ status: true, data }, stop, at("10:01"))).toBeNull();
     }
     expect(officialDelayTargets(parseOfficialJourney(payload, train, date), at("20:00"))).toEqual([]);
+  });
+  it("accepts the real G3068 nonconsecutive official numbers without inventing a stop", () => {
+    const journey = parseOfficialJourney(g3068, "G3068", "2026-10-10");
+    expect(journey.stops).toHaveLength(13);
+    expect(journey.stops.map(stop => stop.station)).toEqual(g3068.data.data.map(row => row.station_name));
+    expect(journey.stops[locateJourney(journey, Date.parse("2026-10-10T10:01:00+08:00")).nextIndex!].station).toBe("惠州北");
+    expect(journey.stops.at(-1)?.station).toBe("上海南");
   });
 });
 
@@ -56,6 +68,22 @@ function officialFetch() {
   });
 }
 describe("official data gateway", () => {
+  it("serves G3068 with a gap in official station numbers to both web and desktop callers", async () => {
+    vi.resetModules();
+    const normal = officialFetch();
+    vi.stubGlobal("fetch", vi.fn(async (input: URL | string) => {
+      const url = new URL(String(input));
+      if (url.hostname === "search.12306.cn") return Response.json({ status: true, data: [{ date: "20261010", station_train_code: "G3068", from_station: "佛山", to_station: "上海南", train_no: "6u000G306801" }] });
+      if (url.pathname.endsWith("queryTrainInfo/query")) return Response.json(g3068);
+      return normal(input);
+    }));
+    const { onRequestPost } = await import("../../functions/api/rail");
+    const response = await onRequestPost({ request: new Request("https://cr.yukino.bond/api/rail?mode=journey&train=G3068&date=2026-10-10", { method: "POST" }) });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toMatchObject({ source: "12306", train: "G3068", date: "2026-10-10" });
+    expect(parseOfficialJourney(body, "G3068", "2026-10-10").stops).toHaveLength(13);
+  });
   it("loads and caches the official timetable without querying any third party or ticket inventory", async () => {
     vi.resetModules(); const fetchMock = officialFetch(); vi.stubGlobal("fetch", fetchMock);
     const { onRequestGet } = await import("../../functions/api/rail");

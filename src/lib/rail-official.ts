@@ -38,7 +38,11 @@ export function parseOfficialJourney(payload: OfficialTimetable, train: string, 
     throw new Error("12306 暂未返回可用停站时刻表，请稍后重试或前往官网查询");
   }
   const ordered = rows.slice().sort((a, b) => Number(a.station_no) - Number(b.station_no));
-  if (ordered.some((row, index) => !/^\d{1,3}$/.test(row.station_no || "") || Number(row.station_no) !== index + 1)) {
+  // 12306 may omit a non-stopping operational point (G3068 skips 03).
+  // Preserve the supplied stops; station numbers identify order, not a dense index.
+  if (Number(ordered[0].station_no) !== 1 || ordered.some((row, index) =>
+    !/^\d{1,3}$/.test(row.station_no || "") ||
+    (index > 0 && Number(row.station_no) <= Number(ordered[index - 1].station_no)))) {
     throw new Error("12306 停站表站序缺失或重复，无法可靠判断下一站");
   }
   const codes = [...new Set(ordered.map(row => row.station_train_code).filter((code): code is string => typeof code === "string" && TRAIN_CODE.test(code)))];
