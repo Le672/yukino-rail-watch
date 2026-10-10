@@ -1,7 +1,7 @@
 {
   "name": "yukino-rail-watch",
   "private": true,
-  "version": "1.10.14",
+  "version": "1.10.15",
   "type": "module",
   "main": "electron/rail-main.cjs",
   "description": "12306 余票查询与 Windows 通知",

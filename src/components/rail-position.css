@@ -134,4 +134,4 @@
 .rail-detection-candidates button:focus-visible { outline: 2px solid #315c42; outline-offset: 2px; }
 .rail-detection-candidates strong { font-size: 1.15rem; }
 .rail-detection-candidates small { color: #758376; line-height: 1.5; }
-.rail-train-map-label { color: #315c42; border-color: #acc2a1; background: #fffefb; font-weight: 600; max-width: 250px; white-space: normal; }
+.rail-train-map-label { color: #315c42; border-color: #acc2a1; background: #fffefb; font-weight: 600; width: max-content; max-width: min(250px, 65vw); white-space: normal; overflow-wrap: anywhere; }
