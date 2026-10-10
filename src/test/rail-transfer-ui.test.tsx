@@ -61,11 +61,12 @@ it("shows the requested walking connection before slow city alternatives and ret
   const extra: Station = { name: "广州东", code: "GGQ", pinyin: "", city: "广州" };
   const fetchMock = vi.fn(async (input: string | URL, options?: RequestInit) => {
     const url = new URL(String(input), "https://cr.yukino.bond"), key = `${url.searchParams.get("from")}/${url.searchParams.get("to")}`;
+    if (url.searchParams.get("mode") === "equipment") return Response.json({ source: "12306", train: url.searchParams.get("train"), date: "2026-10-05", scope: "dated", checkedAt: Date.now(), model: url.searchParams.get("train") === "G91" ? "CR400AF" : "CRH6A" });
     if (url.searchParams.get("from") === "GGQ") return await new Promise<Response>((_resolve, reject) => {
       options?.signal?.addEventListener("abort", () => reject(options.signal!.reason), { once: true });
     });
     const trains = url.searchParams.get("date") !== "2026-10-05" ? [] : key === "IOQ/IZQ" ? [make("G91", "IOQ", "IZQ", "09:00", "10:00", "01:00", 80, "CR400AF")] : key === "PYA/EGQ" ? [make("C92", "PYA", "EGQ", "10:30", "11:00", "00:30", 30, "CRH6A")] : [];
-    return Response.json({ source: "12306", trains: trains.map(t => ({ ...t, date: "2026-10-05", originDate: "2026-10-05" })), checkedAt: new Date().toISOString() });
+    return Response.json({ source: "12306", trains: trains.map(t => ({ ...t, trainsetModel: null, date: "2026-10-05", originDate: "2026-10-05" })), checkedAt: new Date().toISOString() });
   });
   vi.stubGlobal("fetch", fetchMock);
   const { container } = render(<RailTransfer stations={[...stations, extra]} onPosition={vi.fn()}/>);
@@ -74,6 +75,8 @@ it("shows the requested walking connection before slow city alternatives and ret
   await screen.findByText("已确认的方案先行展示，其余区间及车型票价资料仍在查询中。");
   expect(container.querySelectorAll(".rail-trip")).toHaveLength(1);
   expect(screen.getByRole("button", { name: "取消查询" })).toBeVisible();
+  expect(await screen.findByText("车型：CR400AF")).toBeVisible();
+  expect(await screen.findByText("车型：CRH6A")).toBeVisible();
   const calls = fetchMock.mock.calls.map(([input]) => new URL(String(input), "https://cr.yukino.bond").searchParams);
   expect(calls.findIndex(query => query.get("from") === "PYA" && query.get("to") === "EGQ")).toBeLessThan(calls.findIndex(query => query.get("from") === "GGQ"));
   fireEvent.click(screen.getByRole("button", { name: "取消查询" }));

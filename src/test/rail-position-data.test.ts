@@ -38,10 +38,18 @@ describe("position data dates and caching", () => {
     expect(cached.checkedAt).toBe(a.checkedAt); expect(fetchMock).toHaveBeenCalledTimes(1);
   });
   it("does not turn an unavailable response into a guessed timetable", async () => {
-    vi.resetModules(); const fetchMock = vi.fn().mockResolvedValue(Response.json({ error: "12306 暂未返回可用时刻表" }, { status: 502 })); vi.stubGlobal("fetch", fetchMock);
+    vi.resetModules(); vi.useFakeTimers(); const fetchMock = vi.fn().mockImplementation(async () => Response.json({ error: "12306 暂未返回可用时刻表" }, { status: 503 })); vi.stubGlobal("fetch", fetchMock);
     const { loadJourney } = await import("../lib/rail-position-data");
-    await expect(loadJourney("G6003", "2026-09-29")).rejects.toThrow(/暂未返回/);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const failed = expect(loadJourney("G6003", "2026-09-29")).rejects.toThrow(/暂未返回/);
+    await vi.runAllTimersAsync(); await failed;
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+  it("recovers a transient HTML gateway failure with an uncached POST and shares the recovered timetable", async () => {
+    vi.resetModules(); vi.useFakeTimers(); const fetchMock = vi.fn().mockResolvedValueOnce(new Response("<h1>Bad Gateway</h1>", { status: 502 })).mockResolvedValueOnce(Response.json(response)); vi.stubGlobal("fetch", fetchMock);
+    const { loadJourney } = await import("../lib/rail-position-data");
+    const pending = Promise.all([loadJourney("G6003", "2026-09-29"), loadJourney("G6003", "2026-09-29")]);
+    await vi.advanceTimersByTimeAsync(1300); const [a, b] = await pending;
+    expect(a.checkedAt).toBe(b.checkedAt); expect(fetchMock).toHaveBeenCalledTimes(2); expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: "POST", cache: "no-store" });
   });
   it("does not send malformed dates or train codes upstream", async () => {
     vi.resetModules(); const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);

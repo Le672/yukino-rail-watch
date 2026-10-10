@@ -530,7 +530,7 @@ export async function onRequestGet(context: { request: Request }) {
       const tags = ["会话", "余票数据", "无法识别", "查询地址", "超时", "繁忙", "非法", "预售", "日期", "未登录"].filter(tag => message.includes(tag));
       console.warn("rail-gateway-failure", JSON.stringify({ upstreamStatus: http ? Number(http[1]) : undefined, tags }));
     }
-    const status = error instanceof QueryError ? error.status : ["query", "fare", "hubs"].includes(mode) ? 503 : 502;
+    const status = error instanceof QueryError ? error.status : 503;
     const response = json({ error: message }, status);
     // A caught upstream outage is a readable API error, rather than an edge-generated 502 page.
     // Explicitly bound recovery pauses for a network error, and respect longer upstream rate limits.
@@ -539,10 +539,10 @@ export async function onRequestGet(context: { request: Request }) {
   }
 }
 
-/** Public, read-only transfer queries use an uncacheable transport at the edge. */
+/** Public, read-only queries use an uncacheable transport at the edge. */
 export async function onRequestPost(context: { request: Request }) {
   const mode = new URL(context.request.url).searchParams.get("mode") || "query";
-  if (!["query", "fare", "hubs"].includes(mode)) return json({ error: "此查询方式不支持 POST" }, 405);
+  if (!["query", "fare", "hubs", "journey", "delays", "journey-board", "equipment", "board", "board-row"].includes(mode)) return json({ error: "此查询方式不支持 POST" }, 405);
   const response = await onRequestGet(context);
   const headers = new Headers(response.headers);
   headers.set("Cache-Control", "no-store");

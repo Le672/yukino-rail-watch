@@ -7,7 +7,7 @@ import { ticketDateRange } from "../lib/rail-ticket-date";
 import { DEFAULT_TRANSFER, searchTransfers, sortTrips, tripFare, tripRailFare, tripSeats, hasUrban } from "../lib/rail-transfer";
 import type { TransferSettings, TransferResult, TransferProgress } from "../lib/rail-transfer";
 import { DEFAULT_TRAIN_FILTERS, durationLabel, money, trainIdentity } from "../lib/rail-tickets";
-import type { Station, TrainFilters } from "../lib/rail-tickets";
+import type { Station, Train, TrainFilters } from "../lib/rail-tickets";
 import { RailResultControls, TrainFare } from "./RailResultControls";
 import { officialCityKey } from "../lib/rail-national-network";
 import { TrainIllustration } from "./TrainIllustration";
@@ -63,22 +63,50 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
   const run = async (query = settings) => {
     controller.current?.abort(); const current = ++generation.current, abort = new AbortController(); controller.current = abort;
     setChecking(true); setError(null); setResult(null); setDetails(null); setPage(1); setShowAlternatives(false); setJourneyKind("all");
+    // Enrich confirmed legs while slower route searches continue, and retain those
+    // details when a later partial snapshot arrives. Limit each batch to three.
+    const completed = new Map<string, Train>(), queued = new Set<string>(), queue: Train[] = [];
+    let working = false, done = 0;
+    const merge = (value: TransferResult): TransferResult => {
+      const legs = (trip: TransferResult["trips"][number]) => ({ ...trip, legs: trip.legs.map(leg => {
+        const detail = completed.get(trainIdentity(leg));
+        if (!detail) return leg;
+        const prices = new Map(detail.seats.map(seat => [seat.label, seat]));
+        return { ...mergeTrainDetails(leg, detail), seats: leg.seats.map(seat => seat.price != null ? seat :
+          { ...seat, price: prices.get(seat.label)?.price, priceMax: prices.get(seat.label)?.priceMax }) };
+      }) });
+      return { ...value, trips: value.trips.map(legs), alternatives: value.alternatives?.map(legs) };
+    };
+    const enrich = async () => {
+      working = true;
+      try {
+        while (queue.length && current === generation.current && !abort.signal.aborted) {
+          const batch = queue.splice(0, 3);
+          await enrichTrainList(batch, query.date, updates => {
+            if (current !== generation.current || abort.signal.aborted) return;
+            for (const train of updates) completed.set(trainIdentity(train), train);
+            done += updates.length;
+            setResult(previous => previous ? merge(previous) : previous);
+            setDetails({ done, total: queued.size });
+          }, abort.signal);
+        }
+      } catch { if (current === generation.current) setDetails(null); }
+      finally { working = false; }
+    };
+    const publish = (value: TransferResult) => {
+      if (current !== generation.current || abort.signal.aborted) return;
+      setResult(merge(value));
+      for (const leg of [...value.trips, ...value.alternatives || []].flatMap(trip => trip.legs)) {
+        const key = trainIdentity(leg);
+        if (!queued.has(key)) { queued.add(key); queue.push(leg); }
+      }
+      if (queued.size) setDetails({ done, total: queued.size });
+      if (!working && queue.length) void enrich();
+    };
     try {
-      const next = await searchTransfers(query, stations, abort.signal, value => { if (current === generation.current) setProgress(value); }, value => {
-        if (current === generation.current) setResult(value);
-      });
+      const next = await searchTransfers(query, stations, abort.signal, value => { if (current === generation.current) setProgress(value); }, publish);
       if (current !== generation.current) return;
-      setResult(next); setChecking(false); setProgress(null);
-      const unique = [...new Map([...next.trips, ...next.alternatives || []].flatMap(trip => trip.legs).map(l => [trainIdentity(l), l])).values()];
-      if (!unique.length) return;
-      setDetails({ done: 0, total: unique.length });
-      await enrichTrainList(unique, query.date, (updates, done) => {
-        const byId = new Map(updates.map(t => [trainIdentity(t), t]));
-        if (current !== generation.current) return;
-        setResult(previous => previous ? { ...previous, trips: previous.trips.map(trip => ({ ...trip, legs: trip.legs.map(l => mergeTrainDetails(l, byId.get(trainIdentity(l)))) })),
-          alternatives: previous.alternatives?.map(trip => ({ ...trip, legs: trip.legs.map(l => mergeTrainDetails(l, byId.get(trainIdentity(l)))) })) } : previous);
-        setDetails({ done, total: unique.length });
-      }, abort.signal);
+      publish(next); setChecking(false); setProgress(null);
     } catch (cause) { if (current === generation.current && !abort.signal.aborted) setError(cause instanceof Error ? cause.message : String(cause)); }
     finally { if (current === generation.current) { setChecking(false); setProgress(null); } }
   };
@@ -121,7 +149,7 @@ export function RailTransfer({ stations, onPosition }: { stations: Station[]; on
       {settings.allowUrban && <div className="rail-urban-status" role="status">{urbanLoading ? "正在加载全国轨道线路与站点…" : urbanError ? urbanError : urbanStats ? <>已载入 {urbanStats.lines} 条方向／支线、{urbanStations.length} 个轨道站 · 数据快照 {urbanStats.sourceDate.slice(0, 10)}。输入城市或站名检索，展示前 80 个匹配候选；重复名称需选择完整站名。<br/>网络覆盖全国已收录线路，开放数据可能漏站或缺线；未录入的线路不会伪造接驳。班次、运营日期与票价缺失时标为待确认。</> : "轨道网络待加载"}</div>}
       <p className="rail-transfer-help">已载入 {stations.length} 个官方车站、{cityCount} 个城市标识，全国车站均可作为中转候选。指定中转站的方案必须经过该站或已核实的相邻站群；同城其他车站不会替代指定站。开启城市轨道后，两中转站之间可乘地铁，不要求中间再坐一趟铁路。</p>
       <p className="rail-transfer-help">广州南／番禺、惠州北高铁／城际等已核对的相邻站群按方向至少预留 20–40 分钟，保留各自 12306 代码。其他同城异站按站外交通预留，不能视为同站通道；含未核实城区范围的站点至少预留 180 分钟。轨道耗时包含步行、候车、换线及衔接铁路进站预留。</p>
-      <div className="rail-transfer-actions"><button className="rail-transfer-primary" disabled={checking || !stations.length || !!settings.allowUrban && (urbanLoading || !!urbanError)} type="submit"><ArrowRightLeft size={16}/>{checking ? "正在规划" : result ? "重新查询 / 刷新余票" : "查询中转"}</button>{checking && <button type="button" onClick={() => { controller.current?.abort(); generation.current++; setChecking(false); setProgress(null); }}><X size={15}/>取消查询</button>}<span>{!stations.length ? "正在加载官方车站表…" : progress ? `${progress.queryCount} 个区间 · ${progress.text}` : "铁路车次、时刻、余票及票价来自 12306"}</span></div>
+      <div className="rail-transfer-actions"><button className="rail-transfer-primary" disabled={checking || !stations.length || !!settings.allowUrban && (urbanLoading || !!urbanError)} type="submit"><ArrowRightLeft size={16}/>{checking ? "正在规划" : result ? "重新查询 / 刷新余票" : "查询中转"}</button>{checking && <button type="button" onClick={() => { controller.current?.abort(); generation.current++; setChecking(false); setProgress(null); setDetails(null); }}><X size={15}/>取消查询</button>}<span>{!stations.length ? "正在加载官方车站表…" : progress ? `${progress.queryCount} 个区间 · ${progress.text}` : "铁路车次、时刻、余票及票价来自 12306"}</span></div>
     </form>
     {error && <div className="rail-error" role="alert">{error}</div>}
     {result && <div className="rail-transfer-results">

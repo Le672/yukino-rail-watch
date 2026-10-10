@@ -41,7 +41,7 @@ describe("ticket date window and expired transfer requests", () => {
       expect(response.status).toBe(400); expect(response.headers.get("cache-control")).toBe("no-store");
       expect(await response.json()).toMatchObject({ code: "INVALID_TICKET_DATE" });
     }
-    const unsupported = await onRequestPost({ request: new Request("https://cr.yukino.bond/api/rail?mode=equipment", { method: "POST" }) });
+    const unsupported = await onRequestPost({ request: new Request("https://cr.yukino.bond/api/rail?mode=stations", { method: "POST" }) });
     expect(unsupported.status).toBe(405); expect(fetchMock).not.toHaveBeenCalled();
   });
 

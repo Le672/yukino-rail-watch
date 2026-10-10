@@ -20,6 +20,8 @@ let error = null;
 let checking = false;
 let availability = {};
 let revision = 0;
+let activeCheck = null;
+let settingsNotice = null;
 const locationWatcher = createLocationWatcher(event => {
   if (window && !window.isDestroyed() && window.isVisible()) window.webContents.send("rail:location", event);
 });
@@ -30,16 +32,19 @@ function configPath() { return path.join(app.getPath("userData"), "rail-monitor.
 function readSettings() {
   try {
     const saved = JSON.parse(fs.readFileSync(configPath(), "utf8"));
+    const today = ticketDates().min;
+    const expired = typeof saved.date === "string" && saved.date < today;
+    if (expired) settingsNotice = `上次保存的乘车日期 ${saved.date} 已过期，已更新为今天 ${today}；监控已停止，请核对日期后重新开启。`;
     return validate({
       ...DEFAULT_SETTINGS, ...saved,
-      date: saved.date || DEFAULT_SETTINGS.date,
+      date: expired ? today : saved.date || today,
       queryMode: saved.queryMode || (saved.from || saved.to ? "route" : "train"),
-      enabled: saved.queryMode ? Boolean(saved.enabled) : false,
+      enabled: !!saved.queryMode && Boolean(saved.enabled) && !expired && !ticketDateError(saved.date),
     });
   } catch { return DEFAULT_SETTINGS; }
 }
 
-function validate(value) {
+function validate(value, enforceDate = true) {
   if (!value || typeof value !== "object") throw new Error("无效监控设置");
   const next = {
     queryMode: value.queryMode || (value.from || value.to ? "route" : "train"),
@@ -53,7 +58,21 @@ function validate(value) {
   if (next.from.length > 30 || next.to.length > 30 || next.train.length > 8) throw new Error("查询条件过长");
   if (!Number.isInteger(next.intervalMinutes) || next.intervalMinutes < 1 || next.intervalMinutes > 60) throw new Error("检查间隔须为 1–60 分钟");
   if (next.enabled && !queryReady(next)) throw new Error("请填写日期，以及有效车次或两个不同的车站");
+  if (next.enabled && enforceDate && ticketDateError(next.date)) throw new Error(ticketDateError(next.date));
   return next;
+}
+
+function ticketDates(now = Date.now()) {
+  const day = at => new Date(at + 8 * 3600000).toISOString().slice(0, 10);
+  return { min: day(now), max: day(now + 14 * 86400000) };
+}
+function ticketDateError(date, now = Date.now()) {
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(date || "") ? new Date(`${date}T00:00:00Z`) : null;
+  if (!parsed || !Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) return "请填写有效的乘车日期。";
+  const { min, max } = ticketDates(now);
+  if (date < min) return `乘车日期 ${date} 已过期，不能查询历史余票。请选择 ${min} 至 ${max} 的日期。`;
+  if (date > max) return `乘车日期 ${date} 超出 12306 预售期（含当天 15 天）。目前可查询 ${min} 至 ${max}。`;
+  return null;
 }
 
 function queryReady(config) {
@@ -61,15 +80,20 @@ function queryReady(config) {
     !!config.from && !!config.to && config.from !== config.to);
 }
 
-function snapshot() { return { settings, result, error, checking }; }
+function snapshot() { return { settings, result, error, checking, version: app.getVersion(), notice: settingsNotice }; }
 function emit() {
   if (window && !window.isDestroyed()) window.webContents.send("rail:update", snapshot());
 }
 
-async function apiRequest(url) {
-  const response = await fetch(url, { signal: AbortSignal.timeout(60000) });
-  const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || `接口返回 ${response.status}`);
+async function apiRequest(url, signal) {
+  const mode = new URL(url).searchParams.get("mode") || "query";
+  const post = ["query", "fare", "hubs"].includes(mode);
+  const response = await fetch(url, { method: post ? "POST" : "GET", ...(post ? { cache: "no-store" } : {}), signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(60000)]) : AbortSignal.timeout(60000) });
+  let payload;
+  try { payload = await response.json(); }
+  catch { throw new Error(`铁路查询服务暂时不可用（HTTP ${response.status}），请稍后重试`); }
+  if (!payload || typeof payload !== "object") throw new Error("铁路查询返回的资料不完整，请稍后重试");
+  if (!response.ok || payload.error) throw new Error(payload.error || `接口返回 ${response.status}`);
   return payload;
 }
 
@@ -78,18 +102,32 @@ function availableSeats(train, seat) {
 }
 
 async function check(value, withNotification = false) {
-  const config = validate(value);
+  const config = validate(value, false);
   if (!queryReady(config)) throw new Error("请填写日期，以及有效车次或两个不同的车站");
+  const dateError = ticketDateError(config.date);
+  if (dateError) {
+    if (withNotification) {
+      settings = { ...settings, enabled: false }; settingsNotice = dateError;
+      if (timer) clearInterval(timer); timer = undefined;
+      fs.writeFileSync(configPath(), JSON.stringify(settings), "utf8"); error = dateError; emit();
+    }
+    throw new Error(dateError);
+  }
   const params = new URLSearchParams({ date: config.date, search: config.queryMode });
   if (config.queryMode === "train") params.set("train", config.train);
   else { params.set("from", config.from); params.set("to", config.to); }
   const requestRevision = revision;
+  const key = JSON.stringify(config);
+  if (activeCheck && activeCheck.revision === revision && activeCheck.key === key) return activeCheck.promise;
+  activeCheck?.controller.abort();
+  const current = { revision, key, controller: new AbortController(), promise: null };
+  activeCheck = current;
   checking = true;
   error = null;
   emit();
-  try {
-    const next = await apiRequest(`${API}?${params}`);
-    if (requestRevision !== revision) return next;
+  current.promise = (async () => { try {
+    const next = await apiRequest(`${API}?${params}`, current.controller.signal);
+    if (requestRevision !== revision || activeCheck !== current || current.controller.signal.aborted) return next;
     result = next;
     if (withNotification) {
       const current = {};
@@ -111,11 +149,12 @@ async function check(value, withNotification = false) {
     }
     return next;
   } catch (cause) {
-    if (requestRevision === revision) error = cause instanceof Error ? cause.message : String(cause);
+    if (requestRevision === revision && !current.controller.signal.aborted) error = cause instanceof Error ? cause.message : String(cause);
     throw cause;
   } finally {
-    if (requestRevision === revision) { checking = false; emit(); }
-  }
+    if (activeCheck === current) { activeCheck = null; checking = false; emit(); }
+  } })();
+  return current.promise;
 }
 
 function schedule() {
@@ -186,6 +225,8 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle("rail:configure", (_event, value) => {
       settings = validate(value);
       revision++;
+      activeCheck?.controller.abort(); activeCheck = null;
+      settingsNotice = null;
       checking = false;
       fs.writeFileSync(configPath(), JSON.stringify(settings), "utf8");
       availability = {};

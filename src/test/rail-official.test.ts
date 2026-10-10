@@ -92,7 +92,8 @@ describe("official data gateway", () => {
     vi.stubGlobal("fetch", fetchMock);
     const { onRequestGet } = await import("../../functions/api/rail");
     const response = await onRequestGet({ request: new Request(`https://cr.yukino.bond/api/rail?mode=journey&train=${train}&date=${date}`) });
-    expect(response.status).toBe(502);
+    expect(response.status).toBe(503);
+    expect(response.headers.get("Retry-After")).toBe("5");
     expect((await response.json()).error).toContain("12306");
     expect(fetchMock.mock.calls.every(([input]) => new URL(String(input)).hostname.endsWith(".12306.cn"))).toBe(true);
   });

@@ -10,11 +10,12 @@ const result: Result = { checkedAt: "2026-09-30T02:00:00Z", date: "2026-09-30", 
 const state: DesktopState = { settings: { queryMode: "train", date: result.date, train: "G6581", from: "", to: "", seat: "二等座", intervalMinutes: 1, enabled: false }, result: null, checking: false, error: null };
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-09-30T02:00:00Z"));
   mobile.host.getState.mockResolvedValue(state); mobile.host.stations.mockResolvedValue({ stations: [] });
   mobile.host.configure.mockImplementation(async settings => ({ ...state, settings }));
   mobile.host.checkNow.mockResolvedValue(result); mobile.host.onUpdate.mockReturnValue(() => {});
 });
-afterEach(() => { cleanup(); localStorage.clear(); });
+afterEach(() => { cleanup(); localStorage.clear(); vi.useRealTimers(); });
 
 it("queries through the native host and opens the chosen train in the mobile position tab", async () => {
   await act(async () => { render(<MobileRail />); });
