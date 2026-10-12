@@ -18,6 +18,10 @@ export type UrbanSearchCoverage = { limit: number; from: { reachable: number; se
 export type TransferResult = { date: string; from: string; to: string; checkedAt: string; trips: Trip[]; alternatives?: Trip[]; omittedVia?: string; hubs: Station[]; warnings: string[]; queryCount: number; candidateCount: number; hubLimit: number; serviceUnavailable?: boolean; incomplete?: boolean; urban?: { lines: number; stops: number; sourceDate: string; coverage?: UrbanSearchCoverage } };
 export type TransferProgress = { queryCount: number; text: string };
 export const DEFAULT_TRANSFER: TransferSettings = { date: chinaDateTime().slice(0, 10), from: "", to: "", via: "", via2: "", maxChanges: 1, minimum: 20, maximumWait: 240, cityMinutes: 90, allowCity: true, stationGroupEndpoints: true, earliest: "00:00", hubLimit: 64, allowUrban: false };
+function earliestDeparture(settings: TransferSettings) {
+  const earliest = Date.parse(`${settings.date}T${settings.earliest}:00+08:00`), now = Date.now();
+  return settings.date === chinaDateTime(now).slice(0, 10) ? Math.max(earliest, now) : earliest;
+}
 const routeCache = new Map<string, { at: number; trains: Train[]; checkedAt: string }>();
 const DAY = 86400000;
 export function tripRailFare(trip: Trip, seat: string) {
@@ -57,7 +61,7 @@ export function timedLeg(train: Train, date: string): Leg | null {
 export function makeTrip(legs: Leg[], connections: TransferLink[], settings: TransferSettings, access?: TransferLink, egress?: TransferLink): Trip | null {
   if (!legs.length || connections.length !== legs.length - 1 || new Set(legs.map(l => `${l.trainNo || l.code}/${l.originDate || l.date}`)).size !== legs.length) return null;
   const departureAt = legs[0].departureAt - (access?.minimum || 0) * 60000, arrivalAt = legs.at(-1)!.arrivalAt + (egress?.minimum || 0) * 60000;
-  const earliest = Date.parse(`${settings.date}T${settings.earliest}:00+08:00`);
+  const earliest = earliestDeparture(settings);
   if (!Number.isFinite(earliest) || departureAt < earliest) return null;
   for (let i = 0; i < connections.length; i++) {
     const link = connections[i], wait = (legs[i + 1].departureAt - legs[i].arrivalAt) / 60000;
@@ -106,7 +110,7 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   let orderGateways = (gateways: UrbanGateway[]) => gateways;
   const directUrban = urban && !manual.length ? urban.route(from, to, signal) : null;
   if (directUrban && isUrbanStation(from) && isUrbanStation(to)) {
-    const departureAt = Date.parse(`${settings.date}T${settings.earliest}:00+08:00`);
+    const departureAt = earliestDeparture(settings);
     // A local urban-rail journey does not require hundreds of unrelated 12306 queries.
     return { date: settings.date, from: from.name, to: to.name, checkedAt: new Date().toISOString(), trips: [{ id: directUrban.id, legs: [], connections: [], urbanOnly: directUrban, departureAt, arrivalAt: departureAt + directUrban.minutes * 60000, duration: directUrban.minutes }],
       hubs: [], warnings: [directUrban.note], queryCount: 0, candidateCount: 0, hubLimit,
@@ -133,7 +137,7 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
     if (outgoing.length > gatewayLimit || incoming.length > gatewayLimit) warnings.add(`起终点轨道接驳分别发现 ${outgoing.length}／${incoming.length} 个可达铁路站，本次各选取最多 ${gatewayLimit} 个；扩大搜索范围会增加接驳候选，未选中不代表不可通达。`);
     const route = directUrban;
     if (route) {
-      const departureAt = Date.parse(`${settings.date}T${settings.earliest}:00+08:00`);
+      const departureAt = earliestDeparture(settings);
       trips.set(route.id, { id: route.id, legs: [], connections: [], urbanOnly: route, departureAt, arrivalAt: departureAt + route.minutes * 60000, duration: route.minutes });
     }
     warnings.add("城市轨道为可选的估算方案；没有对应日期的班次、首末班或停运资料时，不保证可赶上衔接列车，轨道票价未知时不会把铁路小计当作总价。");
@@ -227,7 +231,7 @@ export async function searchTransfers(settings: TransferSettings, stations: Stat
   }
   const readFirst = async (nodes: Station[]) => Promise.all(nodes.filter(hub => !firstLegs.has(hub.code)).map(async hub => {
     const values = (await Promise.all(origins.map(origin => route(origin, hub, settings.date)))).flat();
-    firstLegs.set(hub.code, values);
+    firstLegs.set(hub.code, values.filter(leg => leg.departureAt - (accessLinks.get(leg.fromCode)?.minimum || (leg.fromCode !== from.code ? transferLink(from, station(leg.fromCode), 0)?.minimum : 0) || 0) * 60000 >= earliestDeparture(settings)));
   }));
   const datesAfter = (values: Leg[], link: TransferLink) => [...new Set(values.flatMap(leg => {
     const start = leg.arrivalAt + link.minimum * 60000, end = leg.arrivalAt + settings.maximumWait * 60000;

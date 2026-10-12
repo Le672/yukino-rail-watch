@@ -35,6 +35,15 @@ function official(values: Train[], hubs: Station[] = []) {
 const settings = { ...DEFAULT_TRANSFER, date, allowUrban: true, allowCity: false, stationGroupEndpoints: false, hubLimit: 32 };
 
 describe("urban access, egress and interchange discovery", () => {
+  it("rejects today's train when the required metro departure has already passed, while keeping a later catchable train", async () => {
+    vi.setSystemTime(new Date("2026-10-13T09:00:00+08:00"));
+    const start = station("当日端点", "EG1"), hub = station("当日接驳", "EG2"), end = station("当日目的", "EG3");
+    vi.mocked(loadUrbanRail).mockResolvedValue(new UrbanRailPlanner(network([at(start.name, 30, 120), at(hub.name, 30, 120.03)], [line("时刻核验", [start.name, hub.name])])));
+    official([train("G9701", hub, end, "09:10", "10:10"), train("G9702", hub, end, "11:00", "12:00")]);
+    const result = await searchTransfers({ ...settings, from: start.name, to: end.name }, [start, hub, end], new AbortController().signal, vi.fn());
+    expect(result.trips.map(trip => trip.legs[0].code)).toEqual(["G9702"]);
+    expect(result.trips[0].departureAt).toBeGreaterThanOrEqual(Date.now());
+  });
   it("keeps an onward railway hub ahead of many closer minor metro-connected railway stops", async () => {
     const start = station("起点枢纽", "EF1", "甲城"), end = station("远端壬", "EF2", "乙城");
     const minor = Array.from({ length: 15 }, (_, i) => station(`街区节点${i}`, `F${i}`, "甲城"));
