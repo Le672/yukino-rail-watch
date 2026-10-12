@@ -43,7 +43,12 @@ it("makes the metro bridge discoverable and labels Panyu intercity alternatives 
   await waitFor(() => expect(screen.getByRole("button", { name: "查询中转" })).toBeEnabled());
   fireEvent.click(screen.getByRole("button", { name: "查询中转" }));
   await screen.findByRole("button", { name: /^含地铁／城市轨道（[1-9]/ });
-  fireEvent.click(screen.getByRole("button", { name: /^含地铁／城市轨道/ }));
+  expect(screen.getByLabelText("城市轨道方案比较")).toHaveTextContent("含城市轨道的最短方案");
+  expect(screen.getByLabelText("方案优先顺序")).toHaveValue("railway");
+  fireEvent.change(screen.getByLabelText("排序"), { target: { value: "price" } });
+  fireEvent.click(screen.getByRole("button", { name: "查看最短轨道备选" }));
+  expect(screen.getByLabelText("排序")).toHaveValue("duration");
+  expect(screen.getByRole("button", { name: /^含地铁／城市轨道/ })).toHaveAttribute("aria-pressed", "true");
   await waitFor(() => expect(container.querySelectorAll(".rail-trip")).toHaveLength(1));
   let trip = container.querySelector(".rail-trip") as HTMLElement;
   expect(within(trip).getByText(/地铁 7号线/)).toBeVisible();
@@ -54,6 +59,7 @@ it("makes the metro bridge discoverable and labels Panyu intercity alternatives 
   trip = container.querySelector(".rail-trip") as HTMLElement;
   expect(within(trip).getByText("C9105")).toBeVisible();
   expect(within(trip).getByText("惠州北（城际）")).toBeVisible();
+  expect(screen.queryByLabelText("城市轨道方案比较")).toBeNull();
   expect(screen.getByLabelText("中转站 2（可选）")).toHaveValue("广州新塘");
 });
 it("shows the requested walking connection before slow city alternatives and retains it on cancellation", async () => {
