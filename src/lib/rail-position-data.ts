@@ -47,7 +47,8 @@ export async function loadJourneyEquipment(journey: TrainJourney) {
   const trainsetModel = mtrLiveryModel({ code: journey.train, trainsetModel: equipment?.model ?? journey.model, trainsetOwner: equipment?.owner ?? journey.owner, trainsetNumber: equipment.number },
     { date: journey.date, fromCode: journey.stops[0].telecode, toCode: journey.stops.at(-1)?.telecode });
   return { model: trainsetModel, owner: equipment.owner, operator: equipment.operator, modelSource: equipment.model ? equipment.source : null,
-    modelScope: equipment.model ? equipment.scope : "reference" as const, modelDate: equipment.date, modelNumber: equipment.number, modelCheckedAt: equipment.checkedAt };
+    modelScope: equipment.model ? equipment.scope : "reference" as const, modelDate: equipment.date, modelNumber: equipment.number,
+    modelCheckedAt: equipment.checkedAt, modelHistory: equipment.history };
 }
 export async function loadRailway(journey: TrainJourney): Promise<RailwayMapData> {
   // The national, versioned network is persisted on our server/CDN. A cache

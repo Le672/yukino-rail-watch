@@ -5,8 +5,9 @@ export type TimetableStop = {
 };
 export type TrainJourney = {
   train: string; date: string; codes: string[]; model: string | null; owner: string | null;
-  operator?: string | null; modelSource?: "12306" | "RailGo" | null; modelScope?: "dated" | "reference";
+  operator?: string | null; modelSource?: "12306" | "RailGo" | "rail.re" | null; modelScope?: "dated" | "reference" | "inferred";
   modelDate?: string; modelNumber?: string | null; modelCheckedAt?: number;
+  modelHistory?: import("./rail-equipment-history").EquipmentHistory;
   stops: TimetableStop[]; checkedAt: number;
   source?: "12306";
 };

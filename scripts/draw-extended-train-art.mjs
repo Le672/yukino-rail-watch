@@ -55,10 +55,15 @@ export function drawExtendedArt(root, render) {
   const profiles=JSON.parse(fs.readFileSync(path.join(root,'src/data/train-art-profiles.json'),'utf8'));
   let count=0;
   const generated=new Set();
+  const baseReferences = {
+    CRH2A: {head:'duck',paint:'blue'}, CRH2B: {head:'duck',paint:'blue'},
+    CRH6A: {head:'cinova',paint:'blue'}, CRH6F: {head:'cinova',paint:'blue'},
+  };
   for(const item of catalogue) {
-    const p=profiles[item.asset]; if(!p) continue;
-    if(generated.has(item.asset)) continue;
-    generated.add(item.asset);
+    const p=profiles[item.asset] || baseReferences[item.model]; if(!p) continue;
+    const asset=item.asset||item.model;
+    if(generated.has(asset)) continue;
+    generated.add(asset);
     if(p.coach) fs.writeFileSync(path.join(root,'src/assets/trains',item.asset+'.svg'),coachSvg(item,p));
     else {
       const options={...p.options};

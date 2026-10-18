@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { drawCr200Art } from './draw-cr200-art.mjs';
 import { drawExtendedArt } from './draw-extended-train-art.mjs';
+import { detailTrainSvg, ART_REVISION } from './train-art-detail.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 drawCr200Art(root);
 const catalogue=JSON.parse(fs.readFileSync(path.join(root,'src/data/train-art.json'),'utf8'));
@@ -19,7 +20,9 @@ const profiles={
  'CR400BF':['bf','bf'],'CR400BF-B':['bf','bf'],'CR400BF-G':['bf','bf'],
  'CR400BF-AZ':['bfz','dragon'],'CR400BF-BZ':['bfz','dragon'],'CR400BF-GZ':['bfz','dragon'],'CR400BF-AS':['bfz','upgrade'],'CR400BF-BS':['bfz','upgrade'],
  'CR300AF':['af300','af300'],'CR300BF':['bf300','bf300'],
- 'CRH1A':['regina','regina'],'CRH1A-A':['z250','z250'],'CRH2G':['h2g','h2g'],'CRH3C':['h3c','velaro'],
+ 'CRH1A':['regina','regina'],'CRH1A-A':['z250','z250'],'CRH1B':['regina','regina'],'CRH2G':['h2g','h2g'],'CRH3C':['h3c','velaro'],
+ 'CR400AF-S':['afz','phoenix'],'CR400BF-A':['bf','bf'],'CR400BF-Z':['bfz','dragon'],'CR400BF-S':['bfz','upgrade'],
+ 'CRH5G':['h5','h5'],
  'CRH380A':['rocket','rocket'],'CRH380AL':['rocket','rocket'],'CRH380B':['h380b','velaro'],'CRH380BG':['h380b','velaro'],'CRH380BL':['h380b','velaro'],'CRH380CL':['hcl','velaro'],'CRH380D':['z380','z380'],'CRH5A':['h5','h5']
 };
 // [body outline, front mask, driver's SIDE window, headlight, door x, window belt]
@@ -68,11 +71,11 @@ const out=path.join(root,'src/assets/trains');fs.mkdirSync(out,{recursive:true})
 function drawProfile(item, profile) {
  const [head,paint,options={}]=profile,h=options.head || heads[head],silver=options.silver ?? ['af','afc','phoenix','dragon','upgrade','z380'].includes(paint),blueBody=['af300','bf300'].includes(paint);
  const xs=head==='regina'?[145,173,201,229,257,285]:[157,184,211,238,265,291];
- const windows=xs.map(x=>`<rect x="${x}" y="46" width="18" height="12" rx="1.8" fill="url(#glass)" stroke="#223746" stroke-width=".6"/>`).join('');
+ const windows=xs.map(x=>`<rect x="${x}" y="44" width="18" height="15" rx="2.4" fill="url(#glass)" stroke="#263f50" stroke-width=".65"/>`).join('');
  const door=h[4],bodyColors=options.bodyColors || [silver?'#eff2f3':'#fffef9',blueBody?'#d4e8f4':silver?'#cdd4da':'#f8faf7',blueBody?'#58a2d2':silver?'#adb8c1':'#dbe1e1'];
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 112" role="img" aria-labelledby="title desc">
 <title id="title">${esc(item.model)} Q版首车侧视图</title><desc id="desc">${esc(item.livery+'。'+item.features+'。外观核对：'+item.reviewSource+'。首车比例压缩，参考外观，非实际编组。')}</desc>
-<metadata>Yukino original side-view drawing, revision ${paint==='mtr'?'3, 2026-09-30':'2, 2026-09-29'}. CC BY-SA 4.0. Photo reference: ${esc(item.source)}; China-EMU review: ${esc(item.reviewSource)}. The site's front-view avatars are not reproduced.</metadata>
+<metadata>Yukino original side-view drawing, revision ${ART_REVISION}. CC BY-SA 4.0. Photo reference: ${esc(item.source)}; China-EMU review: ${esc(item.reviewSource)}. The site's front-view avatars are not reproduced.</metadata>
 <defs><linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${bodyColors[0]}"/><stop offset=".48" stop-color="${bodyColors[1]}"/><stop offset="1" stop-color="${bodyColors[2]}"/></linearGradient><linearGradient id="noseSilver" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d8e1e8"/><stop offset=".55" stop-color="#b8c6d0"/><stop offset="1" stop-color="#8b9fae"/></linearGradient><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b5264"/><stop offset="1" stop-color="#122938"/></linearGradient><clipPath id="car"><path d="${h[0]}"/></clipPath></defs>
 <ellipse cx="169" cy="102" rx="142" ry="3" fill="#315c42" opacity=".07"/>
 <g fill="#293740"><rect x="70" y="84" width="43" height="10" rx="3"/><rect x="251" y="84" width="43" height="10" rx="3"/><circle cx="79" cy="95" r="6"/><circle cx="105" cy="95" r="6"/><circle cx="260" cy="95" r="6"/><circle cx="286" cy="95" r="6"/></g><g fill="#b0bac0"><circle cx="79" cy="95" r="2.5"/><circle cx="105" cy="95" r="2.5"/><circle cx="260" cy="95" r="2.5"/><circle cx="286" cy="95" r="2.5"/></g>
@@ -85,10 +88,18 @@ ${[166,196,226,256,284].map(x=>`<rect x="${x}" y="82" width="11" height="4" rx="
 drawExtendedArt(root, drawProfile);
 for(const item of catalogue){
  if(item.accuracy==='reference'){
-  if(!fs.existsSync(path.join(out,(item.asset||item.model)+'.svg'))) throw Error('Missing reference art: '+item.model);
-  continue;
+  if(!profiles[item.model]) {
+   if(!fs.existsSync(path.join(out,(item.asset||item.model)+'.svg'))) throw Error('Missing reference art: '+item.model);
+   continue;
+  }
  }
  const profile=profiles[item.model];if(!profile) throw Error('No reviewed profile: '+item.model);
  drawProfile(item, profile);
 }
-console.log(`Redrew ${catalogue.filter(item=>item.accuracy!=='reference').length} source-reviewed side views; retained ${catalogue.filter(item=>item.accuracy==='reference').length} reference images`);
+for(const asset of new Set(catalogue.map(item=>item.asset||item.model))) {
+ const file=path.join(out,asset+'.svg');
+ const item=catalogue.find(row=>(row.asset||row.model)===asset);
+ const svg=fs.readFileSync(file,'utf8');
+ fs.writeFileSync(file,detailTrainSvg(svg,{coach:/^(?:19[KT]|22B|25[A-Z]+)$/.test(item.model)}));
+}
+console.log(`Optimized all ${new Set(catalogue.map(item=>item.asset||item.model)).size} illustrations; model and version uncertainty labels retained`);

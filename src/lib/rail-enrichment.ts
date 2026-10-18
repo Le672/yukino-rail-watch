@@ -29,7 +29,7 @@ async function ticketFares(train: Train, date: string) {
 }
 export async function enrichTrainDetails(train: Train, date: string): Promise<Train> {
   const [equipment, prices] = await Promise.all([
-    train.trainsetModel && train.trainsetSource !== "RailGo" ? Promise.resolve(train) : loadTrainEquipment(train.code, train.originDate || train.date || date).then(item => {
+    train.trainsetModel && train.trainsetSource !== "RailGo" && train.trainsetScope !== "inferred" ? Promise.resolve(train) : loadTrainEquipment(train.code, train.originDate || train.date || date).then(item => {
       const next = { ...train, ...equipmentFields(item) };
       return { ...next, trainsetSource: item.model ? item.source : null, trainsetScope: item.model ? item.scope : "reference" as const,
         trainsetModel: mtrLiveryModel(next, { date: item.date, fromCode: train.fromCode, toCode: train.toCode }) };
@@ -51,5 +51,6 @@ export async function enrichTrainList(trains: Train[], date: string, onBatch: (u
 export function mergeTrainDetails<T extends Train>(train: T, updated: Train | undefined): T {
   return updated ? { ...train, trainsetModel: updated.trainsetModel, trainsetOwner: updated.trainsetOwner, trainOperator: updated.trainOperator,
     trainsetSource: updated.trainsetSource, trainsetScope: updated.trainsetScope, trainsetDate: updated.trainsetDate,
-    trainsetNumber: updated.trainsetNumber, trainsetCheckedAt: updated.trainsetCheckedAt, seats: updated.seats, fareStatus: updated.fareStatus } : train;
+    trainsetNumber: updated.trainsetNumber, trainsetCheckedAt: updated.trainsetCheckedAt, trainsetHistory: updated.trainsetHistory,
+    seats: updated.seats, fareStatus: updated.fareStatus } : train;
 }

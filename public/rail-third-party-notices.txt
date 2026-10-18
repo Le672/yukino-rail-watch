@@ -1,5 +1,10 @@
 Yukino Rail Watch - map and coordinate library notices
 
+Historical equipment reference: rail.re / Arnie97 emu-log
+https://rail.re/ - https://github.com/arnie97/emu-log
+Used only when official equipment is missing. Dated past records are marked
+as historical inference, not a confirmed assignment for the requested day.
+
 Leaflet 1.9.4
 
 BSD 2-Clause License
